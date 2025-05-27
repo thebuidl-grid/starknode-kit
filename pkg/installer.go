@@ -17,10 +17,14 @@ const (
 	LatestGethVersion       = "1.15.10"
 	LatestRethVersion       = "1.3.4"
 	LatestLighthouseVersion = "7.0.1"
-
-	// -------------------- Functions --------------------
-	execCommand = exec.Command
 )
+
+// execCommand allows mocking exec.Command in tests
+var execCommand = exec.Command
+
+// installed_clients_dir is the base directory for client installations
+// This can be overridden in tests
+var installed_clients_dir = "ethereum_clients"
 
 // GethHash maps Geth versions to their commit hashes
 var GethHash = map[string]string{
@@ -136,7 +140,7 @@ func (i *Installer) InstallClient(client ClientType) error {
 	}
 
 	// Create client directory paths
-	clientDir := filepath.Join(i.InstallDir, "ethereum_clients", string(client))
+	clientDir := filepath.Join(i.InstallDir, installed_clients_dir, string(client))
 	databaseDir := filepath.Join(clientDir, "database")
 	logsDir := filepath.Join(clientDir, "logs")
 
@@ -226,7 +230,7 @@ func (i *Installer) InstallClient(client ClientType) error {
 
 // SetupJWTSecret creates a JWT secret file for client authentication
 func (i *Installer) SetupJWTSecret() error {
-	jwtDir := filepath.Join(i.InstallDir, "ethereum_clients", "jwt")
+	jwtDir := filepath.Join(i.InstallDir, installed_clients_dir, "jwt")
 	jwtPath := filepath.Join(jwtDir, "jwt.hex")
 
 	// Check if JWT already exists
@@ -256,7 +260,7 @@ func (i *Installer) SetupJWTSecret() error {
 
 // RemoveClient removes a client's installation
 func (i *Installer) RemoveClient(client ClientType) error {
-	clientDir := filepath.Join(i.InstallDir, "ethereum_clients", string(client))
+	clientDir := filepath.Join(i.InstallDir, installed_clients_dir, string(client))
 
 	if _, err := os.Stat(clientDir); err == nil {
 		fmt.Printf("Removing %s installation.\n", client)
@@ -264,6 +268,46 @@ func (i *Installer) RemoveClient(client ClientType) error {
 	}
 
 	return nil
+}
+
+// GetClientVersion gets the installed version of a client
+func (i *Installer) GetClientVersion(client ClientType) (string, error) {
+	clientDir := filepath.Join(i.InstallDir, installed_clients_dir, string(client))
+
+	// Check if client is installed
+	clientPath := filepath.Join(clientDir, string(client))
+	if client == ClientPrysm {
+		clientPath = filepath.Join(clientDir, "prysm.sh")
+	}
+
+	if _, err := os.Stat(clientPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("%s is not installed", client)
+	}
+
+	// Get the current directory to return to it later
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("failed to get current directory: %w", err)
+	}
+
+	// Change to the installation directory
+	if err := os.Chdir(i.InstallDir); err != nil {
+		return "", fmt.Errorf("failed to change to installation directory: %w", err)
+	}
+	defer os.Chdir(currentDir) // Return to original directory when done
+
+	version := GetVersionNumber(string(client))
+	if version == "" {
+		return "", fmt.Errorf("failed to get version for %s", client)
+	}
+
+	return version, nil
+}
+
+// IsClientLatestVersion checks if the installed client is the latest version
+func (i *Installer) IsClientLatestVersion(client ClientType, version string) (bool, string) {
+	isLatest, latestVersion := CompareClientVersions(string(client), version)
+	return isLatest, latestVersion
 }
 
 // downloadFile downloads a file from a URL to a local path
@@ -401,9 +445,9 @@ func GetVersionNumber(client string) string {
 	switch runtime.GOOS {
 	case "darwin", "linux":
 		if client == "prysm" {
-			clientCommand = filepath.Join("ethereum_clients", client, fmt.Sprintf("%s.sh", client))
+			clientCommand = filepath.Join(installed_clients_dir, client, fmt.Sprintf("%s.sh", client))
 		} else {
-			clientCommand = filepath.Join("ethereum_clients", client, client)
+			clientCommand = filepath.Join(installed_clients_dir, client, client)
 		}
 	case "windows":
 		fmt.Println("getVersionNumber() for windows is not yet implemented")
@@ -447,13 +491,14 @@ func CompareClientVersions(client, installedVersion string) (bool, string) {
 	var latestVersion string
 	switch client {
 	case "reth":
-		latestVersion, _ = LatestRethVersion
+		latestVersion = LatestRethVersion
 	case "geth":
-		latestVersion, _ = LatestGethVersion
+		latestVersion = LatestGethVersion
 	case "lighthouse":
-		latestVersion, _ = LatestlighthouseVersion
-	// case "prysm":
-	//	latestVersion, _ = GetLatestGitHubRelease(clients[client].owner, clients[client].repo)
+		latestVersion = LatestLighthouseVersion
+	case "prysm":
+		// Just use a hard-coded latest version for Prysm
+		latestVersion = "4.0.5" // Replace with an appropriate version
 	default:
 		fmt.Printf("Unknown client: %s\n", client)
 		return false, ""
