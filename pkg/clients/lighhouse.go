@@ -18,9 +18,9 @@ type lightHouseConfig struct {
 func (p lightHouseConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
-		return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym.sh")
+		return filepath.Join(pkg.InstallClientsDir, "lighthouse", "lighthouse.exe")
 	}
-	return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym")
+	return filepath.Join(pkg.InstallClientsDir, "lighthouse", "lighthouse")
 }
 
 // BuildGethArgs builds the arguments for the geth command
