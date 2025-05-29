@@ -33,16 +33,6 @@ var (
 	}
 )
 
-// ClientType represents an Ethereum client type
-type ClientType string
-
-const (
-	ClientGeth       ClientType = "geth"
-	ClientReth       ClientType = "reth"
-	ClientLighthouse ClientType = "lighthouse"
-	ClientPrysm      ClientType = "prysm"
-)
-
 // ClientConfig holds the download configuration for a client
 type ClientConfig struct {
 	FileName    string
@@ -270,7 +260,7 @@ func (i *Installer) RemoveClient(client ClientType) error {
 
 // GetClientVersion gets the installed version of a client
 func (i *Installer) GetClientVersion(client ClientType) (string, error) {
-	clientDir := filepath.Join(i.InstallDir,, string(client))
+	clientDir := filepath.Join(i.InstallDir, string(client))
 
 	// Check if client is installed
 	clientPath := filepath.Join(clientDir, string(client))
