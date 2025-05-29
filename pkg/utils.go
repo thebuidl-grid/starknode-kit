@@ -25,7 +25,7 @@ var (
 	JWTPath = path.Join(jwtDir, "jwt.hex")
 )
 
-func GetClClient(c string) (ClientType, error) {
+func GetExecutionClient(c string) (ClientType, error) {
 	sprtClients := map[string]ClientType{
 		"geth": ClientGeth,
 		"reth": ClientReth,
@@ -36,7 +36,7 @@ func GetClClient(c string) (ClientType, error) {
 	}
 	return client, nil
 }
-func GetElClient(c string) (ClientType, error) {
+func GetConsensusClient(c string) (ClientType, error) {
 	sprtClients := map[string]ClientType{
 		"lighhouse": ClientLighthouse,
 		"prysm":     ClientPrysm,
