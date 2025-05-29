@@ -2,6 +2,7 @@ package commands
 
 import (
 	"buidlguidl-go/cli/cmd/commands"
+	"buidlguidl-go/cli/cmd/options"
 	"fmt"
 	"os"
 
@@ -28,7 +29,6 @@ func Execute() {
 
 func init() {
 
-	// rootCmd.AddCommand(startCmd)
-	// rootCmd.AddCommand(stopCmd)
-  rootCmd.AddCommand(commands.InstallCommand)
+	options.InitGlobalOptions(rootCmd)
+	rootCmd.AddCommand(commands.InstallCommand)
 }
