@@ -3,6 +3,7 @@ package commands
 import (
 	"buidlguidl-go/cli/cmd/options"
 	"buidlguidl-go/pkg"
+	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -13,30 +14,34 @@ var InstallCommand = &cobra.Command{
 	Long: `The add command registers a new Ethereum client (such as Prysm, Lighthouse, Geth, etc.)
 to the local configuration. This sets up the necessary parameters for managing and running
 the client as part of your node stack.`,
-	RunE: installCommand,
+	Run: installCommand,
 }
 
-func installCommand(cmd *cobra.Command, args []string) error {
+func installCommand(cmd *cobra.Command, args []string) {
 	if options.ConsensusClient != "" {
 		client, err := pkg.GetConsensusClient(options.ConsensusClient)
 		if err != nil {
-			return err
+			fmt.Println(err)
+			return
 		}
 		err = pkg.Newinstaller().InstallClient(client)
 		if err != nil {
-			return err
+			fmt.Println(err)
+			return
 		}
 	}
 	if options.ExecutionClient != "" {
 		client, err := pkg.GetExecutionClient(options.ExecutionClient)
 		if err != nil {
-			return err
+			fmt.Println(err)
+			return
 		}
 		err = pkg.Newinstaller().InstallClient(client)
 		if err != nil {
-			return err
+			fmt.Println(err)
+			return
 		}
 	}
 
-	return nil
+	return
 }
