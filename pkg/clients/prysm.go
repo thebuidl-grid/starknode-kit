@@ -76,3 +76,5 @@ func StartPrsym(port ...string) error {
 	}
 	return nil
 }
+
+// TODO add log rotation

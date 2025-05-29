@@ -2,24 +2,20 @@ package pkg
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"syscall"
 )
 
-func StartProcess(name, command, logsPath string, args ...string) error {
-	loggerName := fmt.Sprintf("%s.log", name)
-	logger, err := os.OpenFile(loggerName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		return err
-	}
+func StartProcess(command string, logPath io.Writer, args ...string) error {
+
 	cmd := execCommand(command, args...)
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setsid: true,
 	}
-	cmd.Stdout = logger
-	cmd.Stderr = logger
-	err = cmd.Start()
+	cmd.Stdout = logPath
+	cmd.Stderr = logPath
+	err := cmd.Start()
 	if err != nil {
 		return err
 	}
