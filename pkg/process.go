@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func isRunning(pid int) bool {
+func IsRunning(pid int) bool {
 	err := syscall.Kill(pid, 0)
 	return err != nil
 }
@@ -39,7 +39,7 @@ func StopProcess(pid int) error {
 		return err
 	}
 	time.Sleep(time.Second * 3)
-	if running := isRunning(pid); running {
+	if running := IsRunning(pid); running {
 		err = p.Signal(syscall.SIGTERM)
 		if err != nil {
 			return err
