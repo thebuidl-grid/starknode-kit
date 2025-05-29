@@ -56,8 +56,8 @@ type Installer struct {
 }
 
 // NewInstaller creates a new installer instance
-func NewInstaller(installDir string) *Installer {
-	return &Installer{InstallDir: installDir}
+func NewInstaller() *Installer {
+	return &Installer{InstallDir: InstallClientsDir}
 }
 
 // GetClientFileName returns the file name based on platform and architecture
@@ -140,7 +140,7 @@ func (i *Installer) InstallClient(client ClientType) error {
 	}
 
 	// Create client directory paths
-	clientDir := filepath.Join(InstallClientsDir, string(client))
+	clientDir := filepath.Join(i.InstallDir, string(client))
 	databaseDir := filepath.Join(clientDir, "database")
 	logsDir := filepath.Join(clientDir, "logs")
 
@@ -258,7 +258,7 @@ func (i *Installer) SetupJWTSecret() error {
 
 // RemoveClient removes a client's installation
 func (i *Installer) RemoveClient(client ClientType) error {
-	clientDir := filepath.Join(i.InstallDir, installed_clients_dir, string(client))
+	clientDir := filepath.Join(i.InstallDir, string(client))
 
 	if _, err := os.Stat(clientDir); err == nil {
 		fmt.Printf("Removing %s installation.\n", client)
@@ -270,7 +270,7 @@ func (i *Installer) RemoveClient(client ClientType) error {
 
 // GetClientVersion gets the installed version of a client
 func (i *Installer) GetClientVersion(client ClientType) (string, error) {
-	clientDir := filepath.Join(i.InstallDir, installed_clients_dir, string(client))
+	clientDir := filepath.Join(i.InstallDir,, string(client))
 
 	// Check if client is installed
 	clientPath := filepath.Join(clientDir, string(client))
@@ -443,9 +443,9 @@ func GetVersionNumber(client string) string {
 	switch runtime.GOOS {
 	case "darwin", "linux":
 		if client == "prysm" {
-			clientCommand = filepath.Join(installed_clients_dir, client, fmt.Sprintf("%s.sh", client))
+			clientCommand = filepath.Join(InstallClientsDir, client, fmt.Sprintf("%s.sh", client))
 		} else {
-			clientCommand = filepath.Join(installed_clients_dir, client, client)
+			clientCommand = filepath.Join(InstallClientsDir, client, client)
 		}
 	case "windows":
 		fmt.Println("getVersionNumber() for windows is not yet implemented")
