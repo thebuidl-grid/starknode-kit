@@ -19,19 +19,19 @@ const (
 	LatestLighthouseVersion = "7.0.1"
 )
 
-// execCommand allows mocking exec.Command in tests
-var execCommand = exec.Command
+var (
+	// execCommand allows mocking exec.Command in tests
+	execCommand = exec.Command
 
-// installed_clients_dir is the base directory for client installations
-// This can be overridden in tests
-var installed_clients_dir = "ethereum_clients"
+	// This can be overridden in tests
 
-// GethHash maps Geth versions to their commit hashes
-var GethHash = map[string]string{
-	"1.14.3":  "ab48ba42",
-	"1.14.12": "293a300d",
-	"1.15.10": "2bf8a789",
-}
+	// GethHash maps Geth versions to their commit hashes
+	GethHash = map[string]string{
+		"1.14.3":  "ab48ba42",
+		"1.14.12": "293a300d",
+		"1.15.10": "2bf8a789",
+	}
+)
 
 // ClientType represents an Ethereum client type
 type ClientType string
@@ -140,7 +140,7 @@ func (i *Installer) InstallClient(client ClientType) error {
 	}
 
 	// Create client directory paths
-	clientDir := filepath.Join(i.InstallDir, installed_clients_dir, string(client))
+	clientDir := filepath.Join(InstallClientsDir, string(client))
 	databaseDir := filepath.Join(clientDir, "database")
 	logsDir := filepath.Join(clientDir, "logs")
 
@@ -230,11 +230,9 @@ func (i *Installer) InstallClient(client ClientType) error {
 
 // SetupJWTSecret creates a JWT secret file for client authentication
 func (i *Installer) SetupJWTSecret() error {
-	jwtDir := filepath.Join(i.InstallDir, installed_clients_dir, "jwt")
-	jwtPath := filepath.Join(jwtDir, "jwt.hex")
 
 	// Check if JWT already exists
-	if _, err := os.Stat(jwtPath); err == nil {
+	if _, err := os.Stat(jwtDir); err == nil {
 		return nil
 	}
 
@@ -251,7 +249,7 @@ func (i *Installer) SetupJWTSecret() error {
 	}
 
 	// Write JWT to file
-	if err := os.WriteFile(jwtPath, jwt, 0600); err != nil {
+	if err := os.WriteFile(JWTPath, jwt, 0600); err != nil {
 		return fmt.Errorf("failed to write JWT secret: %w", err)
 	}
 
