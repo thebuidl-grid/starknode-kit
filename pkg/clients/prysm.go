@@ -18,7 +18,7 @@ type prysmConfig struct {
 func (p prysmConfig) getPrysmCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
-		return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym.exe")
+		return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym.sh")
 	}
 	return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym")
 }
