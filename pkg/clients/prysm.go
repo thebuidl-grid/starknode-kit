@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// Configuration options for Geth
+// Configuration options for prysm
 type prysmConfig struct {
 	consensusPeerPorts  string
 	consensusPeerPorts2 string
@@ -38,8 +38,8 @@ func (p *prysmConfig) buildPrysmArgs() []string {
 		"http://localhost:8551",
 		"--grpc-gateway-host=0.0.0.0",
 		"--grpc-gateway-port=5052",
-		`--checkpoint-sync-url=${consensusCheckpoint}`,
-		`--genesis-beacon-api-url=${consensusCheckpoint}`,
+		//		`--checkpoint-sync-url=${consensusCheckpoint}`,
+		//	`--genesis-beacon-api-url=${consensusCheckpoint}`,
 		"--accept-terms-of-use=true",
 		"--jwt-secret",
 		pkg.JWTPath,
