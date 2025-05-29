@@ -150,6 +150,7 @@ func TestNewInstaller(t *testing.T) {
 
 	if installer == nil {
 		t.Error("NewInstaller() returned nil")
+		return
 	}
 
 	if installer.InstallDir != installDir {
