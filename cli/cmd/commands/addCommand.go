@@ -7,16 +7,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var AddCommand = &cobra.Command{
+var InstallCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add an Ethereum client to the config",
 	Long: `The add command registers a new Ethereum client (such as Prysm, Lighthouse, Geth, etc.)
 to the local configuration. This sets up the necessary parameters for managing and running
 the client as part of your node stack.`,
-	RunE: addCommand,
+	RunE: installCommand,
 }
 
-func addCommand(cmd *cobra.Command, args []string) error {
+func installCommand(cmd *cobra.Command, args []string) error {
 	if options.ConsensusClient != "" {
 		client, err := pkg.GetConsensusClient(options.ConsensusClient)
 		if err != nil {

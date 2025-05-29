@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"buidlguidl-go/cli/cmd/commands"
 	"fmt"
 	"os"
 
@@ -29,5 +30,5 @@ func init() {
 
 	// rootCmd.AddCommand(startCmd)
 	// rootCmd.AddCommand(stopCmd)
-	// rootCmd.AddCommand(addCmd)
+  rootCmd.AddCommand(commands.InstallCommand)
 }
