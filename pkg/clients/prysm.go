@@ -15,7 +15,7 @@ type prysmConfig struct {
 	consensusPeerPorts2 string
 }
 
-func (p prysmConfig) getPrysmCommand() string {
+func (p prysmConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
 		return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym.sh")
@@ -24,7 +24,7 @@ func (p prysmConfig) getPrysmCommand() string {
 }
 
 // BuildGethArgs builds the arguments for the geth command
-func (p *prysmConfig) buildPrysmArgs() []string {
+func (p *prysmConfig) buildArgs() []string {
 	args := []string{
 		"beacon-chain",
 		"--mainnet",
@@ -59,8 +59,8 @@ func (p *prysmConfig) buildPrysmArgs() []string {
 
 func StartPrsym(port ...string) error {
 	config := prysmConfig{port[0], port[1]} // TODO change
-	args := config.buildPrysmArgs()
-	command := config.getPrysmCommand()
+	args := config.buildArgs()
+	command := config.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
 		pkg.InstallClientsDir,
