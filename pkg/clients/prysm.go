@@ -20,7 +20,7 @@ func (p prysmConfig) getPrysmCommand() string {
 	if platform == "windows" {
 		return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym.exe")
 	}
-	return filepath.Join(pkg.InstallClientsDir, "ethereum_clients", "prsym", "prsym")
+	return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym")
 }
 
 // BuildGethArgs builds the arguments for the geth command
