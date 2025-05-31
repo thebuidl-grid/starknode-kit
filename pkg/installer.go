@@ -103,8 +103,8 @@ func (i *installer) GetClientFileName(client ClientType) (string, error) {
 	return fileName, nil
 }
 
-// GetDownloadURL returns the appropriate URL for downloading a client
-func (i *installer) GetDownloadURL(client ClientType, fileName string) (string, error) {
+// getDownloadURL returns the appropriate URL for downloading a client
+func (i *installer) getDownloadURL(client ClientType, fileName string) (string, error) {
 	switch client {
 	case ClientGeth:
 		return fmt.Sprintf("https://gethstore.blob.core.windows.net/builds/%s.tar.gz", fileName), nil
@@ -158,7 +158,7 @@ func (i *installer) InstallClient(client ClientType) error {
 	}
 
 	// Get download URL
-	downloadURL, err := i.GetDownloadURL(client, fileName)
+	downloadURL, err := i.getDownloadURL(client, fileName)
 	if err != nil {
 		return err
 	}
