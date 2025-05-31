@@ -38,7 +38,7 @@ func GetExecutionClient(c string) (ClientType, error) {
 }
 func GetConsensusClient(c string) (ClientType, error) {
 	sprtClients := map[string]ClientType{
-		"lighhouse": ClientLighthouse,
+		"lighthouse": ClientLighthouse,
 		"prysm":     ClientPrysm,
 	}
 	client, ok := sprtClients[c]
