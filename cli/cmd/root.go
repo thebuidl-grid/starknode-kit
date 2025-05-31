@@ -12,11 +12,13 @@ import (
 var (
 	rootCmd = &cobra.Command{
 		Use:   "stacknode",
-		Short: "To add",
-		Long:  `Add long command here`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("This is root test command")
-		},
+		Short: "Tool for setting up and managing Ethereum and StarkNet nodes",
+		Long: `Stacknode is a CLI tool designed to simplify the setup and management 
+of Ethereum and StarkNet nodes. It helps developers quickly configure, 
+launch, monitor, and maintain full nodes or validator setups for both networks.
+
+This tool aims to streamline the experience for node operators, 
+developers, and testers working with decentralized infrastructure.`,
 	}
 )
 
