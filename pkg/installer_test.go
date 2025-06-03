@@ -284,3 +284,4 @@ func TestRemoveClient(t *testing.T) {
 	// Skip this test as it requires filesystem operations
 	t.Skip("Skipping RemoveClient test as it requires filesystem operations")
 }
+
