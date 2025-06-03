@@ -1,6 +1,6 @@
 ## `starknode-kit` CLI Documentation
 
-**Starknode** is a command-line tool to help developers and node operators easily set up, manage, and maintain Ethereum and StarkNet nodes.
+**Starknode** is a command-line tool to help developers and node operators easily set up, manage, and maintain Ethereum and Starknet nodes.
 
 ---
 
