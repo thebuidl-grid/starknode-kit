@@ -1,6 +1,6 @@
-## `stacknode-kit` CLI Documentation
+## `starknode-kit` CLI Documentation
 
-**Stacknode** is a command-line tool to help developers and node operators easily set up, manage, and maintain Ethereum and StarkNet nodes.
+**Starknode** is a command-line tool to help developers and node operators easily set up, manage, and maintain Ethereum and StarkNet nodes.
 
 ---
 
@@ -21,7 +21,7 @@
 | -------------------------- | ------------------------------------------------------ |
 | `-c`, `--consensus_client` | Specify the consensus client (e.g., Lighthouse, Prysm) |
 | `-e`, `--execution_client` | Specify the execution client (e.g., Geth, Reth)        |
-| `-h`, `--help`             | Show help for the `stacknode` command                  |
+| `-h`, `--help`             | Show help for the `starknode` command                  |
 
 ---
 
@@ -30,25 +30,23 @@
 #### Add a client pair (consensus + execution)
 
 ```bash
-stacknode add --consensus_client lighthouse --execution_client geth
+starknode add --consensus_client lighthouse --execution_client geth
 ```
 
 #### Remove a configured client
 
 ```bash
-stacknode remove --consensus_client lighthouse
+starknode remove --consensus_client lighthouse
 ```
 
 #### Generate bash completion script
 
 ```bash
-stacknode completion bash > /etc/bash_completion.d/stacknode
+starknode completion bash > /etc/bash_completion.d/starknode
 ```
 
 #### Show help for a subcommand
 
 ```bash
-stacknode help add
+starknode help add
 ```
-
-
