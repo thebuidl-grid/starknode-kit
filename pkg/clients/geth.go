@@ -200,7 +200,7 @@ func BuildGethArgs(config *GethConfig) []string {
 		"--authrpc.addr=0.0.0.0",
 		"--authrpc.port=8551",
 		"--authrpc.vhosts=*",
-		"--metrics",How 
+    "--metrics",
 		"--metrics.addr=0.0.0.0",
 		"--metrics.port=6060",
 	}
