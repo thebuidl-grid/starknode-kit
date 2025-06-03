@@ -6,7 +6,7 @@ build:
 
 # Run tests
 test:
-    go test -v ./
+    cd pkg && go test -v ./
 
 # Clean build artifacts
 clean:
