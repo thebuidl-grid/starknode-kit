@@ -11,7 +11,7 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "stacknode",
+		Use:   "starknode",
 		Short: "Tool for setting up and managing Ethereum and StarkNet nodes",
 		Long: `Stacknode is a CLI tool designed to simplify the setup and management 
 of Ethereum and StarkNet nodes. It helps developers quickly configure, 
@@ -33,5 +33,6 @@ func init() {
 
 	options.InitGlobalOptions(rootCmd)
 	rootCmd.AddCommand(commands.InstallCommand)
+	rootCmd.AddCommand(commands.InitCommand)
 	rootCmd.AddCommand(commands.RemoveCommand)
 }
