@@ -10,8 +10,8 @@ const (
 )
 
 type StarkNodeKitConfig struct {
-	ExecutionCientSettings ClientConfig `yaml:"execution_client"`
-	ConsensusCientSettings ClientConfig `yaml:"consensus_client"`
+	ExecutionCientSettings clientConfig `yaml:"execution_client"`
+	ConsensusCientSettings clientConfig `yaml:"consensus_client"`
 }
 
 type clientConfig struct {
