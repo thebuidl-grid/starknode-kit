@@ -54,7 +54,7 @@ func NewInstaller(Installpath string) *installer {
 }
 
 // GetClientFileName returns the file name based on platform and architecture
-func (i *installer) GetClientFileName(client ClientType) (string, error) {
+func (i *installer) getClientFileName(client ClientType) (string, error) {
 	// Get current OS and architecture
 	goos := runtime.GOOS     // "darwin", "linux", "windows"
 	goarch := runtime.GOARCH // "amd64", "arm64"
@@ -127,7 +127,7 @@ func (i *installer) getDownloadURL(client ClientType, fileName string) (string, 
 // InstallClient installs the specified Ethereum client
 func (i *installer) InstallClient(client ClientType) error {
 	// Get client file name
-	fileName, err := i.GetClientFileName(client)
+	fileName, err := i.getClientFileName(client)
 	if err != nil {
 		return err
 	}
