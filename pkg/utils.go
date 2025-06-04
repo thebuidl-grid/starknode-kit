@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"buidlguidl-go/pkg/types"
 	"fmt"
 	"os"
 	"path"
@@ -39,7 +40,7 @@ func GetExecutionClient(c string) (ClientType, error) {
 func GetConsensusClient(c string) (ClientType, error) {
 	sprtClients := map[string]ClientType{
 		"lighthouse": ClientLighthouse,
-		"prysm":     ClientPrysm,
+		"prysm":      ClientPrysm,
 	}
 	client, ok := sprtClients[c]
 	if !ok {
@@ -54,4 +55,19 @@ func getHomeDir() string {
 		panic(err)
 	}
 	return homeDir
+}
+
+func DefaultConfig() types.StarkNodeKitConfig {
+	return types.StarkNodeKitConfig{
+		ExecutionCientSettings: types.ClientConfig{
+			Name:    "reth",
+			Network: "sepolia",
+			Port:    []string{"8545", "30303"},
+		},
+		ConsensusCientSettings: types.ClientConfig{
+			Name:    "lighthouse",
+			Network: "sepolia",
+			Port:    []string{"8545", "30303"},
+		},
+	}
 }
