@@ -17,8 +17,8 @@ var (
 
 	jwtDir         = path.Join(InstallDir, "ethereum_clients", "jwt")
 	JWTPath        = path.Join(jwtDir, "jwt.hex")
-	config_dir     = path.Join(InstallDir, "config")
-	yamlConfigPath = fmt.Sprintf("%s/stacknode.yaml", config_dir)
+	configDir     = path.Join(InstallDir, "config")
+	yamlConfigPath = fmt.Sprintf("%s/stacknode.yaml", configDir)
 )
 
 func GetExecutionClient(c string) (ClientType, error) {
@@ -62,6 +62,9 @@ func loadConfig() error {
 
 func CreateStackNodeConfig() error {
 	default_config := defaultConfig()
+  if err := os.MkdirAll(configDir, 0755); err != nil {
+		return fmt.Errorf("failed to create JWT directory: %w", err)
+	}
 	cfg, err := yaml.Marshal(default_config)
 	if err != nil {
 		return err
