@@ -30,7 +30,6 @@ func Execute() {
 }
 
 func init() {
-
 	options.InitGlobalOptions(rootCmd)
 	rootCmd.AddCommand(commands.InstallCommand)
 	rootCmd.AddCommand(commands.InitCommand)
