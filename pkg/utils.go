@@ -55,9 +55,8 @@ func getHomeDir() string {
 func loadConfig() error {
 	_, err := os.ReadFile(yamlConfigPath)
 	if err != nil {
-		panic(err)
+		config = defaultConfig()
 	}
-	config = defaultConfig()
 	return nil
 }
 
