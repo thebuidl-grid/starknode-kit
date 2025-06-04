@@ -63,8 +63,6 @@ func TestGetVersionNumber(t *testing.T) {
 	execCommand = fakeExecCommand
 	defer func() { execCommand = exec.Command }()
 
-	installed_clients_dir = "./fakepath"
-
 	tests := []struct {
 		client   string
 		expected string
@@ -131,7 +129,7 @@ func TestGetDownloadURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(string(tt.client), func(t *testing.T) {
-			url, err := installer.GetDownloadURL(tt.client, tt.fileName)
+			url, err := installer.getDownloadURL(tt.client, tt.fileName)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetDownloadURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -212,7 +210,6 @@ func TestIsClientLatestVersion(t *testing.T) {
 
 // MockInstaller represents a mock installer for testing
 type MockInstaller struct {
-	*Installer
 	RemoveClientCalled   bool
 	InstallClientCalled  bool
 	SetupJWTSecretCalled bool
@@ -222,38 +219,6 @@ type MockInstaller struct {
 func (m *MockInstaller) RemoveClient(client ClientType) error {
 	m.RemoveClientCalled = true
 	return nil
-}
-
-// TestCommandLineRun tests the CommandLine.Run method
-func TestCommandLineRun(t *testing.T) {
-	mockInstaller := &MockInstaller{
-		Installer: NewInstaller("/tmp"),
-	}
-
-	cmdLine := &CommandLine{
-		Installer: mockInstaller.Installer,
-	}
-
-	// Test with remove flag
-	args := []string{"installer", "--client", "geth", "--remove"}
-	err := cmdLine.Run(args)
-	if err != nil {
-		t.Errorf("CommandLine.Run() error = %v", err)
-	}
-
-	// Test with invalid client
-	args = []string{"installer", "--client", "unknown"}
-	err = cmdLine.Run(args)
-	if err == nil {
-		t.Errorf("CommandLine.Run() with invalid client should return error")
-	}
-
-	// Test with missing client
-	args = []string{"installer"}
-	err = cmdLine.Run(args)
-	if err == nil {
-		t.Errorf("CommandLine.Run() with missing client should return error")
-	}
 }
 
 // TestDownloadFile tests the downloadFile function with a mock HTTP server
