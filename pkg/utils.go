@@ -1,29 +1,24 @@
 package pkg
 
 import (
-	"buidlguidl-go/pkg/types"
 	"fmt"
 	"os"
 	"path"
-)
 
-// ClientType represents an Ethereum client type
-type ClientType string
-
-const (
-	ClientGeth       ClientType = "geth"
-	ClientReth       ClientType = "reth"
-	ClientLighthouse ClientType = "lighthouse"
-	ClientPrysm      ClientType = "prysm"
+	"gopkg.in/yaml.v3"
 )
 
 var (
+	config     StarkNodeKitConfig
+	_          = loadConfig()
 	InstallDir = path.Join(getHomeDir(), "starcknode-kit")
 
 	InstallClientsDir = path.Join(InstallDir, "ethereum_clients")
 
-	jwtDir  = path.Join(InstallDir, "ethereum_clients", "jwt")
-	JWTPath = path.Join(jwtDir, "jwt.hex")
+	jwtDir         = path.Join(InstallDir, "ethereum_clients", "jwt")
+	JWTPath        = path.Join(jwtDir, "jwt.hex")
+	config_dir     = path.Join(InstallDir, "config")
+	yamlConfigPath = fmt.Sprintf("%s/stacknode.yaml", config_dir)
 )
 
 func GetExecutionClient(c string) (ClientType, error) {
@@ -44,7 +39,7 @@ func GetConsensusClient(c string) (ClientType, error) {
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Execution Client %s not supported", client)
+		return "", fmt.Errorf("Execution Client %s not supported", client) // TODO change this
 	}
 	return client, nil
 }
@@ -57,15 +52,37 @@ func getHomeDir() string {
 	return homeDir
 }
 
-func DefaultConfig() types.StarkNodeKitConfig {
-	return types.StarkNodeKitConfig{
-		ExecutionCientSettings: types.ClientConfig{
-			Name:    "reth",
+func loadConfig() error {
+	_, err := os.ReadFile(yamlConfigPath)
+	if err != nil {
+		panic(err)
+	}
+	config = defaultConfig()
+	return nil
+}
+
+func CreateStackNodeConfig() error {
+	default_config := defaultConfig()
+	cfg, err := yaml.Marshal(default_config)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(yamlConfigPath, cfg, 0600)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func defaultConfig() StarkNodeKitConfig {
+	return StarkNodeKitConfig{
+		ExecutionCientSettings: clientConfig{
+			Name:    ClientGeth,
 			Network: "sepolia",
 			Port:    []string{"8545", "30303"},
 		},
-		ConsensusCientSettings: types.ClientConfig{
-			Name:    "lighthouse",
+		ConsensusCientSettings: clientConfig{
+			Name:    ClientPrysm,
 			Network: "sepolia",
 			Port:    []string{"8545", "30303"},
 		},
