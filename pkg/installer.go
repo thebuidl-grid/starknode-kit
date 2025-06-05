@@ -34,7 +34,7 @@ var (
 )
 
 // ClientConfig holds the download configuration for a client
-type ClientConfig struct {
+type clientConfig struct {
 	FileName    string
 	DownloadURL string
 	BinaryPath  string
