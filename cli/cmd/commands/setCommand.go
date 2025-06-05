@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"buidlguidl-go/cli/cmd/options"
 	"buidlguidl-go/pkg"
 	"fmt"
 	"strings"
@@ -11,33 +10,58 @@ import (
 
 var SetCommand = &cobra.Command{
 	Use:   "set",
-	Short: "Set config values",
-	Long:  "Set allows you to modify configuration values used by the application. You can set individual keys or multiple values at once.",
-	Run:   setCommand,
+	Short: "Set config values for clients",
+	Long: `The 'set' command updates the configuration for execution or consensus clients.
+
+Usage:
+  starknodekit set el network=mainnet port=9000,9001
+  starknodekit set cl network=mainnet port=9000
+
+Available keys:
+  - client: sets the client (e.g., client=reth)
+  - network: sets the client network (e.g., network=mainnet)
+  - port: sets a comma-separated list of client ports (e.g., port=9000,9001)
+`,
 }
 
-func setCommand(cmd *cobra.Command, args []string) {
+// Subcommand: `set el`
+var setELCmd = &cobra.Command{
+	Use:   "el key=value [key=value...]",
+	Short: "Set execution layer (EL) client configuration",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runSetCommand("execution", args)
+	},
+}
+
+// Subcommand: `set cl`
+var setCLCmd = &cobra.Command{
+	Use:   "cl key=value [key=value...]",
+	Short: "Set consensus layer (CL) client configuration",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runSetCommand("consensus", args)
+	},
+}
+
+func runSetCommand(target string, args []string) {
 	cfg, err := pkg.LoadConfig()
 	if err != nil {
+		fmt.Println("Failed to load config:", err)
+		return
+	}
+
+	if err := processConfigArgs(&cfg, args, target); err != nil {
 		fmt.Println(err)
 		return
 	}
-	if options.ConsensusClient != "" {
-		client, err := pkg.GetConsensusClient(options.ConsensusClient)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		cfg.ConsensusCientSettings.Name = pkg.ClientType(client)
+
+	if err := pkg.UpdateStackNodeConfig(cfg); err != nil {
+		fmt.Println("Failed to save config:", err)
 	}
-	if options.ExecutionClient != "" {
-		client, err := pkg.GetExecutionClient(options.ExecutionClient)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		cfg.ExecutionCientSettings.Name = pkg.ClientType(client)
-	}
+}
+
+func processConfigArgs(cfg *pkg.StarkNodeKitConfig, args []string, target string) error {
 	for _, arg := range args {
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) != 2 {
@@ -47,28 +71,82 @@ func setCommand(cmd *cobra.Command, args []string) {
 		key := strings.ToLower(parts[0])
 		value := parts[1]
 
-		if err := applyConfigUpdate(&cfg, key, value); err != nil {
-			fmt.Printf("Failed to set %s: %v\n", key, err)
+		if err := applyConfigUpdate(cfg, key, value, target); err != nil {
+			return err
 		}
 	}
-	err = pkg.UpdateStackNodeConfig(cfg)
-	if err != nil {
-		fmt.Println(err)
-		return
-
-	}
+	return nil
 }
-func applyConfigUpdate(cfg *pkg.StarkNodeKitConfig, key, value string) error {
+
+func applyConfigUpdate(cfg *pkg.StarkNodeKitConfig, key, value, target string) error {
+	var (
+		updated pkg.ClientConfig
+		err     error
+	)
+
+	switch target {
+	case "execution":
+		updated, err = setClientConfigValue(cfg.ExecutionCientSettings, key, value, target)
+		if err == nil {
+			cfg.ExecutionCientSettings = updated
+		}
+	case "consensus":
+		updated, err = setClientConfigValue(cfg.ConsensusCientSettings, key, value, target)
+		if err == nil {
+			cfg.ConsensusCientSettings = updated
+		}
+	default:
+		return fmt.Errorf("invalid config target: %s (must be 'execution' or 'consensus')", target)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setClientConfigValue(clientCfg pkg.ClientConfig, key, value, target string) (pkg.ClientConfig, error) {
 	switch key {
+	case "client":
+		var client pkg.ClientType
+		var err error
+
+		switch target {
+		case "execution":
+			client, err = pkg.GetExecutionClient(value)
+			if err != nil {
+				return clientCfg, fmt.Errorf(`%w
+Supported execution clients are:
+  - geth
+  - reth`, err)
+			}
+		case "consensus":
+			client, err = pkg.GetConsensusClient(value)
+			if err != nil {
+				return clientCfg, fmt.Errorf(`%w
+Supported execution clients are:
+  - lighthouse 
+  - prysm`, err)
+			}
+			clientCfg.Name = pkg.ClientType(client)
+		}
+
 	case "network":
-		cfg.ExecutionCientSettings.Network = value
+		clientCfg.Network = value
+
 	case "port":
-		cfg.ExecutionCientSettings.Port = parsePorts(value)
+		clientCfg.Port = parsePorts(value)
 
 	default:
-		return fmt.Errorf("unknown config key: %s", key)
+		return clientCfg, fmt.Errorf(`
+"unknown config key: %s", key
+Available keys you can set:
+  - client           (client name)
+  - network          (client network)
+  - port             (client ports, comma-separated)`, key)
 	}
-	return nil
+	return clientCfg, nil
 }
 
 func parsePorts(value string) []string {
@@ -81,4 +159,8 @@ func parsePorts(value string) []string {
 		}
 	}
 	return ports
+}
+func init() {
+	SetCommand.AddCommand(setELCmd)
+	SetCommand.AddCommand(setCLCmd)
 }
