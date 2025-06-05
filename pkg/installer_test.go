@@ -63,6 +63,8 @@ func TestGetVersionNumber(t *testing.T) {
 	execCommand = fakeExecCommand
 	defer func() { execCommand = exec.Command }()
 
+	// Note: InstallClientsDir is used by GetVersionNumber internally
+
 	tests := []struct {
 		client   string
 		expected string
@@ -84,7 +86,8 @@ func TestGetVersionNumber(t *testing.T) {
 }
 
 func TestGetClientFileName(t *testing.T) {
-	installer := NewInstaller("/tmp")
+	installer := Newinstaller()
+	installer.InstallDir = "/tmp"
 
 	tests := []struct {
 		client  ClientType
@@ -113,7 +116,8 @@ func TestGetClientFileName(t *testing.T) {
 }
 
 func TestGetDownloadURL(t *testing.T) {
-	installer := NewInstaller("/tmp")
+	installer := Newinstaller()
+	installer.InstallDir = "/tmp"
 
 	tests := []struct {
 		client   ClientType
@@ -131,28 +135,27 @@ func TestGetDownloadURL(t *testing.T) {
 		t.Run(string(tt.client), func(t *testing.T) {
 			url, err := installer.getDownloadURL(tt.client, tt.fileName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetDownloadURL() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("getDownloadURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if !tt.wantErr && url == "" {
-				t.Errorf("GetDownloadURL() returned empty url")
+				t.Errorf("getDownloadURL() returned empty url")
 			}
 		})
 	}
 }
 
 func TestNewInstaller(t *testing.T) {
-	installDir := "/test/path"
-	installer := NewInstaller(installDir)
+	installer := Newinstaller()
 
 	if installer == nil {
-		t.Error("NewInstaller() returned nil")
+		t.Error("Newinstaller() returned nil")
 		return
 	}
 
-	if installer.InstallDir != installDir {
-		t.Errorf("NewInstaller() InstallDir = %v, want %v", installer.InstallDir, installDir)
+	if installer.InstallDir != InstallClientsDir {
+		t.Errorf("Newinstaller() InstallDir = %v, want %v", installer.InstallDir, InstallClientsDir)
 	}
 }
 
@@ -182,7 +185,8 @@ func TestCompareVersions(t *testing.T) {
 
 // TestIsClientLatestVersion tests the IsClientLatestVersion method
 func TestIsClientLatestVersion(t *testing.T) {
-	installer := NewInstaller("/tmp")
+	installer := Newinstaller()
+	installer.InstallDir = "/tmp"
 
 	tests := []struct {
 		client     ClientType
@@ -210,6 +214,7 @@ func TestIsClientLatestVersion(t *testing.T) {
 
 // MockInstaller represents a mock installer for testing
 type MockInstaller struct {
+	*installer
 	RemoveClientCalled   bool
 	InstallClientCalled  bool
 	SetupJWTSecretCalled bool
@@ -219,6 +224,41 @@ type MockInstaller struct {
 func (m *MockInstaller) RemoveClient(client ClientType) error {
 	m.RemoveClientCalled = true
 	return nil
+}
+
+// TestCommandLineRun tests the CommandLine.Run method
+func TestCommandLineRun(t *testing.T) {
+	baseInstaller := Newinstaller()
+	baseInstaller.InstallDir = "/tmp"
+
+	mockInstaller := &MockInstaller{
+		installer: baseInstaller,
+	}
+
+	cmdLine := &CommandLine{
+		installer: mockInstaller.installer,
+	}
+
+	// Test with remove flag
+	args := []string{"installer", "--client", "geth", "--remove"}
+	err := cmdLine.Run(args)
+	if err != nil {
+		t.Errorf("CommandLine.Run() error = %v", err)
+	}
+
+	// Test with invalid client
+	args = []string{"installer", "--client", "unknown"}
+	err = cmdLine.Run(args)
+	if err == nil {
+		t.Errorf("CommandLine.Run() with invalid client should return error")
+	}
+
+	// Test with missing client
+	args = []string{"installer"}
+	err = cmdLine.Run(args)
+	if err == nil {
+		t.Errorf("CommandLine.Run() with missing client should return error")
+	}
 }
 
 // TestDownloadFile tests the downloadFile function with a mock HTTP server
@@ -244,3 +284,4 @@ func TestRemoveClient(t *testing.T) {
 	// Skip this test as it requires filesystem operations
 	t.Skip("Skipping RemoveClient test as it requires filesystem operations")
 }
+

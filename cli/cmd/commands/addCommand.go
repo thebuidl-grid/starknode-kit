@@ -14,7 +14,7 @@ var InstallCommand = &cobra.Command{
 	Short: "Add an Ethereum client to the config",
 	Long: `The add command registers a new Ethereum client (such as Prysm, Lighthouse, Geth, etc.)
 to the local configuration. This sets up the necessary parameters for managing and running
-the client as part of your node stack.`,
+the client as part of your node stark.`,
 	Run: installCommand,
 }
 
