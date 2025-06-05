@@ -26,7 +26,7 @@ func GetExecutionClient(c string) (ClientType, error) {
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Execution Client %s not supported", client)
+		return "", fmt.Errorf("Execution Client %s not supported", c)
 	}
 	return client, nil
 }
@@ -37,7 +37,7 @@ func GetConsensusClient(c string) (ClientType, error) {
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Consensus Client %s not supported", client) // TODO change this
+		return "", fmt.Errorf("Consensus Client %s not supported", c) 
 	}
 	return client, nil
 }
@@ -96,12 +96,12 @@ func CreateStackNodeConfig() error {
 
 func defaultConfig() StarkNodeKitConfig {
 	return StarkNodeKitConfig{
-		ExecutionCientSettings: ClientSettings{
+		ExecutionCientSettings: ClientConfig{
 			Name:    ClientGeth,
 			Network: "sepolia",
 			Port:    []string{"8545", "30303"},
 		},
-		ConsensusCientSettings: ClientSettings{
+		ConsensusCientSettings: ClientConfig{
 			Name:    ClientPrysm,
 			Network: "sepolia",
 			Port:    []string{"8545", "30303"},
