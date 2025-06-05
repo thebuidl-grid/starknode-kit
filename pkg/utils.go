@@ -37,7 +37,7 @@ func GetConsensusClient(c string) (ClientType, error) {
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Execution Client %s not supported", client) // TODO change this
+		return "", fmt.Errorf("Consensus Client %s not supported", client) // TODO change this
 	}
 	return client, nil
 }
@@ -56,7 +56,7 @@ func LoadConfig() (StarkNodeKitConfig, error) {
 	if err != nil {
 		return StarkNodeKitConfig{}, err
 	}
-	err = yaml.Unmarshal(cfgByt, cfg)
+	err = yaml.Unmarshal(cfgByt, &cfg)
 	if err != nil {
 		return StarkNodeKitConfig{}, err
 	}
