@@ -96,12 +96,12 @@ func CreateStackNodeConfig() error {
 
 func defaultConfig() StarkNodeKitConfig {
 	return StarkNodeKitConfig{
-		ExecutionCientSettings: clientConfig{
+		ExecutionCientSettings: ClientSettings{
 			Name:    ClientGeth,
 			Network: "sepolia",
 			Port:    []string{"8545", "30303"},
 		},
-		ConsensusCientSettings: clientConfig{
+		ConsensusCientSettings: ClientSettings{
 			Name:    ClientPrysm,
 			Network: "sepolia",
 			Port:    []string{"8545", "30303"},
