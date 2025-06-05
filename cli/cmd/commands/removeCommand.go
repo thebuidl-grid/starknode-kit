@@ -21,7 +21,10 @@ func removeCommand(cmd *cobra.Command, args []string) {
 	if options.ConsensusClient != "" {
 		client, err := pkg.GetConsensusClient(options.ConsensusClient)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("Error: %v\n\n", err)
+			fmt.Println("Supported consensus clients are:")
+			fmt.Println("  - prysm")
+			fmt.Println("  - lighthouse")
 			return
 		}
 		err = installer.RemoveClient(client)
@@ -33,7 +36,10 @@ func removeCommand(cmd *cobra.Command, args []string) {
 	if options.ExecutionClient != "" {
 		client, err := pkg.GetExecutionClient(options.ExecutionClient)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("Error: %v\n\n", err)
+			fmt.Println("Supported execution clients are:")
+			fmt.Println("  - geth")
+			fmt.Println("  - reth")
 			return
 		}
 		err = installer.RemoveClient(client)
