@@ -125,7 +125,7 @@ Supported execution clients are:
 			client, err = pkg.GetConsensusClient(value)
 			if err != nil {
 				return clientCfg, fmt.Errorf(`%w
-Supported execution clients are:
+Supported consensus clients are:
   - lighthouse 
   - prysm`, err)
 			}
