@@ -63,7 +63,7 @@ func LoadConfig() (StarkNodeKitConfig, error) {
 	return cfg, nil
 }
 
-func UpdateStackNodeConfig(config StarkNodeKitConfig) error {
+func UpdateStarkNodeConfig(config StarkNodeKitConfig) error {
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return fmt.Errorf("failed to update config file: %w", err)
 	}
@@ -78,7 +78,7 @@ func UpdateStackNodeConfig(config StarkNodeKitConfig) error {
 	return nil
 }
 
-func CreateStackNodeConfig() error {
+func CreateStarkNodeConfig() error {
 	default_config := defaultConfig()
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
