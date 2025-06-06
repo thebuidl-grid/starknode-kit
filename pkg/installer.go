@@ -33,13 +33,6 @@ var (
 	}
 )
 
-// ClientConfig holds the download configuration for a client
-type clientConfig struct {
-	FileName    string
-	DownloadURL string
-	BinaryPath  string
-}
-
 // installer manages Ethereum client installation
 type installer struct {
 	InstallDir string

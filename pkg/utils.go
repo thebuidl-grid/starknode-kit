@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	InstallDir = path.Join(getHomeDir(), "starcknode-kit")
+	InstallDir = path.Join(getHomeDir(), "starknode-kit")
 
 	InstallClientsDir = path.Join(InstallDir, "ethereum_clients")
 
 	jwtDir         = path.Join(InstallDir, "ethereum_clients", "jwt")
 	JWTPath        = path.Join(jwtDir, "jwt.hex")
 	configDir      = path.Join(InstallDir, "config")
-	yamlConfigPath = fmt.Sprintf("%s/stacknode.yaml", configDir)
+	yamlConfigPath = fmt.Sprintf("%s/starknode.yaml", configDir)
 )
 
 func GetExecutionClient(c string) (ClientType, error) {
@@ -26,7 +26,7 @@ func GetExecutionClient(c string) (ClientType, error) {
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Execution Client %s not supported", c)
+		return "", fmt.Errorf("execution client %s not supported", c)
 	}
 	return client, nil
 }
@@ -37,7 +37,7 @@ func GetConsensusClient(c string) (ClientType, error) {
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Consensus Client %s not supported", c) 
+		return "", fmt.Errorf("consensus client %s not supported", c)
 	}
 	return client, nil
 }
@@ -104,7 +104,7 @@ func defaultConfig() StarkNodeKitConfig {
 		ConsensusCientSettings: ClientConfig{
 			Name:    ClientPrysm,
 			Network: "sepolia",
-			Port:    []string{"8545", "30303"},
+			Port:    []string{"5052", "90000"},
 		},
 	}
 }
