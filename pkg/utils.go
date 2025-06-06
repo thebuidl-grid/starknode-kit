@@ -4,16 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path"
-)
 
-// ClientType represents an Ethereum client type
-type ClientType string
-
-const (
-	ClientGeth       ClientType = "geth"
-	ClientReth       ClientType = "reth"
-	ClientLighthouse ClientType = "lighthouse"
-	ClientPrysm      ClientType = "prysm"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -21,8 +13,10 @@ var (
 
 	InstallClientsDir = path.Join(InstallDir, "ethereum_clients")
 
-	jwtDir  = path.Join(InstallDir, "ethereum_clients", "jwt")
-	JWTPath = path.Join(jwtDir, "jwt.hex")
+	jwtDir         = path.Join(InstallDir, "ethereum_clients", "jwt")
+	JWTPath        = path.Join(jwtDir, "jwt.hex")
+	configDir      = path.Join(InstallDir, "config")
+	yamlConfigPath = fmt.Sprintf("%s/stacknode.yaml", configDir)
 )
 
 func GetExecutionClient(c string) (ClientType, error) {
@@ -32,18 +26,18 @@ func GetExecutionClient(c string) (ClientType, error) {
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Execution Client %s not supported", client)
+		return "", fmt.Errorf("Execution Client %s not supported", c)
 	}
 	return client, nil
 }
 func GetConsensusClient(c string) (ClientType, error) {
 	sprtClients := map[string]ClientType{
 		"lighthouse": ClientLighthouse,
-		"prysm":     ClientPrysm,
+		"prysm":      ClientPrysm,
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Execution Client %s not supported", client)
+		return "", fmt.Errorf("Consensus Client %s not supported", c) 
 	}
 	return client, nil
 }
@@ -54,4 +48,63 @@ func getHomeDir() string {
 		panic(err)
 	}
 	return homeDir
+}
+
+func LoadConfig() (StarkNodeKitConfig, error) {
+	var cfg StarkNodeKitConfig
+	cfgByt, err := os.ReadFile(yamlConfigPath)
+	if err != nil {
+		return StarkNodeKitConfig{}, err
+	}
+	err = yaml.Unmarshal(cfgByt, &cfg)
+	if err != nil {
+		return StarkNodeKitConfig{}, err
+	}
+	return cfg, nil
+}
+
+func UpdateStarkNodeConfig(config StarkNodeKitConfig) error {
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		return fmt.Errorf("failed to update config file: %w", err)
+	}
+	cfg, err := yaml.Marshal(config)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(yamlConfigPath, cfg, 0600)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateStarkNodeConfig() error {
+	default_config := defaultConfig()
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		return fmt.Errorf("failed to create config file: %w", err)
+	}
+	cfg, err := yaml.Marshal(default_config)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(yamlConfigPath, cfg, 0600)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func defaultConfig() StarkNodeKitConfig {
+	return StarkNodeKitConfig{
+		ExecutionCientSettings: ClientConfig{
+			Name:    ClientGeth,
+			Network: "sepolia",
+			Port:    []string{"8545", "30303"},
+		},
+		ConsensusCientSettings: ClientConfig{
+			Name:    ClientPrysm,
+			Network: "sepolia",
+			Port:    []string{"8545", "30303"},
+		},
+	}
 }

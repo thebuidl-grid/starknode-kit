@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//TODO use loggers and not print
 var InstallCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add an Ethereum client to the config",

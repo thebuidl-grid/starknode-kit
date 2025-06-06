@@ -11,6 +11,7 @@
 | `add`        | Add an Ethereum client to the configuration                |
 | `remove`     | Removes a specified resource (client, config, etc.)        |
 | `completion` | Generate the autocompletion script for the specified shell |
+| `set`        | Set config values for execution or consensus clients       |
 | `help`       | Display help about any command                             |
 
 ---
@@ -27,6 +28,12 @@
 
 ### 🧪 Example Usage
 
+#### Generate Config file 
+
+```bash
+starknode init
+```
+
 #### Add a client pair (consensus + execution)
 
 ```bash
@@ -37,6 +44,12 @@ starknode add --consensus_client lighthouse --execution_client geth
 
 ```bash
 starknode remove --consensus_client lighthouse
+```
+
+#### Set an execution client
+
+```bash
+starknodekit set el client=reth network=mainnet port=9000,9001
 ```
 
 #### Generate bash completion script

@@ -34,7 +34,7 @@ var (
 )
 
 // ClientConfig holds the download configuration for a client
-type ClientConfig struct {
+type clientConfig struct {
 	FileName    string
 	DownloadURL string
 	BinaryPath  string
@@ -46,12 +46,15 @@ type installer struct {
 }
 
 // Newinstaller creates a new installer instance
-func Newinstaller() *installer {
-	return &installer{InstallDir: InstallClientsDir}
+func NewInstaller(Installpath string) *installer {
+	if err := setupJWTSecret(); err != nil {
+		panic(err)
+	}
+	return &installer{InstallDir: Installpath}
 }
 
 // GetClientFileName returns the file name based on platform and architecture
-func (i *installer) GetClientFileName(client ClientType) (string, error) {
+func (i *installer) getClientFileName(client ClientType) (string, error) {
 	// Get current OS and architecture
 	goos := runtime.GOOS     // "darwin", "linux", "windows"
 	goarch := runtime.GOARCH // "amd64", "arm64"
@@ -124,7 +127,7 @@ func (i *installer) getDownloadURL(client ClientType, fileName string) (string, 
 // InstallClient installs the specified Ethereum client
 func (i *installer) InstallClient(client ClientType) error {
 	// Get client file name
-	fileName, err := i.GetClientFileName(client)
+	fileName, err := i.getClientFileName(client)
 	if err != nil {
 		return err
 	}
@@ -218,8 +221,8 @@ func (i *installer) InstallClient(client ClientType) error {
 	return nil
 }
 
-// SetupJWTSecret creates a JWT secret file for client authentication
-func (i *installer) SetupJWTSecret() error {
+// setupJWTSecret creates a JWT secret file for client authentication
+func setupJWTSecret() error {
 
 	// Check if JWT already exists
 	if _, err := os.Stat(jwtDir); err == nil {
@@ -326,94 +329,6 @@ func downloadFile(url, filepath string) error {
 	}
 
 	return nil
-}
-
-// CommandLine represents the command line program
-type CommandLine struct {
-	installer *installer
-}
-
-// Run parses and executes command line arguments
-func (c *CommandLine) Run(args []string) error {
-	if len(args) < 2 {
-		return fmt.Errorf("not enough arguments")
-	}
-
-	// Parse flags
-	var clientStr, directory string
-	var isRemove, isVersion bool
-
-	for i := 1; i < len(args); i++ {
-		switch args[i] {
-		case "--client", "-c":
-			if i+1 < len(args) {
-				clientStr = args[i+1]
-				i++
-			}
-		case "--directory", "-d":
-			if i+1 < len(args) {
-				directory = args[i+1]
-				i++
-			}
-		case "--remove", "-r":
-			isRemove = true
-		case "--version", "-v":
-			isVersion = true
-		}
-	}
-
-	// Validate client
-	if clientStr == "" {
-		return fmt.Errorf("client must be specified with --client")
-	}
-
-	var client ClientType
-	switch clientStr {
-	case "geth":
-		client = ClientGeth
-	case "reth":
-		client = ClientReth
-	case "lighthouse":
-		client = ClientLighthouse
-	case "prysm":
-		client = ClientPrysm
-	default:
-		return fmt.Errorf("unknown client: %s", clientStr)
-	}
-
-	// Update installer directory if specified
-	if directory != "" {
-		c.installer.InstallDir = directory
-	}
-
-	// Execute requested action
-	if isRemove {
-		return c.installer.RemoveClient(client)
-	} else if isVersion {
-		version, err := c.installer.GetClientVersion(client)
-		if err != nil {
-			return err
-		}
-
-		isLatest, latestVersion := c.installer.IsClientLatestVersion(client, version)
-		fmt.Printf("%s version: %s\n", client, version)
-
-		if !isLatest {
-			fmt.Printf("Update available: %s (latest: %s)\n", version, latestVersion)
-		} else {
-			fmt.Println("You have the latest version.")
-		}
-
-		return nil
-	} else {
-		// Install JWT secret if needed
-		if err := c.installer.SetupJWTSecret(); err != nil {
-			return err
-		}
-
-		// Install the client
-		return c.installer.InstallClient(client)
-	}
 }
 
 func GetVersionNumber(client string) string {

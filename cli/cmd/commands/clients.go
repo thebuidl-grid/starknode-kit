@@ -2,4 +2,4 @@ package commands
 
 import "buidlguidl-go/pkg"
 
-var installer = pkg.Newinstaller()
+var installer = pkg.NewInstaller(pkg.InstallClientsDir)
