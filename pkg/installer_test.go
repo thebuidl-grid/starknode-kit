@@ -151,12 +151,12 @@ func TestNewInstaller(t *testing.T) {
 	installer := NewInstaller(installDir)
 
 	if installer == nil {
-		t.Error("NewInstaller() returned nil")
+		t.Error("Newinstaller() returned nil")
 		return
 	}
 
-	if installer.InstallDir != installDir {
-		t.Errorf("NewInstaller() InstallDir = %v, want %v", installer.InstallDir, installDir)
+	if installer.InstallDir != InstallClientsDir {
+		t.Errorf("Newinstaller() InstallDir = %v, want %v", installer.InstallDir, InstallClientsDir)
 	}
 }
 
