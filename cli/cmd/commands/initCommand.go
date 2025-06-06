@@ -16,7 +16,7 @@ var (
 )
 
 func initCommand(cmd *cobra.Command, args []string) {
-	err := pkg.CreateStackNodeConfig()
+	err := pkg.CreateStarkNodeConfig()
 	if err != nil {
 		fmt.Println(err)
 		return

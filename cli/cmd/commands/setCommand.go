@@ -56,7 +56,7 @@ func runSetCommand(target string, args []string) {
 		return
 	}
 
-	if err := pkg.UpdateStackNodeConfig(cfg); err != nil {
+	if err := pkg.UpdateStarkNodeConfig(cfg); err != nil {
 		fmt.Println("Failed to save config:", err)
 	}
 }
