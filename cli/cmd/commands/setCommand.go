@@ -142,6 +142,8 @@ Supported consensus clients are:
 			return clientCfg, err
 		}
 		clientCfg.Port = ports
+	case "type":
+		clientCfg.ExecutionType = value
 
 	default:
 		return clientCfg, fmt.Errorf(`

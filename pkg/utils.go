@@ -109,9 +109,10 @@ func CreateStarkNodeConfig() error {
 func defaultConfig() StarkNodeKitConfig {
 	return StarkNodeKitConfig{
 		ExecutionCientSettings: ClientConfig{
-			Name:    ClientGeth,
-			Network: "sepolia",
-			Port:    []int{8545, 30303},
+			Name:          ClientGeth,
+			Network:       "sepolia",
+			Port:          []int{8545, 30303},
+			ExecutionType: "full",
 		},
 		ConsensusCientSettings: ClientConfig{
 			Name:    ClientPrysm,
