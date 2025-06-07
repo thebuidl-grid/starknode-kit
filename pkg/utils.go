@@ -116,7 +116,7 @@ func defaultConfig() StarkNodeKitConfig {
 		ConsensusCientSettings: ClientConfig{
 			Name:    ClientPrysm,
 			Network: "sepolia",
-			Port:    []string{"5052", "90000"},
+			Port:    []string{"5052", "9000"},
 		},
 	}
 }
