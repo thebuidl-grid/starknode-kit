@@ -122,6 +122,7 @@ Supported execution clients are:
   - geth
   - reth`, err)
 			}
+			clientCfg.Name = pkg.ClientType(client)
 		case "consensus":
 			client, err = pkg.GetConsensusClient(value)
 			if err != nil {
