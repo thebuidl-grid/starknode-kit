@@ -37,7 +37,7 @@ func GetConsensusClient(c string) (ClientType, error) {
 	}
 	client, ok := sprtClients[c]
 	if !ok {
-		return "", fmt.Errorf("Consensus Client %s not supported", c) 
+		return "", fmt.Errorf("Consensus Client %s not supported", c)
 	}
 	return client, nil
 }
@@ -48,6 +48,18 @@ func getHomeDir() string {
 		panic(err)
 	}
 	return homeDir
+}
+
+func GetClientDir(c ClientType) (string, error) {
+	dir := path.Join(InstallClientsDir, string(c))
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		return "", err
+	}
+	if !info.IsDir() {
+		return "", err
+	}
+	return dir, nil
 }
 
 func LoadConfig() (StarkNodeKitConfig, error) {
