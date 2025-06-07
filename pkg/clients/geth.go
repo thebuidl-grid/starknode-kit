@@ -65,9 +65,9 @@ func StartGeth(executionType string, port []int) error {
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
 		pkg.InstallClientsDir,
-		"lighthouse",
+		"geth",
 		"logs",
-		fmt.Sprintf("lighthouse_%s.log", timestamp))
+		fmt.Sprintf("geth_%s.log", timestamp))
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return err
