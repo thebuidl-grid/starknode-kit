@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+var consensusCheckpoint = "https://mainnet-checkpoint-sync.stakely.io/"
+
 // Configuration options for prysm
 type lightHouseConfig struct {
 	consensusPeerPorts  string
@@ -35,8 +37,8 @@ func (p *lightHouseConfig) buildArgs() []string {
 		p.consensusPeerPorts2,
 		"--execution-endpoint",
 		"http://localhost:8551",
-		//"--checkpoint-sync-url",
-		// consensusCheckpoint,
+		"--checkpoint-sync-url",
+		consensusCheckpoint,
 		"--checkpoint-sync-url-timeout",
 		"1200",
 		"--disable-deposit-contract-sync",
@@ -53,22 +55,22 @@ func (p *lightHouseConfig) buildArgs() []string {
 
 	// TODO still too large
 	// Add data directory
-	dataDir := filepath.Join(pkg.InstallClientsDir, "prsym", "database")
+	dataDir := filepath.Join(pkg.InstallClientsDir, "lighthouse", "database")
 	args = append(args, "--datadir="+dataDir)
 
 	return args
 }
 
-func StartLighHouse(port ...string) error {
-	config := prysmConfig{port[0], port[1]} // TODO change
+func StartLightHouse(port ...string) error {
+	config := lightHouseConfig{port[0], port[1]} // TODO change
 	args := config.buildArgs()
 	command := config.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
 		pkg.InstallClientsDir,
-		"lighhouse",
+		"lighthouse",
 		"logs",
-		fmt.Sprintf("lighhouse_%s.log", timestamp))
+		fmt.Sprintf("lighthouse_%s.log", timestamp))
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return err
