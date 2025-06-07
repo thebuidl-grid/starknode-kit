@@ -28,7 +28,6 @@ func (p *prysmConfig) buildArgs() []string {
 	args := []string{
 		"beacon-chain",
 		"--mainnet",
-		"--p2p-udp-port",
 		fmt.Sprintf("--p2p-udp-port=%d", p.consensusPeerPorts2),
 		fmt.Sprintf("--p2p-quic-port=%d", p.consensusPeerPorts),
 		fmt.Sprintf("--p2p-tcp-port=%d", p.consensusPeerPorts),
