@@ -13,8 +13,8 @@ var consensusCheckpoint = "https://mainnet-checkpoint-sync.stakely.io/"
 
 // Configuration options for prysm
 type lightHouseConfig struct {
-	consensusPeerPorts  string
-	consensusPeerPorts2 string
+	consensusPeerPorts  int
+	consensusPeerPorts2 int
 }
 
 func (p lightHouseConfig) getCommand() string {
@@ -31,10 +31,8 @@ func (p *lightHouseConfig) buildArgs() []string {
 		"bn",
 		"--network",
 		"mainnet",
-		"--port",
-		p.consensusPeerPorts,
-		"--quic-port",
-		p.consensusPeerPorts2,
+		fmt.Sprintf("--port=%d", p.consensusPeerPorts),
+		fmt.Sprintf("--quic-port=%d", p.consensusPeerPorts2),
 		"--execution-endpoint",
 		"http://localhost:8551",
 		"--checkpoint-sync-url",
@@ -61,7 +59,7 @@ func (p *lightHouseConfig) buildArgs() []string {
 	return args
 }
 
-func StartLightHouse(port ...string) error {
+func StartLightHouse(port ...int) error {
 	config := lightHouseConfig{port[0], port[1]} // TODO change
 	args := config.buildArgs()
 	command := config.getCommand()

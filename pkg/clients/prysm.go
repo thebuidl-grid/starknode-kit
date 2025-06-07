@@ -11,8 +11,8 @@ import (
 
 // Configuration options for prysm
 type prysmConfig struct {
-	consensusPeerPorts  string
-	consensusPeerPorts2 string
+	consensusPeerPorts  int
+	consensusPeerPorts2 int
 }
 
 func (p prysmConfig) getCommand() string {
@@ -29,11 +29,9 @@ func (p *prysmConfig) buildArgs() []string {
 		"beacon-chain",
 		"--mainnet",
 		"--p2p-udp-port",
-		p.consensusPeerPorts2,
-		"--p2p-quic-port",
-		p.consensusPeerPorts,
-		"--p2p-tcp-port",
-		p.consensusPeerPorts,
+		fmt.Sprintf("--p2p-udp-port=%d", p.consensusPeerPorts2),
+		fmt.Sprintf("--p2p-quic-port=%d", p.consensusPeerPorts),
+		fmt.Sprintf("--p2p-tcp-port=%d", p.consensusPeerPorts),
 		"--execution-endpoint",
 		"http://localhost:8551",
 		"--grpc-gateway-host=0.0.0.0",
@@ -57,7 +55,7 @@ func (p *prysmConfig) buildArgs() []string {
 	return args
 }
 
-func StartPrsym(port ...string) error {
+func StartPrsym(port ...int) error {
 	config := prysmConfig{port[0], port[1]} // TODO change
 	args := config.buildArgs()
 	command := config.getCommand()

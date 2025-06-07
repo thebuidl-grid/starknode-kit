@@ -3,6 +3,7 @@ package commands
 import (
 	"buidlguidl-go/pkg"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -136,7 +137,11 @@ Supported consensus clients are:
 		clientCfg.Network = value
 
 	case "port":
-		clientCfg.Port = parsePorts(value)
+		ports, err := parsePorts(value)
+		if err != nil {
+			return clientCfg, err
+		}
+		clientCfg.Port = ports
 
 	default:
 		return clientCfg, fmt.Errorf(`
@@ -149,16 +154,21 @@ Available keys you can set:
 	return clientCfg, nil
 }
 
-func parsePorts(value string) []string {
+func parsePorts(value string) ([]int, error) {
 	parts := strings.Split(value, ",")
-	var ports []string
+	var ports []int
 	for _, p := range parts {
 		trimmed := strings.TrimSpace(p)
-		if trimmed != "" {
-			ports = append(ports, trimmed)
+		if trimmed == "" {
+			continue
 		}
+		port, err := strconv.Atoi(trimmed)
+		if err != nil {
+			return nil, err // you might want to wrap this with more context
+		}
+		ports = append(ports, port)
 	}
-	return ports
+	return ports, nil
 }
 func init() {
 	SetCommand.AddCommand(setELCmd)

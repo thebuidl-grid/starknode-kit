@@ -17,5 +17,5 @@ type StarkNodeKitConfig struct {
 type ClientConfig struct {
 	Name    ClientType `yaml:"name"`
 	Network string     `yaml:"network"`
-	Port    []string   `yaml:"ports"`
+	Port    []int  `yaml:"ports"`
 }
