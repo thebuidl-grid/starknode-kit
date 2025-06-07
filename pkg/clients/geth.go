@@ -58,8 +58,8 @@ func buildGethArgs(config *GethConfig) []string {
 
 	return args
 }
-func StartGeth(executionType string, port int) error {
-	config := GethConfig{ExecutionPeerPort: port, ExecutionType: executionType}
+func StartGeth(executionType string, port []int) error {
+	config := GethConfig{ExecutionPeerPort: port[0], ExecutionType: executionType}
 	args := buildGethArgs(&config)
 	command := GetGethCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")

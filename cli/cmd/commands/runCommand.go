@@ -69,4 +69,16 @@ func runcommand(cmd *cobra.Command, args []string) {
 		fmt.Printf("Please run: starknode add -c %s\n", clClient)
 		return
 	}
+	switch elClient {
+	case pkg.ClientGeth:
+		if err = clients.StartGeth(el.ExecutionType, el.Port); err != nil {
+			fmt.Println(err)
+			return
+		}
+	default:
+		fmt.Printf("Client \"%s\" is not installed.\n", elClient)
+		fmt.Printf("Please run: starknode add -e %s\n", elClient)
+		return
+	}
+
 }
