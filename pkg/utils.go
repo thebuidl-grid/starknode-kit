@@ -111,7 +111,7 @@ func defaultConfig() StarkNodeKitConfig {
 		ExecutionCientSettings: ClientConfig{
 			Name:          ClientGeth,
 			Network:       "sepolia",
-			Port:          []int{8545},
+			Port:          []int{30303},
 			ExecutionType: "full",
 		},
 		ConsensusCientSettings: ClientConfig{
