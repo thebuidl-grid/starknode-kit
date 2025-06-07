@@ -60,10 +60,10 @@ func runcommand(cmd *cobra.Command, args []string) {
 			return
 		}
 	case pkg.ClientPrysm:
-		if err = clients.StartPrsym(cl.Port...); err != nil {
-			fmt.Println(err)
-			return
-		}
+		//if err = clients.StartPrsym(cl.Port...); err != nil {
+		//fmt.Println(err)
+		//	return
+	//	}
 	default:
 		fmt.Printf("Client \"%s\" is not installed.\n", clClient)
 		fmt.Printf("Please run: starknode add -c %s\n", clClient)
@@ -72,6 +72,11 @@ func runcommand(cmd *cobra.Command, args []string) {
 	switch elClient {
 	case pkg.ClientGeth:
 		if err = clients.StartGeth(el.ExecutionType, el.Port); err != nil {
+			fmt.Println(err)
+			return
+		}
+	case pkg.ClientReth:
+		if err = clients.StartReth(el.ExecutionType, el.Port); err != nil {
 			fmt.Println(err)
 			return
 		}
