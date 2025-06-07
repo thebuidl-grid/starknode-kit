@@ -18,9 +18,9 @@ type prysmConfig struct {
 func (p prysmConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
-		return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym.sh")
+		return filepath.Join(pkg.InstallClientsDir, "prysm", "prysm.exe")
 	}
-	return filepath.Join(pkg.InstallClientsDir, "prsym", "prsym")
+	return filepath.Join(pkg.InstallClientsDir, "prysm", "prysm.sh")
 }
 
 // BuildGethArgs builds the arguments for the geth command
