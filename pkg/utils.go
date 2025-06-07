@@ -50,6 +50,18 @@ func getHomeDir() string {
 	return homeDir
 }
 
+func IsInstalled(c ClientType) error {
+	dir := path.Join(InstallClientsDir, string(c))
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		return err
+	}
+	if !info.IsDir() {
+		return err
+	}
+	return nil
+}
+
 func LoadConfig() (StarkNodeKitConfig, error) {
 	var cfg StarkNodeKitConfig
 	cfgByt, err := os.ReadFile(yamlConfigPath)
@@ -97,14 +109,15 @@ func CreateStarkNodeConfig() error {
 func defaultConfig() StarkNodeKitConfig {
 	return StarkNodeKitConfig{
 		ExecutionCientSettings: ClientConfig{
-			Name:    ClientGeth,
-			Network: "sepolia",
-			Port:    []string{"8545", "30303"},
+			Name:          ClientGeth,
+			Network:       "sepolia",
+			Port:          []int{30303},
+			ExecutionType: "full",
 		},
 		ConsensusCientSettings: ClientConfig{
 			Name:    ClientPrysm,
 			Network: "sepolia",
-			Port:    []string{"5052", "90000"},
+			Port:    []int{5052, 9000},
 		},
 	}
 }

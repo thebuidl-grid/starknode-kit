@@ -17,5 +17,6 @@ type StarkNodeKitConfig struct {
 type ClientConfig struct {
 	Name    ClientType `yaml:"name"`
 	Network string     `yaml:"network"`
-	Port    []string   `yaml:"ports"`
+  ExecutionType string `yaml:"execution_type,omitempty"`
+	Port    []int  `yaml:"ports"`
 }
