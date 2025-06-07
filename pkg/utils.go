@@ -50,16 +50,16 @@ func getHomeDir() string {
 	return homeDir
 }
 
-func GetClientDir(c ClientType) (string, error) {
+func IsInstalled(c ClientType) error {
 	dir := path.Join(InstallClientsDir, string(c))
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		return "", err
+		return err
 	}
 	if !info.IsDir() {
-		return "", err
+		return err
 	}
-	return dir, nil
+	return nil
 }
 
 func LoadConfig() (StarkNodeKitConfig, error) {
