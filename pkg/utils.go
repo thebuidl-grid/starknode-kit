@@ -31,10 +31,10 @@ func GetExecutionClient(c string) (t.ClientType, error) {
 	}
 	return client, nil
 }
-func GetConsensusClient(c string) (ClientType, error) {
-	sprtClients := map[string]ClientType{
-		"lighthouse": ClientLighthouse,
-		"prysm":      ClientPrysm,
+func GetConsensusClient(c string) (t.ClientType, error) {
+	sprtClients := map[string]t.ClientType{
+		"lighthouse": t.ClientLighthouse,
+		"prysm":      t.ClientPrysm,
 	}
 	client, ok := sprtClients[c]
 	if !ok {
@@ -51,7 +51,7 @@ func getHomeDir() string {
 	return homeDir
 }
 
-func IsInstalled(c ClientType) error {
+func IsInstalled(c t.ClientType) error {
 	dir := path.Join(InstallClientsDir, string(c))
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
@@ -63,20 +63,20 @@ func IsInstalled(c ClientType) error {
 	return nil
 }
 
-func LoadConfig() (StarkNodeKitConfig, error) {
-	var cfg StarkNodeKitConfig
+func LoadConfig() (t.StarkNodeKitConfig, error) {
+	var cfg t.StarkNodeKitConfig
 	cfgByt, err := os.ReadFile(yamlConfigPath)
 	if err != nil {
-		return StarkNodeKitConfig{}, err
+		return t.StarkNodeKitConfig{}, err
 	}
 	err = yaml.Unmarshal(cfgByt, &cfg)
 	if err != nil {
-		return StarkNodeKitConfig{}, err
+		return t.StarkNodeKitConfig{}, err
 	}
 	return cfg, nil
 }
 
-func UpdateStarkNodeConfig(config StarkNodeKitConfig) error {
+func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return fmt.Errorf("failed to update config file: %w", err)
 	}
@@ -116,8 +116,26 @@ func defaultConfig() t.StarkNodeKitConfig {
 			ExecutionType: "full",
 		},
 		ConsensusCientSettings: t.ClientConfig{
-			Name: t.ClientPrysm,
-			Port: []int{5052, 9000},
+			Name:                t.ClientPrysm,
+			Port:                []int{5052, 9000},
+			ConsensusCheckpoint: "https://mainnet-checkpoint-sync.stakely.io/",
 		},
+	}
+}
+
+func GetClientVersion(clientName string) string {
+	// This would typically be cached or retrieved from a version check
+	// For now, return a placeholder
+	switch clientName {
+	case "geth":
+		return latestGethVersion
+	case "reth":
+		return latestRethVersion
+	case "lighthouse":
+		return latestLighthouseVersion
+	case "prysm":
+		return latestPrysmVersion
+	default:
+		return "unknown"
 	}
 }

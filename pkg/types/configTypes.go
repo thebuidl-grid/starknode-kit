@@ -10,8 +10,7 @@ const (
 )
 
 type Client interface {
-	Command() string
-	BuildArgs(ClientConfig) []string
+	Start()
 }
 
 type StarkNodeKitConfig struct {
@@ -21,7 +20,8 @@ type StarkNodeKitConfig struct {
 }
 
 type ClientConfig struct {
-	Name          ClientType `yaml:"name"`
-	ExecutionType string     `yaml:"execution_type,omitempty"`
-	Port          []int      `yaml:"ports"`
+	Name                ClientType `yaml:"name"`
+	ExecutionType       string     `yaml:"execution_type,omitempty"`
+	Port                []int      `yaml:"ports"`
+	ConsensusCheckpoint string     `yaml:"consensus_checkpoint,omitempty"`
 }
