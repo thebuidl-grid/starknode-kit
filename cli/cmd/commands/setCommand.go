@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"buidlguidl-go/pkg"
+	"starknode-kit/pkg"
 	"fmt"
 	"strconv"
 	"strings"

@@ -1,5 +1,5 @@
 package commands
 
-import "buidlguidl-go/pkg"
+import "starknode-kit/pkg"
 
 var installer = pkg.NewInstaller(pkg.InstallClientsDir)
