@@ -9,14 +9,16 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"starknode-kit/pkg/types"
 	"strings"
 )
 
 // Version constants
 const (
-	LatestGethVersion       = "1.15.10"
-	LatestRethVersion       = "1.3.4"
-	LatestLighthouseVersion = "7.0.1"
+	latestGethVersion       = "1.15.10"
+	latestRethVersion       = "1.3.4"
+	latestLighthouseVersion = "7.0.1"
+	latestPrysmVersion      = "v4.2.1"
 )
 
 var (
@@ -47,7 +49,7 @@ func NewInstaller(Installpath string) *installer {
 }
 
 // GetClientFileName returns the file name based on platform and architecture
-func (i *installer) getClientFileName(client ClientType) (string, error) {
+func (i *installer) getClientFileName(client types.ClientType) (string, error) {
 	// Get current OS and architecture
 	goos := runtime.GOOS     // "darwin", "linux", "windows"
 	goarch := runtime.GOARCH // "amd64", "arm64"
@@ -78,19 +80,19 @@ func (i *installer) getClientFileName(client ClientType) (string, error) {
 	// Determine filename based on client
 	var fileName string
 	switch client {
-	case ClientGeth:
+	case types.ClientGeth:
 		// Map Go arch back to geth arch names
 		gethArch := "amd64"
 		if goarch == "arm64" {
 			gethArch = "arm64"
 		}
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
-			goos, gethArch, LatestGethVersion, GethHash[LatestGethVersion])
-	case ClientReth:
-		fileName = fmt.Sprintf("reth-v%s-%s", LatestRethVersion, archName)
-	case ClientLighthouse:
-		fileName = fmt.Sprintf("lighthouse-v%s-%s", LatestLighthouseVersion, archName)
-	case ClientPrysm:
+			goos, gethArch, latestGethVersion, GethHash[latestGethVersion])
+	case types.ClientReth:
+		fileName = fmt.Sprintf("reth-v%s-%s", latestRethVersion, archName)
+	case types.ClientLighthouse:
+		fileName = fmt.Sprintf("lighthouse-v%s-%s", latestLighthouseVersion, archName)
+	case types.ClientPrysm:
 		fileName = "prysm.sh"
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
@@ -100,17 +102,17 @@ func (i *installer) getClientFileName(client ClientType) (string, error) {
 }
 
 // getDownloadURL returns the appropriate URL for downloading a client
-func (i *installer) getDownloadURL(client ClientType, fileName string) (string, error) {
+func (i *installer) getDownloadURL(client types.ClientType, fileName string) (string, error) {
 	switch client {
-	case ClientGeth:
+	case types.ClientGeth:
 		return fmt.Sprintf("https://gethstore.blob.core.windows.net/builds/%s.tar.gz", fileName), nil
-	case ClientReth:
+	case types.ClientReth:
 		return fmt.Sprintf("https://github.com/paradigmxyz/reth/releases/download/v%s/%s.tar.gz",
-			LatestRethVersion, fileName), nil
-	case ClientLighthouse:
+			latestRethVersion, fileName), nil
+	case types.ClientLighthouse:
 		return fmt.Sprintf("https://github.com/sigp/lighthouse/releases/download/v%s/%s.tar.gz",
-			LatestLighthouseVersion, fileName), nil
-	case ClientPrysm:
+			latestLighthouseVersion, fileName), nil
+	case types.ClientPrysm:
 		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
@@ -118,7 +120,7 @@ func (i *installer) getDownloadURL(client ClientType, fileName string) (string, 
 }
 
 // InstallClient installs the specified Ethereum client
-func (i *installer) InstallClient(client ClientType) error {
+func (i *installer) InstallClient(client types.ClientType) error {
 	// Get client file name
 	fileName, err := i.getClientFileName(client)
 	if err != nil {
@@ -132,7 +134,7 @@ func (i *installer) InstallClient(client ClientType) error {
 
 	// Determine the path to the client binary/script
 	var clientPath string
-	if client == ClientPrysm {
+	if client == types.ClientPrysm {
 		clientPath = filepath.Join(clientDir, "prysm.sh")
 	} else {
 		clientPath = filepath.Join(clientDir, string(client))
@@ -160,7 +162,7 @@ func (i *installer) InstallClient(client ClientType) error {
 	}
 
 	// Handle installation differently based on client
-	if client == ClientPrysm {
+	if client == types.ClientPrysm {
 		fmt.Println("Downloading Prysm.")
 		if err := downloadFile(downloadURL, clientPath); err != nil {
 			return err
@@ -190,7 +192,7 @@ func (i *installer) InstallClient(client ClientType) error {
 		}
 
 		// For Geth, we need to move the binary from the extracted folder
-		if client == ClientGeth {
+		if client == types.ClientGeth {
 			extractedDir := filepath.Join(clientDir, fileName)
 			mvCmd := exec.Command("mv", filepath.Join(extractedDir, "geth"), clientDir)
 			if err := mvCmd.Run(); err != nil {
@@ -243,7 +245,7 @@ func setupJWTSecret() error {
 }
 
 // RemoveClient removes a client's installation
-func (i *installer) RemoveClient(client ClientType) error {
+func (i *installer) RemoveClient(client types.ClientType) error {
 	clientDir := filepath.Join(i.InstallDir, string(client))
 
 	if _, err := os.Stat(clientDir); err == nil {
@@ -255,12 +257,12 @@ func (i *installer) RemoveClient(client ClientType) error {
 }
 
 // GetClientVersion gets the installed version of a client
-func (i *installer) GetClientVersion(client ClientType) (string, error) {
+func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	clientDir := filepath.Join(i.InstallDir, string(client))
 
 	// Check if client is installed
 	clientPath := filepath.Join(clientDir, string(client))
-	if client == ClientPrysm {
+	if client == types.ClientPrysm {
 		clientPath = filepath.Join(clientDir, "prysm.sh")
 	}
 
@@ -289,7 +291,7 @@ func (i *installer) GetClientVersion(client ClientType) (string, error) {
 }
 
 // IsClientLatestVersion checks if the installed client is the latest version
-func (i *installer) IsClientLatestVersion(client ClientType, version string) (bool, string) {
+func (i *installer) IsClientLatestVersion(client types.ClientType, version string) (bool, string) {
 	isLatest, latestVersion := CompareClientVersions(string(client), version)
 	return isLatest, latestVersion
 }
@@ -387,11 +389,11 @@ func CompareClientVersions(client, installedVersion string) (bool, string) {
 	var latestVersion string
 	switch client {
 	case "reth":
-		latestVersion = LatestRethVersion
+		latestVersion = latestRethVersion
 	case "geth":
-		latestVersion = LatestGethVersion
+		latestVersion = latestGethVersion
 	case "lighthouse":
-		latestVersion = LatestLighthouseVersion
+		latestVersion = latestLighthouseVersion
 	case "prysm":
 		// Just use a hard-coded latest version for Prysm
 		latestVersion = "4.0.5" // Replace with an appropriate version
