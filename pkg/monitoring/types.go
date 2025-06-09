@@ -1,4 +1,3 @@
-// filepath: /home/otowo-samuel/Documents/NODE/starknode-kit/pkg/monitoring/types.go
 package monitoring
 
 import (
@@ -27,21 +26,4 @@ type MonitorApp struct {
 	// Control
 	StopChan   chan bool
 	UpdateRate time.Duration
-}
-
-type ClientStatus struct {
-	Name       string
-	Status     string // "running", "stopped", "syncing"
-	PID        int
-	Uptime     time.Duration
-	Version    string
-	SyncStatus SyncInfo
-}
-
-type SyncInfo struct {
-	IsSyncing    bool
-	CurrentBlock uint64
-	HighestBlock uint64
-	SyncPercent  float64
-	PeersCount   int
 }

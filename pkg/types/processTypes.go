@@ -21,3 +21,20 @@ type EthereumMetrics struct {
 	GasPrice     string  `json:"gas_price"`
 	NetworkName  string  `json:"network"`
 }
+
+type ClientStatus struct {
+	Name       string
+	Status     string // "running", "stopped", "syncing"
+	PID        int
+	Uptime     time.Duration
+	Version    string
+	SyncStatus SyncInfo
+}
+
+type SyncInfo struct {
+	IsSyncing    bool
+	CurrentBlock uint64
+	HighestBlock uint64
+	SyncPercent  float64
+	PeersCount   int
+}

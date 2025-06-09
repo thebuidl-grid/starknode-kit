@@ -9,6 +9,11 @@ const (
 	ClientPrysm      ClientType = "prysm"
 )
 
+type Client interface {
+	Command() string
+	BuildArgs(ClientConfig) []string
+}
+
 type StarkNodeKitConfig struct {
 	Network                string       `yaml:"network"`
 	ExecutionCientSettings ClientConfig `yaml:"execution_client"`
