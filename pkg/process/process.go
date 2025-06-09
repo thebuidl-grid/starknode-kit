@@ -6,8 +6,11 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"starknode-kit/pkg"
 	"syscall"
 	"time"
+
+	t "starknode-kit/pkg/types"
 
 	"gopkg.in/yaml.v3"
 )
@@ -35,19 +38,19 @@ func StartProcess(name, command string, logPath io.Writer, args ...string) error
 	return nil
 }
 
-func loadProcesses() (Process, error) {
-	var processes Process
-	processPath := path.Join(InstallDir, ".process")
+func loadProcesses() (t.Process, error) {
+	var processes t.Process
+	processPath := path.Join(pkg.InstallDir, ".process")
 	if _, err := os.Stat(processPath); os.IsNotExist(err) {
-		return Process{}, fmt.Errorf("No running process")
+		return t.Process{}, fmt.Errorf("No running process")
 	}
 	prb, err := os.ReadFile(processPath)
 	if err != nil {
-		return Process{}, err
+		return t.Process{}, err
 	}
 
 	if err = yaml.Unmarshal(prb, processes); err != nil {
-		return Process{}, err
+		return t.Process{}, err
 	}
 
 	return processes, nil
@@ -55,7 +58,7 @@ func loadProcesses() (Process, error) {
 }
 
 func writeToPIDFile(pid int, name string) error {
-	pidFile := path.Join(InstallDir, ".process", fmt.Sprintf("%s.pid", name))
+	pidFile := path.Join(pkg.InstallDir, ".process", fmt.Sprintf("%s.pid", name))
 	pidWrite := fmt.Sprintf("%d\n", pid)
 	err := os.WriteFile(pidFile, []byte(pidWrite), 0644)
 	if err != nil {
