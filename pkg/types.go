@@ -10,13 +10,13 @@ const (
 )
 
 type StarkNodeKitConfig struct {
+	Network                string       `yaml:"network"`
 	ExecutionCientSettings ClientConfig `yaml:"execution_client"`
 	ConsensusCientSettings ClientConfig `yaml:"consensus_client"`
 }
 
 type ClientConfig struct {
-	Name    ClientType `yaml:"name"`
-	Network string     `yaml:"network"`
-  ExecutionType string `yaml:"execution_type,omitempty"`
-	Port    []int  `yaml:"ports"`
+	Name          ClientType `yaml:"name"`
+	ExecutionType string     `yaml:"execution_type,omitempty"`
+	Port          []int      `yaml:"ports"`
 }
