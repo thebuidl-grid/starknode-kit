@@ -1,11 +1,11 @@
 package clients
 
 import (
-	"starknode-kit/pkg"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"starknode-kit/pkg"
 	"time"
 )
 
@@ -72,7 +72,7 @@ func StartGeth(executionType string, port []int) error {
 	if err != nil {
 		return err
 	}
-	if err := pkg.StartProcess(command, logFile, args...); err != nil {
+	if err := pkg.StartProcess("geth", command, logFile, args...); err != nil {
 		return err
 	}
 	return nil

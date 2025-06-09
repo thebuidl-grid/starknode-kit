@@ -69,7 +69,7 @@ func StartReth(executionType string, port []int) error {
 	if err != nil {
 		return err
 	}
-	if err := pkg.StartProcess(command, logFile, args...); err != nil {
+	if err := pkg.StartProcess("reth", command, logFile, args...); err != nil {
 		return err
 	}
 	return nil
