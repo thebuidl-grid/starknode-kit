@@ -1,9 +1,9 @@
 package commands
 
 import (
+	"fmt"
 	"starknode-kit/pkg"
 	"starknode-kit/pkg/clients"
-	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -55,33 +55,38 @@ func runcommand(cmd *cobra.Command, args []string) {
 	}
 	switch clClient {
 	case pkg.ClientLighthouse:
+		fmt.Println("Starting Lighthouse consensus client...")
 		if err = clients.StartLightHouse(cl.Port...); err != nil {
-			fmt.Println(err)
+			fmt.Println("Error:", err)
 			return
 		}
 	case pkg.ClientPrysm:
+		fmt.Println("Starting Prysm consensus client...")
 		if err = clients.StartPrsym(cl.Port...); err != nil {
-			fmt.Println(err)
+			fmt.Println("Error:", err)
 			return
 		}
 	default:
-		fmt.Printf("Client \"%s\" is not installed.\n", clClient)
+		fmt.Printf("Consensus client \"%s\" is not installed.\n", clClient)
 		fmt.Printf("Please run: starknode add -c %s\n", clClient)
 		return
 	}
+
 	switch elClient {
 	case pkg.ClientGeth:
+		fmt.Println("Starting Geth execution client...")
 		if err = clients.StartGeth(el.ExecutionType, el.Port); err != nil {
-			fmt.Println(err)
+			fmt.Println("Error:", err)
 			return
 		}
 	case pkg.ClientReth:
+		fmt.Println("Starting Reth execution client...")
 		if err = clients.StartReth(el.ExecutionType, el.Port); err != nil {
-			fmt.Println(err)
+			fmt.Println("Error:", err)
 			return
 		}
 	default:
-		fmt.Printf("Client \"%s\" is not installed.\n", elClient)
+		fmt.Printf("Execution client \"%s\" is not installed.\n", elClient)
 		fmt.Printf("Please run: starknode add -e %s\n", elClient)
 		return
 	}
