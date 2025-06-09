@@ -1,11 +1,12 @@
 package clients
 
 import (
-	"starknode-kit/pkg"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"starknode-kit/pkg"
+	"starknode-kit/pkg/process"
 	"time"
 )
 
@@ -73,7 +74,7 @@ func StartLightHouse(port ...int) error {
 	if err != nil {
 		return err
 	}
-	if err := pkg.StartProcess("lighthouse",command, logFile, args...); err != nil {
+	if err := process.StartProcess("lighthouse",command, logFile, args...); err != nil {
 		return err
 	}
 	return nil

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"starknode-kit/pkg"
+	"starknode-kit/pkg/process"
 	"time"
 )
 
@@ -68,7 +69,7 @@ func StartPrsym(port ...int) error {
 	if err != nil {
 		return err
 	}
-	if err := pkg.StartProcess("prysm", command, logFile, args...); err != nil {
+	if err := process.StartProcess("prysm", command, logFile, args...); err != nil {
 		return err
 	}
 	return nil

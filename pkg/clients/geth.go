@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"starknode-kit/pkg"
+	"starknode-kit/pkg/process"
 	"time"
 )
 
@@ -72,7 +73,7 @@ func StartGeth(executionType string, port []int) error {
 	if err != nil {
 		return err
 	}
-	if err := pkg.StartProcess("geth", command, logFile, args...); err != nil {
+	if err := process.StartProcess("geth", command, logFile, args...); err != nil {
 		return err
 	}
 	return nil
