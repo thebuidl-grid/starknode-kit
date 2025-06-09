@@ -10,15 +10,13 @@ import (
 	"time"
 )
 
-var consensusCheckpoint = "https://mainnet-checkpoint-sync.stakely.io/"
-
 // Configuration options for prysm
 type lightHouseConfig struct {
-	consensusPeerPorts  int
-	consensusPeerPorts2 int
+	port                []int // [quic/tcp, udp]
+	consensusCheckpoint string
 }
 
-func (p lightHouseConfig) getCommand() string {
+func (_ lightHouseConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
 		return filepath.Join(pkg.InstallClientsDir, "lighthouse", "lighthouse.exe")
@@ -27,17 +25,17 @@ func (p lightHouseConfig) getCommand() string {
 }
 
 // BuildGethArgs builds the arguments for the geth command
-func (p *lightHouseConfig) buildArgs() []string {
+func (c *lightHouseConfig) buildArgs() []string {
 	args := []string{
 		"bn",
 		"--network",
 		"mainnet",
-		fmt.Sprintf("--port=%d", p.consensusPeerPorts),
-		fmt.Sprintf("--quic-port=%d", p.consensusPeerPorts2),
+		fmt.Sprintf("--port=%d", c.port[0]),
+		fmt.Sprintf("--quic-port=%d", c.port[1]),
 		"--execution-endpoint",
 		"http://localhost:8551",
 		"--checkpoint-sync-url",
-		consensusCheckpoint,
+		c.consensusCheckpoint,
 		"--checkpoint-sync-url-timeout",
 		"1200",
 		"--disable-deposit-contract-sync",
@@ -60,24 +58,16 @@ func (p *lightHouseConfig) buildArgs() []string {
 	return args
 }
 
-func StartLightHouse(port ...int) error {
-	config := lightHouseConfig{port[0], port[1]} // TODO change
-	args := config.buildArgs()
-	command := config.getCommand()
+func (c *lightHouseConfig) Start() error {
+	args := c.buildArgs()
+	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	logFilePath := filepath.Join(
-		pkg.InstallClientsDir,
-		"lighthouse",
-		"logs",
-		fmt.Sprintf("lighthouse_%s.log", timestamp))
-	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFilePath := filepath.Join(pkg.InstallClientsDir, "lighthouse", "logs", fmt.Sprintf("lighthouse_%s.log", timestamp))
+
+	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err
 	}
-	if err := process.StartProcess("lighthouse",command, logFile, args...); err != nil {
-		return err
-	}
-	return nil
-}
 
-// TODO add log rotation
+	return process.StartProcess("lighthouse", command, logFile, args...)
+}

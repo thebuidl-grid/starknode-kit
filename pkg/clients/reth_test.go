@@ -8,28 +8,24 @@ import (
 )
 
 // Mock configuration for testing
-func createTestRethConfig() *RethConfig {
-	return &RethConfig{
-		ExecutionType:     "full",
-		ExecutionPeerPort: 30303,
-		LogFilePath:       "/tmp/test-reth/reth_test.log",
+func createTestRethConfig() *rethConfig {
+	return &rethConfig{
+		executionType: "full",
+		port:          30303,
 	}
 }
 
 func TestRethConfig_Creation(t *testing.T) {
 	config := createTestRethConfig()
 
-	if config.ExecutionType != "full" {
-		t.Errorf("ExecutionType = %v, want %v", config.ExecutionType, "full")
+	if config.executionType != "full" {
+		t.Errorf("executionType = %v, want %v", config.executionType, "full")
 	}
 
-	if config.ExecutionPeerPort != 30303 {
-		t.Errorf("ExecutionPeerPort = %v, want %v", config.ExecutionPeerPort, 30303)
+	if config.port != 30303 {
+		t.Errorf("port = %v, want %v", config.port, 30303)
 	}
 
-	if config.LogFilePath == "" {
-		t.Error("LogFilePath should not be empty")
-	}
 }
 
 func TestGetRethCommand(t *testing.T) {
@@ -61,15 +57,14 @@ func TestGetRethCommand(t *testing.T) {
 func TestBuildRethArgs(t *testing.T) {
 	tests := []struct {
 		name     string
-		config   *RethConfig
+		config   *rethConfig
 		expected []string
 	}{
 		{
 			name: "full sync mode",
-			config: &RethConfig{
-				ExecutionType:     "full",
-				ExecutionPeerPort: 30303,
-				LogFilePath:       "/tmp/test.log",
+			config: &rethConfig{
+				executionType: "full",
+				port:          30303,
 			},
 			expected: []string{
 				"node",
@@ -89,10 +84,9 @@ func TestBuildRethArgs(t *testing.T) {
 		},
 		{
 			name: "archive mode",
-			config: &RethConfig{
-				ExecutionType:     "archive",
-				ExecutionPeerPort: 30304,
-				LogFilePath:       "/tmp/test.log",
+			config: &rethConfig{
+				executionType: "archive",
+				port:          30304,
 			},
 			expected: []string{
 				"node",
@@ -140,7 +134,7 @@ func TestBuildRethArgs(t *testing.T) {
 			}
 
 			// Check execution type specific arguments
-			if tt.config.ExecutionType == "archive" {
+			if tt.config.executionType == "archive" {
 				if !strings.Contains(argsStr, "--archive") {
 					t.Errorf("Archive mode should contain --archive flag, got: %s", argsStr)
 				}
@@ -151,7 +145,7 @@ func TestBuildRethArgs(t *testing.T) {
 			}
 
 			// Check port
-			expectedPort := fmt.Sprintf("--port %d", tt.config.ExecutionPeerPort)
+			expectedPort := fmt.Sprintf("--port %d", tt.config.port)
 			if !strings.Contains(argsStr, expectedPort) {
 				t.Errorf("Should contain %s, got: %s", expectedPort, argsStr)
 			}
@@ -213,17 +207,14 @@ func TestRethConfig_Validation(t *testing.T) {
 	t.Run("valid config", func(t *testing.T) {
 		config := createTestRethConfig()
 
-		if config.ExecutionType == "" {
-			t.Error("ExecutionType should not be empty")
+		if config.executionType == "" {
+			t.Error("executionType should not be empty")
 		}
 
-		if config.ExecutionPeerPort <= 0 {
-			t.Error("ExecutionPeerPort should be positive")
+		if config.port <= 0 {
+			t.Error("port should be positive")
 		}
 
-		if config.LogFilePath == "" {
-			t.Error("LogFilePath should not be empty")
-		}
 	})
 
 	t.Run("execution types", func(t *testing.T) {
@@ -231,11 +222,11 @@ func TestRethConfig_Validation(t *testing.T) {
 
 		for _, execType := range validTypes {
 			config := createTestRethConfig()
-			config.ExecutionType = execType
+			config.executionType = execType
 
 			// Verify the config accepts valid execution types
-			if config.ExecutionType != execType {
-				t.Errorf("Failed to set ExecutionType to %s", execType)
+			if config.executionType != execType {
+				t.Errorf("Failed to set executionType to %s", execType)
 			}
 		}
 	})
@@ -247,9 +238,9 @@ func TestRethConfig_Validation(t *testing.T) {
 		testPorts := []int{1024, 30303, 30304, 65535}
 
 		for _, port := range testPorts {
-			config.ExecutionPeerPort = port
-			if config.ExecutionPeerPort != port {
-				t.Errorf("Failed to set ExecutionPeerPort to %d", port)
+			config.port = port
+			if config.port != port {
+				t.Errorf("Failed to set port to %d", port)
 			}
 		}
 	})
@@ -258,10 +249,10 @@ func TestRethConfig_Validation(t *testing.T) {
 func TestRethArgsComparison(t *testing.T) {
 	t.Run("compare full vs archive args", func(t *testing.T) {
 		configFull := createTestRethConfig()
-		configFull.ExecutionType = "full"
+		configFull.executionType = "full"
 
 		configArchive := createTestRethConfig()
-		configArchive.ExecutionType = "archive"
+		configArchive.executionType = "archive"
 
 		argsFull := BuildRethArgs(configFull)
 		argsArchive := BuildRethArgs(configArchive)

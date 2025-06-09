@@ -11,14 +11,13 @@ import (
 )
 
 // Configuration options for Reth
-type RethConfig struct {
-	ExecutionType     string
-	ExecutionPeerPort int
-	LogFilePath       string
+type rethConfig struct {
+	port          int
+	executionType string
 }
 
 // GetRethCommand returns the reth command path based on platform
-func GetRethCommand() string {
+func (_ rethConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
 		return filepath.Join(pkg.InstallClientsDir, "reth", "reth.exe")
@@ -27,7 +26,7 @@ func GetRethCommand() string {
 }
 
 // BuildRethArgs builds the arguments for the reth command
-func BuildRethArgs(config *RethConfig) []string {
+func (config *rethConfig) buildArgs() []string {
 	// Build common arguments
 	args := []string{
 		"node",
@@ -40,12 +39,12 @@ func BuildRethArgs(config *RethConfig) []string {
 		"--authrpc.addr", "0.0.0.0",
 		"--authrpc.port", "8551",
 		"--authrpc.jwtsecret", pkg.JWTPath,
-		"--port", fmt.Sprintf("%d", config.ExecutionPeerPort),
+		"--port", fmt.Sprintf("%d", config.port),
 		"--metrics", "0.0.0.0:6060",
 	}
 
 	// Add execution type specific arguments
-	if config.ExecutionType == "archive" {
+	if config.executionType == "archive" {
 		args = append(args, "--archive")
 	}
 
@@ -56,22 +55,19 @@ func BuildRethArgs(config *RethConfig) []string {
 	return args
 }
 
-func StartReth(executionType string, port []int) error {
-	config := GethConfig{ExecutionPeerPort: port[0], ExecutionType: executionType}
-	args := buildGethArgs(&config)
-	command := GetGethCommand()
+func (c *rethConfig) Start() error {
+	args := c.buildArgs()
+	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
 		pkg.InstallClientsDir,
-		"reth",
+		"geth",
 		"logs",
-		fmt.Sprintf("reth_%s.log", timestamp))
-	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		fmt.Sprintf("geth_%s.log", timestamp))
+	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err
 	}
-	if err := process.StartProcess("reth", command, logFile, args...); err != nil {
-		return err
-	}
-	return nil
+
+	return process.StartProcess("lighthouse", command, logFile, args...)
 }
