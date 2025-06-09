@@ -1,10 +1,10 @@
-package commands
+package cmd
 
 import (
-	"buidlguidl-go/cli/cmd/commands"
-	"buidlguidl-go/cli/cmd/options"
 	"fmt"
 	"os"
+	"starknode-kit/cli/cmd/commands"
+	"starknode-kit/cli/cmd/options"
 
 	"github.com/spf13/cobra"
 )

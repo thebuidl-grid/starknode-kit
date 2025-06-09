@@ -1,7 +1,7 @@
 package clients
 
 import (
-	"buidlguidl-go/pkg"
+	"starknode-kit/pkg"
 	"fmt"
 	"os"
 	"path/filepath"

@@ -1,11 +1,11 @@
 package clients
 
 import (
-	"buidlguidl-go/pkg"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"starknode-kit/pkg"
 	"time"
 )
 
@@ -35,8 +35,8 @@ func (p *prysmConfig) buildArgs() []string {
 		"http://localhost:8551",
 		"--grpc-gateway-host=0.0.0.0",
 		"--grpc-gateway-port=5052",
-		fmt.Sprintf("--checkpoint-sync-url=%d", consensusCheckpoint),
-		fmt.Sprintf("--genesis-beacon-api-url=%d", consensusCheckpoint),
+		fmt.Sprintf("--checkpoint-sync-url=%s", consensusCheckpoint),
+		fmt.Sprintf("--genesis-beacon-api-url=%s", consensusCheckpoint),
 		"--accept-terms-of-use=true",
 		"--jwt-secret",
 		pkg.JWTPath,
