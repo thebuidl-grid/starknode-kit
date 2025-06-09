@@ -63,7 +63,7 @@ func StartPrsym(port ...int) error {
 		pkg.InstallClientsDir,
 		"prysm",
 		"logs",
-		fmt.Sprintf("geth_%s.log", timestamp))
+		fmt.Sprintf("prysm_%s.log", timestamp))
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return err
