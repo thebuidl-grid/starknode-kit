@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	t "starknode-kit/pkg/types"
 
 	"gopkg.in/yaml.v3"
 )
@@ -19,10 +20,10 @@ var (
 	yamlConfigPath = fmt.Sprintf("%s/starknode.yaml", configDir)
 )
 
-func GetExecutionClient(c string) (ClientType, error) {
-	sprtClients := map[string]ClientType{
-		"geth": ClientGeth,
-		"reth": ClientReth,
+func GetExecutionClient(c string) (t.ClientType, error) {
+	sprtClients := map[string]t.ClientType{
+		"geth": t.ClientGeth,
+		"reth": t.ClientReth,
 	}
 	client, ok := sprtClients[c]
 	if !ok {
@@ -106,16 +107,16 @@ func CreateStarkNodeConfig() error {
 	return nil
 }
 
-func defaultConfig() StarkNodeKitConfig {
-	return StarkNodeKitConfig{
+func defaultConfig() t.StarkNodeKitConfig {
+	return t.StarkNodeKitConfig{
 		Network: "sepolia",
-		ExecutionCientSettings: ClientConfig{
-			Name:          ClientGeth,
+		ExecutionCientSettings: t.ClientConfig{
+			Name:          t.ClientGeth,
 			Port:          []int{30303},
 			ExecutionType: "full",
 		},
-		ConsensusCientSettings: ClientConfig{
-			Name: ClientPrysm,
+		ConsensusCientSettings: t.ClientConfig{
+			Name: t.ClientPrysm,
 			Port: []int{5052, 9000},
 		},
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"starknode-kit/pkg"
 	"starknode-kit/pkg/clients"
+	t "starknode-kit/pkg/types"
 
 	"github.com/spf13/cobra"
 )
@@ -54,13 +55,13 @@ func runcommand(cmd *cobra.Command, args []string) {
 		return
 	}
 	switch clClient {
-	case pkg.ClientLighthouse:
+	case t.ClientLighthouse:
 		fmt.Println("Starting Lighthouse consensus client...")
 		if err = clients.StartLightHouse(cl.Port...); err != nil {
 			fmt.Println("Error:", err)
 			return
 		}
-	case pkg.ClientPrysm:
+	case t.ClientPrysm:
 		fmt.Println("Starting Prysm consensus client...")
 		if err = clients.StartPrsym(cl.Port...); err != nil {
 			fmt.Println("Error:", err)
@@ -73,13 +74,13 @@ func runcommand(cmd *cobra.Command, args []string) {
 	}
 
 	switch elClient {
-	case pkg.ClientGeth:
+	case t.ClientGeth:
 		fmt.Println("Starting Geth execution client...")
 		if err = clients.StartGeth(el.ExecutionType, el.Port); err != nil {
 			fmt.Println("Error:", err)
 			return
 		}
-	case pkg.ClientReth:
+	case t.ClientReth:
 		fmt.Println("Starting Reth execution client...")
 		if err = clients.StartReth(el.ExecutionType, el.Port); err != nil {
 			fmt.Println("Error:", err)

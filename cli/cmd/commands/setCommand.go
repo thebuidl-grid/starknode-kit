@@ -1,8 +1,9 @@
 package commands
 
 import (
-	"starknode-kit/pkg"
 	"fmt"
+	"starknode-kit/pkg"
+	t "starknode-kit/pkg/types"
 	"strconv"
 	"strings"
 
@@ -62,7 +63,7 @@ func runSetCommand(target string, args []string) {
 	}
 }
 
-func processConfigArgs(cfg *pkg.StarkNodeKitConfig, args []string, target string) error {
+func processConfigArgs(cfg *t.StarkNodeKitConfig, args []string, target string) error {
 	for _, arg := range args {
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) != 2 {
@@ -79,9 +80,9 @@ func processConfigArgs(cfg *pkg.StarkNodeKitConfig, args []string, target string
 	return nil
 }
 
-func applyConfigUpdate(cfg *pkg.StarkNodeKitConfig, key, value, target string) error {
+func applyConfigUpdate(cfg *t.StarkNodeKitConfig, key, value, target string) error {
 	var (
-		updated pkg.ClientConfig
+		updated t.ClientConfig
 		err     error
 	)
 
@@ -107,10 +108,10 @@ func applyConfigUpdate(cfg *pkg.StarkNodeKitConfig, key, value, target string) e
 	return nil
 }
 
-func setClientConfigValue(clientCfg pkg.ClientConfig, key, value, target string) (pkg.ClientConfig, error) {
+func setClientConfigValue(clientCfg t.ClientConfig, key, value, target string) (t.ClientConfig, error) {
 	switch key {
 	case "client":
-		var client pkg.ClientType
+		var client t.ClientType
 		var err error
 
 		switch target {
@@ -122,7 +123,7 @@ Supported execution clients are:
   - geth
   - reth`, err)
 			}
-			clientCfg.Name = pkg.ClientType(client)
+			clientCfg.Name = t.ClientType(client)
 		case "consensus":
 			client, err = pkg.GetConsensusClient(value)
 			if err != nil {
@@ -131,12 +132,8 @@ Supported consensus clients are:
   - lighthouse 
   - prysm`, err)
 			}
-			clientCfg.Name = pkg.ClientType(client)
+			clientCfg.Name = t.ClientType(client)
 		}
-
-	case "network":
-		clientCfg.Network = value
-
 	case "port":
 		ports, err := parsePorts(value)
 		if err != nil {

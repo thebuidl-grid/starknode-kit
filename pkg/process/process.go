@@ -1,12 +1,15 @@
-package pkg
+package process
 
 import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path"
 	"syscall"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 func IsRunning(pid int) bool {
@@ -15,7 +18,7 @@ func IsRunning(pid int) bool {
 }
 func StartProcess(name, command string, logPath io.Writer, args ...string) error {
 
-	cmd := execCommand(command, args...)
+	cmd := exec.Command(command, args...)
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setsid: true,
@@ -30,6 +33,25 @@ func StartProcess(name, command string, logPath io.Writer, args ...string) error
 		return fmt.Errorf("Failed to write PID file: %v\n", err)
 	}
 	return nil
+}
+
+func loadProcesses() (Process, error) {
+	var processes Process
+	processPath := path.Join(InstallDir, ".process")
+	if _, err := os.Stat(processPath); os.IsNotExist(err) {
+		return Process{}, fmt.Errorf("No running process")
+	}
+	prb, err := os.ReadFile(processPath)
+	if err != nil {
+		return Process{}, err
+	}
+
+	if err = yaml.Unmarshal(prb, processes); err != nil {
+		return Process{}, err
+	}
+
+	return processes, nil
+
 }
 
 func writeToPIDFile(pid int, name string) error {

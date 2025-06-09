@@ -1,4 +1,4 @@
-package pkg
+package types
 
 type ClientType string
 
@@ -19,15 +19,4 @@ type ClientConfig struct {
 	Name          ClientType `yaml:"name"`
 	ExecutionType string     `yaml:"execution_type,omitempty"`
 	Port          []int      `yaml:"ports"`
-}
-
-type Process struct {
-	Processes []process `yaml:"processes"`
-}
-
-type process struct {
-	Name ClientType `yaml:"name"`
-	Type string     `yaml:"type"`
-	Pid  int        `yaml:"pid"`
-	Path string     `yaml:"path"`
 }
