@@ -12,169 +12,15 @@ import (
 	// "regexp"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"starknode-kit/pkg"
-	"starknode-kit/pkg/clients"
+	"starknode-kit/pkg/types"
 )
 
-// ProcessInfo holds information about a running process
-type ProcessInfo struct {
-	PID      int           `json:"pid"`
-	Name     string        `json:"name"`
-	Status   string        `json:"status"`
-	Uptime   time.Duration `json:"uptime"`
-	CPUUsage float64       `json:"cpu_usage"`
-	MemUsage uint64        `json:"mem_usage"`
-}
-
-// EthereumMetrics holds blockchain metrics
-type EthereumMetrics struct {
-	CurrentBlock uint64  `json:"current_block"`
-	HighestBlock uint64  `json:"highest_block"`
-	SyncPercent  float64 `json:"sync_percent"`
-	PeerCount    int     `json:"peer_count"`
-	IsSyncing    bool    `json:"is_syncing"`
-	GasPrice     string  `json:"gas_price"`
-	NetworkName  string  `json:"network"`
-}
-
-// GetRunningClients returns information about running Ethereum clients
-func GetRunningClients() []ClientStatus {
-	var clients []ClientStatus
-
-	// Check for Geth
-	if gethInfo := getProcessInfo("geth"); gethInfo != nil {
-		status := ClientStatus{
-			Name:       "Geth",
-			Status:     gethInfo.Status,
-			PID:        gethInfo.PID,
-			Uptime:     gethInfo.Uptime,
-			Version:    getClientVersion("geth"),
-			SyncStatus: getGethSyncStatus(),
-		}
-		clients = append(clients, status)
-	}
-
-	// Check for Reth
-	if rethInfo := getProcessInfo("reth"); rethInfo != nil {
-		status := ClientStatus{
-			Name:       "Reth",
-			Status:     rethInfo.Status,
-			PID:        rethInfo.PID,
-			Uptime:     rethInfo.Uptime,
-			Version:    getClientVersion("reth"),
-			SyncStatus: getRethSyncStatus(),
-		}
-		clients = append(clients, status)
-	}
-
-	// Check for Lighthouse
-	if lighthouseInfo := getProcessInfo("lighthouse"); lighthouseInfo != nil {
-		status := ClientStatus{
-			Name:       "Lighthouse",
-			Status:     lighthouseInfo.Status,
-			PID:        lighthouseInfo.PID,
-			Uptime:     lighthouseInfo.Uptime,
-			Version:    getClientVersion("lighthouse"),
-			SyncStatus: getLighthouseSyncStatus(),
-		}
-		clients = append(clients, status)
-	}
-
-	// Check for Prysm
-	if prysmInfo := getProcessInfo("prysm"); prysmInfo != nil {
-		status := ClientStatus{
-			Name:       "Prysm",
-			Status:     prysmInfo.Status,
-			PID:        prysmInfo.PID,
-			Uptime:     prysmInfo.Uptime,
-			Version:    getClientVersion("prysm"),
-			SyncStatus: getPrysmSyncStatus(),
-		}
-		clients = append(clients, status)
-	}
-
-	return clients
-}
-
-// getProcessInfo gets information about a running process by name
-func getProcessInfo(processName string) *ProcessInfo {
-	// Read /proc to find the process
-	procDirs, err := filepath.Glob("/proc/[0-9]*")
-	if err != nil {
-		return nil
-	}
-
-	for _, procDir := range procDirs {
-		// Read cmdline to get the command
-		cmdlineFile := filepath.Join(procDir, "cmdline")
-		cmdlineBytes, err := os.ReadFile(cmdlineFile)
-		if err != nil {
-			continue
-		}
-
-		cmdline := string(cmdlineBytes)
-		if strings.Contains(cmdline, processName) {
-			// Extract PID from directory name
-			pidStr := filepath.Base(procDir)
-			pid, err := strconv.Atoi(pidStr)
-			if err != nil {
-				continue
-			}
-
-			// Get process status
-			statusFile := filepath.Join(procDir, "stat")
-			statusBytes, err := os.ReadFile(statusFile)
-			if err != nil {
-				continue
-			}
-
-			// Parse stat file for uptime
-			statFields := strings.Fields(string(statusBytes))
-			if len(statFields) > 21 {
-				startTimeJiffies, err := strconv.ParseUint(statFields[21], 10, 64)
-				if err == nil {
-					// Calculate uptime (simplified)
-					uptimeSeconds := time.Now().Unix() - int64(startTimeJiffies/100)
-					uptime := time.Duration(uptimeSeconds) * time.Second
-
-					return &ProcessInfo{
-						PID:    pid,
-						Name:   processName,
-						Status: "running",
-						Uptime: uptime,
-					}
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
-// getClientVersion gets the version of an installed client
-func getClientVersion(clientName string) string {
-	// This would typically be cached or retrieved from a version check
-	// For now, return a placeholder
-	switch clientName {
-	case "geth":
-		return "v1.13.5"
-	case "reth":
-		return "v0.2.0-beta"
-	case "lighthouse":
-		return "v4.5.0"
-	case "prysm":
-		return "v4.2.1"
-	default:
-		return "unknown"
-	}
-}
-
 // getGethSyncStatus gets sync status from Geth's HTTP API
-func getGethSyncStatus() SyncInfo {
-	syncInfo := SyncInfo{IsSyncing: false, SyncPercent: 100.0}
+func GetGethSyncStatus() types.SyncInfo {
+	syncInfo := types.SyncInfo{IsSyncing: false, SyncPercent: 100.0}
 
 	// Try to get sync status from Geth's HTTP API
 	client := &http.Client{Timeout: 2 * time.Second}
@@ -243,14 +89,14 @@ func getGethSyncStatus() SyncInfo {
 }
 
 // getRethSyncStatus gets sync status from Reth's HTTP API
-func getRethSyncStatus() SyncInfo {
+func GetRethSyncStatus() types.SyncInfo {
 	// Similar to Geth but Reth might have different endpoints
 	return getGethSyncStatus() // For now, use same logic
 }
 
 // getLighthouseSyncStatus gets sync status from Lighthouse's HTTP API
-func getLighthouseSyncStatus() SyncInfo {
-	syncInfo := SyncInfo{IsSyncing: false, SyncPercent: 100.0}
+func GetLighthouseSyncStatus() types.SyncInfo {
+	syncInfo := types.SyncInfo{IsSyncing: false, SyncPercent: 100.0}
 
 	client := &http.Client{Timeout: 2 * time.Second}
 
@@ -296,8 +142,8 @@ func getLighthouseSyncStatus() SyncInfo {
 }
 
 // getPrysmSyncStatus gets sync status from Prysm's HTTP API
-func getPrysmSyncStatus() SyncInfo {
-	syncInfo := SyncInfo{IsSyncing: false, SyncPercent: 100.0}
+func GetPrysmSyncStatus() types.SyncInfo {
+	syncInfo := types.SyncInfo{IsSyncing: false, SyncPercent: 100.0}
 
 	client := &http.Client{Timeout: 2 * time.Second}
 
@@ -344,8 +190,8 @@ func getPrysmSyncStatus() SyncInfo {
 }
 
 // GetEthereumMetrics gets blockchain metrics
-func GetEthereumMetrics() EthereumMetrics {
-	metrics := EthereumMetrics{
+func GetEthereumMetrics() types.EthereumMetrics {
+	metrics := types.EthereumMetrics{
 		NetworkName: "Mainnet",
 		IsSyncing:   false,
 		SyncPercent: 100.0,
@@ -463,60 +309,4 @@ func parseHexInt(hexStr string) (uint64, error) {
 		hexStr = hexStr[2:]
 	}
 	return strconv.ParseUint(hexStr, 16, 64)
-}
-
-// IsProcessRunning checks if a process is running by PID
-func IsProcessRunning(pid int) bool {
-	process, err := os.FindProcess(pid)
-	if err != nil {
-		return false
-	}
-
-	// Send signal 0 to check if process exists
-	err = process.Signal(syscall.Signal(0))
-	return err == nil
-}
-
-// StopClient stops a client by name
-func StopClient(clientName string) error {
-	processInfo := getProcessInfo(clientName)
-	if processInfo == nil {
-		return fmt.Errorf("client %s is not running", clientName)
-	}
-
-	return pkg.StopProcess(processInfo.PID)
-}
-
-// RestartClient restarts a client
-func RestartClient(clientName string) error {
-	// First stop the client
-	if err := StopClient(clientName); err != nil {
-		// If it wasn't running, that's ok
-		if !strings.Contains(err.Error(), "not running") {
-			return err
-		}
-	}
-
-	// Wait a bit for clean shutdown
-	time.Sleep(2 * time.Second)
-
-	// Load config to get client settings
-	config, err := pkg.LoadConfig()
-	if err != nil {
-		return fmt.Errorf("failed to load config: %w", err)
-	}
-
-	// Start based on client type
-	switch clientName {
-	case "geth":
-		return clients.StartGeth(config.ExecutionCientSettings.ExecutionType, config.ExecutionCientSettings.Port)
-	case "reth":
-		return clients.StartReth(config.ExecutionCientSettings.ExecutionType, config.ExecutionCientSettings.Port)
-	case "lighthouse":
-		return clients.StartLightHouse(config.ConsensusCientSettings.Port...)
-	case "prysm":
-		return clients.StartPrsym(config.ConsensusCientSettings.Port...)
-	default:
-		return fmt.Errorf("unknown client: %s", clientName)
-	}
 }
