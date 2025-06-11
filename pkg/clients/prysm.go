@@ -67,5 +67,5 @@ func (c *prysmConfig) Start() error {
 		return err
 	}
 
-	return process.StartProcess("prysm", command, logFile, args...)
+	return process.StartClient("prysm", command, logFile, args...)
 }

@@ -69,5 +69,5 @@ func (c *lightHouseConfig) Start() error {
 		return err
 	}
 
-	return process.StartProcess("lighthouse", command, logFile, args...)
+	return process.StartClient("lighthouse", command, logFile, args...)
 }
