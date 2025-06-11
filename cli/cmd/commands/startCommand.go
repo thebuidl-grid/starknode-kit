@@ -4,21 +4,20 @@ import (
 	"fmt"
 	"starknode-kit/pkg"
 	"starknode-kit/pkg/clients"
-	t "starknode-kit/pkg/types"
 
 	"github.com/spf13/cobra"
 )
 
-var RunCommand = &cobra.Command{
-	Use:   "run",
+var StartCommand = &cobra.Command{
+	Use:   "start",
 	Short: "Run the configured Ethereum clients",
 	Long: `The run command starts the Ethereum clients (e.g., Prysm, Lighthouse, Geth, etc.)
 that have been added to your local configuration. This executes the clients using the
 defined settings and manages them as part of your node stack.`,
-	Run: runcommand,
+	Run: startCommand,
 }
 
-func runcommand(cmd *cobra.Command, args []string) {
+func startCommand(cmd *cobra.Command, args []string) {
 	config, err := pkg.LoadConfig()
 	if err != nil {
 		fmt.Println(err)
@@ -54,42 +53,24 @@ func runcommand(cmd *cobra.Command, args []string) {
 		fmt.Printf("Please run: starknode add -c %s\n", clClient)
 		return
 	}
-	switch clClient {
-	case t.ClientLighthouse:
-		fmt.Println("Starting Lighthouse consensus client...")
-		if err = clients.StartLightHouse(cl.Port...); err != nil {
-			fmt.Println("Error:", err)
-			return
-		}
-	case t.ClientPrysm:
-		fmt.Println("Starting Prysm consensus client...")
-		if err = clients.StartPrsym(cl.Port...); err != nil {
-			fmt.Println("Error:", err)
-			return
-		}
-	default:
-		fmt.Printf("Consensus client \"%s\" is not installed.\n", clClient)
-		fmt.Printf("Please run: starknode add -c %s\n", clClient)
+	cClient, err := clients.NewConsensusClient(cl)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	eClient, err := clients.NewExecutionClient(el)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
-	switch elClient {
-	case t.ClientGeth:
-		fmt.Println("Starting Geth execution client...")
-		if err = clients.StartGeth(el.ExecutionType, el.Port); err != nil {
-			fmt.Println("Error:", err)
-			return
-		}
-	case t.ClientReth:
-		fmt.Println("Starting Reth execution client...")
-		if err = clients.StartReth(el.ExecutionType, el.Port); err != nil {
-			fmt.Println("Error:", err)
-			return
-		}
-	default:
-		fmt.Printf("Execution client \"%s\" is not installed.\n", elClient)
-		fmt.Printf("Please run: starknode add -e %s\n", elClient)
+	if err = cClient.Start(); err != nil {
+		fmt.Println(err)
 		return
 	}
-
+	if err = eClient.Start(); err != nil {
+		fmt.Println(err)
+		return
+	}
+	return
 }
