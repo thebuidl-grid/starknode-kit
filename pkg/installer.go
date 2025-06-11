@@ -10,16 +10,11 @@ import (
 	"regexp"
 	"runtime"
 	"starknode-kit/pkg/types"
+	"starknode-kit/pkg/versions"
 	"strings"
 )
 
 // Version constants
-const (
-	latestGethVersion       = "1.15.10"
-	latestRethVersion       = "1.3.4"
-	latestLighthouseVersion = "7.0.1"
-	latestPrysmVersion      = "v4.2.1"
-)
 
 var (
 	// execCommand allows mocking exec.Command in tests
@@ -87,11 +82,11 @@ func (i *installer) getClientFileName(client types.ClientType) (string, error) {
 			gethArch = "arm64"
 		}
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
-			goos, gethArch, latestGethVersion, GethHash[latestGethVersion])
+			goos, gethArch, versions.LatestGethVersion, GethHash[versions.LatestGethVersion])
 	case types.ClientReth:
-		fileName = fmt.Sprintf("reth-v%s-%s", latestRethVersion, archName)
+		fileName = fmt.Sprintf("reth-v%s-%s", versions.LatestRethVersion, archName)
 	case types.ClientLighthouse:
-		fileName = fmt.Sprintf("lighthouse-v%s-%s", latestLighthouseVersion, archName)
+		fileName = fmt.Sprintf("lighthouse-v%s-%s", versions.LatestLighthouseVersion, archName)
 	case types.ClientPrysm:
 		fileName = "prysm.sh"
 	default:
@@ -108,10 +103,10 @@ func (i *installer) getDownloadURL(client types.ClientType, fileName string) (st
 		return fmt.Sprintf("https://gethstore.blob.core.windows.net/builds/%s.tar.gz", fileName), nil
 	case types.ClientReth:
 		return fmt.Sprintf("https://github.com/paradigmxyz/reth/releases/download/v%s/%s.tar.gz",
-			latestRethVersion, fileName), nil
+			versions.LatestRethVersion, fileName), nil
 	case types.ClientLighthouse:
 		return fmt.Sprintf("https://github.com/sigp/lighthouse/releases/download/v%s/%s.tar.gz",
-			latestLighthouseVersion, fileName), nil
+			versions.LatestLighthouseVersion, fileName), nil
 	case types.ClientPrysm:
 		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
 	default:
@@ -220,12 +215,12 @@ func (i *installer) InstallClient(client types.ClientType) error {
 func setupJWTSecret() error {
 
 	// Check if JWT already exists
-	if _, err := os.Stat(jwtDir); err == nil {
+	if _, err := os.Stat(JwtDir); err == nil {
 		return nil
 	}
 
 	// Create JWT directory
-	if err := os.MkdirAll(jwtDir, 0755); err != nil {
+	if err := os.MkdirAll(JwtDir, 0755); err != nil {
 		return fmt.Errorf("failed to create JWT directory: %w", err)
 	}
 
@@ -389,11 +384,11 @@ func CompareClientVersions(client, installedVersion string) (bool, string) {
 	var latestVersion string
 	switch client {
 	case "reth":
-		latestVersion = latestRethVersion
+		latestVersion = versions.LatestRethVersion
 	case "geth":
-		latestVersion = latestGethVersion
+		latestVersion = versions.LatestGethVersion
 	case "lighthouse":
-		latestVersion = latestLighthouseVersion
+		latestVersion = versions.LatestLighthouseVersion
 	case "prysm":
 		// Just use a hard-coded latest version for Prysm
 		latestVersion = "4.0.5" // Replace with an appropriate version
