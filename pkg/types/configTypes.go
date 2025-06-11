@@ -9,8 +9,8 @@ const (
 	ClientPrysm      ClientType = "prysm"
 )
 
-type Client interface {
-	Start()
+type IClient interface {
+	 Start() error
 }
 
 type StarkNodeKitConfig struct {
