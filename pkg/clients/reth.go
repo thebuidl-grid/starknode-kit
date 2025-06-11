@@ -14,6 +14,7 @@ import (
 type rethConfig struct {
 	port          int
 	executionType string
+	network       string
 }
 
 // GetRethCommand returns the reth command path based on platform
@@ -30,7 +31,7 @@ func (config *rethConfig) buildArgs() []string {
 	// Build common arguments
 	args := []string{
 		"node",
-		"--network", "mainnet",
+		"--network", config.network,
 		"--http",
 		"--http.addr", "0.0.0.0",
 		"--http.port", "8545",

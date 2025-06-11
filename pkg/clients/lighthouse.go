@@ -14,6 +14,7 @@ import (
 type lightHouseConfig struct {
 	port                []int // [quic/tcp, udp]
 	consensusCheckpoint string
+	network             string
 }
 
 func (_ lightHouseConfig) getCommand() string {
@@ -29,7 +30,7 @@ func (c *lightHouseConfig) buildArgs() []string {
 	args := []string{
 		"bn",
 		"--network",
-		"mainnet",
+		c.network,
 		fmt.Sprintf("--port=%d", c.port[0]),
 		fmt.Sprintf("--quic-port=%d", c.port[1]),
 		"--execution-endpoint",

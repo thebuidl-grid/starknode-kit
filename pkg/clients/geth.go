@@ -14,6 +14,7 @@ import (
 type gethConfig struct {
 	port          int
 	executionType string
+	network       string
 }
 
 // GetGethCommand returns the geth command path based on platform
@@ -28,7 +29,7 @@ func (_ gethConfig) getCommand() string {
 // BuildGethArgs builds the arguments for the geth command
 func (c *gethConfig) buildArgs() []string {
 	args := []string{
-		"--mainnet",
+		fmt.Sprintf("--%s", c.network),
 		fmt.Sprintf("--port=%d", c.port),
 		fmt.Sprintf("--discovery.port=%d", c.port),
 		"--http",

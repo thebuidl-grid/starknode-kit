@@ -7,33 +7,33 @@ import (
 )
 
 // Mock configuration for testing
-func createTestGethConfig() *GethConfig {
-	return &GethConfig{
-		ExecutionType:     "full",
-		ExecutionPeerPort: 30303,
-		LogFilePath:       "/tmp/test-geth/geth_test.log",
+func createTestGethConfig() *gethConfig {
+	return &gethConfig{
+		port:          30303,
+		executionType: "full",
 	}
 }
 
 func TestGethConfig_Creation(t *testing.T) {
 	config := createTestGethConfig()
 
-	if config.ExecutionType != "full" {
-		t.Errorf("ExecutionType = %v, want %v", config.ExecutionType, "full")
+	if config.executionType != "full" {
+		t.Errorf("executionType = %v, want %v", config.executionType, "full")
 	}
 
-	if config.ExecutionPeerPort != 30303 {
-		t.Errorf("ExecutionPeerPort = %v, want %v", config.ExecutionPeerPort, 30303)
+	if config.port != 30303 {
+		t.Errorf("port = %v, want %v", config.port, 30303)
 	}
 
-	if config.LogFilePath == "" {
-		t.Error("LogFilePath should not be empty")
-	}
 }
 
 func TestGetGethCommand(t *testing.T) {
 	t.Run("current platform", func(t *testing.T) {
-		result := GetGethCommand()
+		geth := gethConfig{
+			port:          30303,
+			executionType: "full",
+		}
+		result := geth.getCommand()
 
 		if runtime.GOOS == "windows" {
 			expectedSuffix := "geth.exe"
@@ -60,12 +60,14 @@ func TestGetGethCommand(t *testing.T) {
 func TestStartGeth_Parameters(t *testing.T) {
 	t.Run("parameter validation", func(t *testing.T) {
 		// Test that StartGeth accepts the correct parameters
-		executionType := "full"
-		ports := []int{30303}
 
 		// We can't actually start geth in tests, but we can verify the function signature
 		// and basic parameter handling by checking it doesn't panic with valid inputs
-		err := StartGeth(executionType, ports)
+		geth := gethConfig{
+			port:          30303,
+			executionType: "full",
+		}
+		err := geth.Start()
 
 		// We expect this to fail since geth binary likely doesn't exist in test environment
 		// but it shouldn't panic and should return an error
@@ -78,10 +80,13 @@ func TestStartGeth_Parameters(t *testing.T) {
 
 	t.Run("different execution types", func(t *testing.T) {
 		executionTypes := []string{"full", "archive"}
-		ports := []int{30303}
 
 		for _, execType := range executionTypes {
-			err := StartGeth(execType, ports)
+			geth := gethConfig{
+				port:          30303,
+				executionType: execType,
+			}
+			err := geth.Start()
 			// Again, we expect this to fail in test environment, but shouldn't panic
 			if err != nil {
 				t.Logf("StartGeth with type %s failed as expected: %v", execType, err)
@@ -90,17 +95,17 @@ func TestStartGeth_Parameters(t *testing.T) {
 	})
 
 	t.Run("different ports", func(t *testing.T) {
-		testPorts := [][]int{
-			{30303},
-			{30304},
-			{31313},
-		}
+		testPorts := []int{30303, 30304, 31313}
 
-		for _, ports := range testPorts {
-			err := StartGeth("full", ports)
+		for _, port := range testPorts {
+			geth := gethConfig{
+				port:          port,
+				executionType: "full",
+			}
+			err := geth.Start()
 			// Expected to fail in test environment
 			if err != nil {
-				t.Logf("StartGeth with ports %v failed as expected: %v", ports, err)
+				t.Logf("StartGeth with ports %v failed as expected: %v", port, err)
 			}
 		}
 	})
@@ -110,17 +115,14 @@ func TestGethConfig_Validation(t *testing.T) {
 	t.Run("valid config", func(t *testing.T) {
 		config := createTestGethConfig()
 
-		if config.ExecutionType == "" {
-			t.Error("ExecutionType should not be empty")
+		if config.executionType == "" {
+			t.Error("executionType should not be empty")
 		}
 
-		if config.ExecutionPeerPort <= 0 {
-			t.Error("ExecutionPeerPort should be positive")
+		if config.port <= 0 {
+			t.Error("port should be positive")
 		}
 
-		if config.LogFilePath == "" {
-			t.Error("LogFilePath should not be empty")
-		}
 	})
 
 	t.Run("execution types", func(t *testing.T) {
@@ -128,11 +130,11 @@ func TestGethConfig_Validation(t *testing.T) {
 
 		for _, execType := range validTypes {
 			config := createTestGethConfig()
-			config.ExecutionType = execType
+			config.executionType = execType
 
 			// Verify the config accepts valid execution types
-			if config.ExecutionType != execType {
-				t.Errorf("Failed to set ExecutionType to %s", execType)
+			if config.executionType != execType {
+				t.Errorf("Failed to set executionType to %s", execType)
 			}
 		}
 	})
@@ -144,9 +146,9 @@ func TestGethConfig_Validation(t *testing.T) {
 		testPorts := []int{1024, 30303, 30304, 65535}
 
 		for _, port := range testPorts {
-			config.ExecutionPeerPort = port
-			if config.ExecutionPeerPort != port {
-				t.Errorf("Failed to set ExecutionPeerPort to %d", port)
+			config.port = port
+			if config.port != port {
+				t.Errorf("Failed to set port to %d", port)
 			}
 		}
 	})
@@ -156,7 +158,11 @@ func TestGethConfig_Validation(t *testing.T) {
 func BenchmarkGetGethCommand(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		GetGethCommand()
+		geth := gethConfig{
+			port:          30303,
+			executionType: "full",
+		}
+		geth.getCommand()
 	}
 }
 

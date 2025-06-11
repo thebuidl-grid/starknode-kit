@@ -14,6 +14,7 @@ import (
 type prysmConfig struct {
 	port                []int // [quic/tcp, udp]
 	consensusCheckpoint string
+	network             string
 }
 
 func (_ prysmConfig) getCommand() string {
@@ -28,7 +29,7 @@ func (_ prysmConfig) getCommand() string {
 func (c *prysmConfig) buildArgs() []string {
 	args := []string{
 		"beacon-chain",
-		"--mainnet",
+		fmt.Sprintf("--%s", c.network),
 		fmt.Sprintf("--p2p-udp-port=%d", c.port[1]),
 		fmt.Sprintf("--p2p-quic-port=%d", c.port[0]),
 		fmt.Sprintf("--p2p-tcp-port=%d", c.port[0]),
