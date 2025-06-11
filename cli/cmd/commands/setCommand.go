@@ -2,8 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"starknode-kit/pkg"
 	t "starknode-kit/pkg/types"
+	"starknode-kit/pkg/utils"
 	"strconv"
 	"strings"
 
@@ -47,7 +47,7 @@ var setCLCmd = &cobra.Command{
 }
 
 func runSetCommand(target string, args []string) {
-	cfg, err := pkg.LoadConfig()
+	cfg, err := utils.LoadConfig()
 	if err != nil {
 		fmt.Println("Failed to load config:", err)
 		return
@@ -58,7 +58,7 @@ func runSetCommand(target string, args []string) {
 		return
 	}
 
-	if err := pkg.UpdateStarkNodeConfig(cfg); err != nil {
+	if err := utils.UpdateStarkNodeConfig(cfg); err != nil {
 		fmt.Println("Failed to save config:", err)
 	}
 }
@@ -116,7 +116,7 @@ func setClientConfigValue(clientCfg t.ClientConfig, key, value, target string) (
 
 		switch target {
 		case "execution":
-			client, err = pkg.GetExecutionClient(value)
+			client, err = utils.GetExecutionClient(value)
 			if err != nil {
 				return clientCfg, fmt.Errorf(`%w
 Supported execution clients are:
@@ -125,7 +125,7 @@ Supported execution clients are:
 			}
 			clientCfg.Name = t.ClientType(client)
 		case "consensus":
-			client, err = pkg.GetConsensusClient(value)
+			client, err = utils.GetConsensusClient(value)
 			if err != nil {
 				return clientCfg, fmt.Errorf(`%w
 Supported consensus clients are:

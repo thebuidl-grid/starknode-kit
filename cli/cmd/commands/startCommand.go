@@ -2,8 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"starknode-kit/pkg"
 	"starknode-kit/pkg/clients"
+	"starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -18,21 +18,21 @@ defined settings and manages them as part of your node stack.`,
 }
 
 func startCommand(cmd *cobra.Command, args []string) {
-	config, err := pkg.LoadConfig()
+	config, err := utils.LoadConfig()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	el := config.ExecutionCientSettings
 	cl := config.ConsensusCientSettings
-	elClient, err := pkg.GetExecutionClient(string(el.Name))
+	elClient, err := utils.GetExecutionClient(string(el.Name))
 	if err != nil {
 		fmt.Println("Supported execution clients are:")
 		fmt.Println(" - geth")
 		fmt.Println(" - reth")
 		return
 	}
-	clClient, err := pkg.GetConsensusClient(string(cl.Name))
+	clClient, err := utils.GetConsensusClient(string(cl.Name))
 	if err != nil {
 		fmt.Println("Supported consensus clients are:")
 		fmt.Println(" - lighhouse")
@@ -40,25 +40,25 @@ func startCommand(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	err = pkg.IsInstalled(elClient)
+	err = utils.IsInstalled(elClient)
 	if err != nil {
 		fmt.Printf("Client \"%s\" is not installed.\n", elClient)
 		fmt.Printf("Please run: starknode add -e %s\n", elClient)
 		return
 	}
-	err = pkg.IsInstalled(clClient)
+	err = utils.IsInstalled(clClient)
 
 	if err != nil {
 		fmt.Printf("Client \"%s\" is not installed.\n", clClient)
 		fmt.Printf("Please run: starknode add -c %s\n", clClient)
 		return
 	}
-	cClient, err := clients.NewConsensusClient(cl)
+	cClient, err := clients.NewConsensusClient(cl, config.Network)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	eClient, err := clients.NewExecutionClient(el)
+	eClient, err := clients.NewExecutionClient(el, config.Network)
 	if err != nil {
 		fmt.Println(err)
 		return
