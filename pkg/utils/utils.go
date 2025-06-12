@@ -38,16 +38,16 @@ func GetConsensusClient(c string) (t.ClientType, error) {
 	return client, nil
 }
 
-func IsInstalled(c t.ClientType) error {
+func IsInstalled(c t.ClientType) bool {
 	dir := path.Join(pkg.InstallClientsDir, string(c))
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		return err
+		return false 
 	}
 	if !info.IsDir() {
-		return err
+		return false 
 	}
-	return nil
+	return true 
 }
 
 func LoadConfig() (t.StarkNodeKitConfig, error) {
