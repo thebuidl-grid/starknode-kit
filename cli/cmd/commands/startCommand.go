@@ -39,16 +39,13 @@ func startCommand(cmd *cobra.Command, args []string) {
 		fmt.Println(" - prysm")
 		return
 	}
-
-	err = utils.IsInstalled(elClient)
-	if err != nil {
+	if !utils.IsInstalled(elClient) {
 		fmt.Printf("Client \"%s\" is not installed.\n", elClient)
 		fmt.Printf("Please run: starknode add -e %s\n", elClient)
 		return
 	}
-	err = utils.IsInstalled(clClient)
 
-	if err != nil {
+	if !utils.IsInstalled(clClient) {
 		fmt.Printf("Client \"%s\" is not installed.\n", clClient)
 		fmt.Printf("Please run: starknode add -c %s\n", clClient)
 		return
