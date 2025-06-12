@@ -49,7 +49,9 @@ var setCLCmd = &cobra.Command{
 func runSetCommand(target string, args []string) {
 	cfg, err := utils.LoadConfig()
 	if err != nil {
-		fmt.Println("Failed to load config:", err)
+		fmt.Println("No config found")
+		fmt.Println("Run `starknode init` to create config file")
+		return
 		return
 	}
 

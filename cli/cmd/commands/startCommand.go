@@ -20,7 +20,8 @@ defined settings and manages them as part of your node stack.`,
 func startCommand(cmd *cobra.Command, args []string) {
 	config, err := utils.LoadConfig()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("No config found")
+		fmt.Println("Run `starknode init` to create config file")
 		return
 	}
 	el := config.ExecutionCientSettings

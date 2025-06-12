@@ -19,7 +19,8 @@ that have been added to your local configuration.`,
 func stopCommand(cmd *cobra.Command, args []string) {
 	config, err := utils.LoadConfig()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("No config found")
+		fmt.Println("Run `starknode init` to create config file")
 		return
 	}
 	elClient := config.ExecutionCientSettings
