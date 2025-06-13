@@ -52,7 +52,6 @@ func runSetCommand(target string, args []string) {
 		fmt.Println("No config found")
 		fmt.Println("Run `starknode init` to create config file")
 		return
-		return
 	}
 
 	if err := processConfigArgs(&cfg, args, target); err != nil {

@@ -5,6 +5,7 @@ import (
 	"starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var ShowConfigCommand = &cobra.Command{
@@ -22,6 +23,14 @@ func showconfigcommand(cmd *cobra.Command, args []string) {
 		fmt.Println("Run `starknode init` to create config file")
 		return
 	}
-	fmt.Println(config)
-  return
+	configBytes, err := yaml.Marshal(config)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("=== Configuration ===")
+  fmt.Println()
+	fmt.Println(string(configBytes))
+	fmt.Println("=== === === === === ===")
+	return
 }
