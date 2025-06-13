@@ -181,7 +181,7 @@ func GetPrysmSyncStatus() t.SyncInfo {
 }
 func defaultConfig() t.StarkNodeKitConfig {
 	return t.StarkNodeKitConfig{
-		Network: "sepolia",
+		Network: "mainnet",
 		ExecutionCientSettings: t.ClientConfig{
 			Name:          t.ClientGeth,
 			Port:          []int{30303},
