@@ -1,14 +1,14 @@
 package commands
 
 import (
-	"starknode-kit/cli/cmd/options"
-	"starknode-kit/pkg"
 	"fmt"
+	"starknode-kit/cli/cmd/options"
+	"starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
 
-//TODO use loggers and not print
+// TODO use loggers and not print
 var InstallCommand = &cobra.Command{
 	Use:   "add",
 	Short: "Add an Ethereum client to the config",
@@ -20,7 +20,7 @@ the client as part of your node stark.`,
 
 func installCommand(cmd *cobra.Command, args []string) {
 	if options.ConsensusClient != "" {
-		client, err := pkg.GetConsensusClient(options.ConsensusClient)
+		client, err := utils.GetConsensusClient(options.ConsensusClient)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -32,7 +32,7 @@ func installCommand(cmd *cobra.Command, args []string) {
 		}
 	}
 	if options.ExecutionClient != "" {
-		client, err := pkg.GetExecutionClient(options.ExecutionClient)
+		client, err := utils.GetExecutionClient(options.ExecutionClient)
 		if err != nil {
 			fmt.Println(err)
 			return

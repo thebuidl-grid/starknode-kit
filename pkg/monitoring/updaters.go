@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"starknode-kit/pkg/stats"
+	"starknode-kit/pkg/utils"
 )
 
 func (m *MonitorApp) updateSystemStats(ctx context.Context) {
@@ -62,7 +63,7 @@ func (m *MonitorApp) updateClientStatus(ctx context.Context) {
 			return
 		case <-ticker.C:
 			// Get real client status data
-			clients := GetRunningClients()
+			clients := utils.GetRunningClients()
 
 			var clientText string
 			if len(clients) == 0 {
@@ -177,7 +178,7 @@ func (m *MonitorApp) updatePeerInfo(ctx context.Context) {
 			return
 		case <-ticker.C:
 			// Get actual peer information from running clients
-			clients := GetRunningClients()
+			clients := utils.GetRunningClients()
 
 			var executionPeers, consensusPeers int
 			var executionClient, consensusClient string
@@ -235,7 +236,7 @@ func (m *MonitorApp) updateLogInfo(ctx context.Context) {
 			// Get logs from running clients
 			var allLogs []string
 
-			clients := GetRunningClients()
+			clients := utils.GetRunningClients()
 			for _, client := range clients {
 				logs := GetLatestLogs(strings.ToLower(client.Name), 5)
 				for _, log := range logs {
