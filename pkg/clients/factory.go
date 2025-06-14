@@ -31,9 +31,9 @@ func NewExecutionClient(cfg types.ClientConfig, network string) (types.IClient, 
 	}
 }
 
-func RestartClient(clientName string) error {
+func RestartClient(pid int) error {
 	// First stop the client
-	if err := process.StopClient(clientName); err != nil {
+	if err := process.StopClient(pid); err != nil {
 		// If it wasn't running, that's ok
 		if !strings.Contains(err.Error(), "not running") {
 			return err
@@ -49,20 +49,15 @@ func RestartClient(clientName string) error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
-	if clientName == "geth" || clientName == "reth" {
-		c, _ := NewExecutionClient(config.ExecutionCientSettings, config.Network)
-		err := c.Start()
-		if err != nil {
-			return err
-		}
-	} else if clientName == "prysm" || clientName == "lighthouse" {
-		c, _ := NewConsensusClient(config.ConsensusCientSettings, config.Network)
-		err := c.Start()
-		if err != nil {
-			return err
-		}
-	} else {
-		return fmt.Errorf("unknown client: %s", clientName)
+	e, _ := NewExecutionClient(config.ExecutionCientSettings, config.Network)
+	err = e.Start()
+	if err != nil {
+		return err
+	}
+	c, _ := NewConsensusClient(config.ConsensusCientSettings, config.Network)
+	err = c.Start()
+	if err != nil {
+		return err
 	}
 
 	return nil
