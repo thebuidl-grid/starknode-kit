@@ -103,6 +103,7 @@ func CreateStarkNodeConfig() error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("StarkNodeKitConfig created successfully")
 	return nil
 }
 
@@ -120,4 +121,13 @@ func defaultConfig() StarkNodeKitConfig {
 			Port:    []int{5052, 9000},
 		},
 	}
+}
+
+func ViewConfig() error {
+	cfg, err := LoadConfig()
+	if err != nil {
+		return err
+	}
+	fmt.Println(cfg)
+	return nil
 }
