@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"starknode-kit/pkg/process"
 	"starknode-kit/pkg/utils"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -36,7 +35,7 @@ func stopCommand(cmd *cobra.Command, args []string) {
 	for _, client := range runningClients {
 
 		fmt.Printf("🛑 Stopping client '%s' (PID %d)...\n", client.Name, client.PID)
-		err := process.StopClient(strings.ToLower(client.Name))
+		err := process.StopClient(client.PID)
 		if err != nil {
 			// Special case for already-finished process
 			if err.Error() == "os: process already finished" {

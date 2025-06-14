@@ -1,7 +1,6 @@
 package process
 
 import (
-	"fmt"
 	"io"
 	"os/exec"
 	t "starknode-kit/pkg/types"
@@ -29,13 +28,8 @@ func StartClient(name, command string, logPath io.Writer, args ...string) error 
 	return nil
 }
 
-func StopClient(clientName string) error {
-	processInfo := getProcessInfo(clientName)
-	if processInfo == nil {
-		return fmt.Errorf("client %s is not running", clientName)
-	}
-
-	return stopProcess(processInfo.PID)
+func StopClient(pid int) error {
+	return stopProcess(pid)
 }
 
 func GetProcessInfo(p string) *t.ProcessInfo {
