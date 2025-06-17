@@ -8,25 +8,53 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
-var SetCommand = &cobra.Command{
-	Use:   "set",
-	Short: "Set config values for clients",
-	Long: `The 'set' command updates the configuration for execution or consensus clients.
-
-Usage:
-  starknodekit set el network=mainnet port=9000,9001
-  starknodekit set cl network=mainnet port=9000
-
-Available keys:
-  - client: sets the client (e.g., client=reth)
-  - network: sets the client network (e.g., network=mainnet)
-  - port: sets a comma-separated list of client ports (e.g., port=9000,9001)
-`,
+var ConfigCommand = &cobra.Command{
+	Use:   "config",
+	Short: "show the configured Ethereum clients",
+	Long: `The show command shows the Ethereum clients (e.g., Prysm, Lighthouse, Geth, etc.)
+that have been added to your local configuration.`,
+	Run: configCommand,
 }
 
-// Subcommand: `set el`
+func configCommand(cmd *cobra.Command, args []string) {
+	config, err := utils.LoadConfig()
+	if err != nil {
+		fmt.Println("No config found")
+		fmt.Println("Run `starknode init` to create config file")
+		return
+	}
+
+	var configBytes []byte
+	all, _ := cmd.Flags().GetBool("all")
+	el, _ := cmd.Flags().GetBool("el")
+	cl, _ := cmd.Flags().GetBool("cl")
+
+	if all {
+
+		configBytes, err = yaml.Marshal(config)
+
+	} else if el {
+
+		configBytes, err = yaml.Marshal(config.ExecutionCientSettings)
+
+	} else if cl {
+		configBytes, err = yaml.Marshal(config.ExecutionCientSettings)
+
+	}
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("=== Configuration ===")
+	fmt.Println()
+	fmt.Println(string(configBytes))
+	fmt.Println("=== === === === === ===")
+	return
+}
+
 var setELCmd = &cobra.Command{
 	Use:   "el key=value [key=value...]",
 	Short: "Set execution layer (EL) client configuration",
@@ -35,8 +63,6 @@ var setELCmd = &cobra.Command{
 		runSetCommand("execution", args)
 	},
 }
-
-// Subcommand: `set cl`
 var setCLCmd = &cobra.Command{
 	Use:   "cl key=value [key=value...]",
 	Short: "Set consensus layer (CL) client configuration",
@@ -171,7 +197,11 @@ func parsePorts(value string) ([]int, error) {
 	}
 	return ports, nil
 }
+
 func init() {
-	SetCommand.AddCommand(setELCmd)
-	SetCommand.AddCommand(setCLCmd)
+	ConfigCommand.Flags().Bool("all", false, "Show all client settings")
+	ConfigCommand.Flags().Bool("el", false, "Show execution client settings")
+	ConfigCommand.Flags().Bool("cl", false, "Show consensus client settings")
+	ConfigCommand.AddCommand(setCLCmd)
+	ConfigCommand.AddCommand(setELCmd)
 }
