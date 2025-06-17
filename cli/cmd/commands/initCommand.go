@@ -40,10 +40,3 @@ func helpFunction(cmd *cobra.Command, args []string) {
 
     Note: This command does not accept global flags.`)
 }
-
-func init() {
-	InitCommand.SetHelpFunc(helpFunction)
-	InitCommand.SetFlagErrorFunc(func(c *cobra.Command, err error) error {
-		return InitCommand.Help()
-	})
-}
