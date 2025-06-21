@@ -1,9 +1,9 @@
 package commands
 
 import (
+	"fmt"
 	"starknode-kit/cli/cmd/options"
 	"starknode-kit/pkg"
-	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -40,6 +40,20 @@ func removeCommand(cmd *cobra.Command, args []string) {
 			fmt.Println("Supported execution clients are:")
 			fmt.Println("  - geth")
 			fmt.Println("  - reth")
+			return
+		}
+		err = installer.RemoveClient(client)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+	if options.StarknetClient != "" {
+		client, err := pkg.GetStarknetClient(options.StarknetClient)
+		if err != nil {
+			fmt.Printf("Error: %v\n\n", err)
+			fmt.Println("Supported Starknet clients are:")
+			fmt.Println("  - juno")
 			return
 		}
 		err = installer.RemoveClient(client)

@@ -7,6 +7,7 @@ const (
 	ClientReth       ClientType = "reth"
 	ClientLighthouse ClientType = "lighthouse"
 	ClientPrysm      ClientType = "prysm"
+	ClientJuno       ClientType = "juno"
 )
 
 type StarkNodeKitConfig struct {
@@ -15,8 +16,8 @@ type StarkNodeKitConfig struct {
 }
 
 type ClientConfig struct {
-	Name    ClientType `yaml:"name"`
-	Network string     `yaml:"network"`
-  ExecutionType string `yaml:"execution_type,omitempty"`
-	Port    []int  `yaml:"ports"`
+	Name          ClientType `yaml:"name"`
+	Network       string     `yaml:"network"`
+	ExecutionType string     `yaml:"execution_type,omitempty"`
+	Port          []int      `yaml:"ports"`
 }

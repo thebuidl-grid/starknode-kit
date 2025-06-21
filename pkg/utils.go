@@ -30,6 +30,7 @@ func GetExecutionClient(c string) (ClientType, error) {
 	}
 	return client, nil
 }
+
 func GetConsensusClient(c string) (ClientType, error) {
 	sprtClients := map[string]ClientType{
 		"lighthouse": ClientLighthouse,
@@ -38,6 +39,17 @@ func GetConsensusClient(c string) (ClientType, error) {
 	client, ok := sprtClients[c]
 	if !ok {
 		return "", fmt.Errorf("consensus client %s not supported", c)
+	}
+	return client, nil
+}
+
+func GetStarknetClient(c string) (ClientType, error) {
+	sprtClients := map[string]ClientType{
+		"juno": ClientJuno,
+	}
+	client, ok := sprtClients[c]
+	if !ok {
+		return "", fmt.Errorf("starknet client %s not supported", c)
 	}
 	return client, nil
 }
