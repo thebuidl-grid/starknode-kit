@@ -42,12 +42,12 @@ func IsInstalled(c t.ClientType) bool {
 	dir := path.Join(pkg.InstallClientsDir, string(c))
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		return false 
+		return false
 	}
 	if !info.IsDir() {
-		return false 
+		return false
 	}
-	return true 
+	return true
 }
 
 func LoadConfig() (t.StarkNodeKitConfig, error) {
@@ -175,4 +175,19 @@ func ParseHexInt(hexStr string) (uint64, error) {
 		hexStr = hexStr[2:]
 	}
 	return strconv.ParseUint(hexStr, 16, 64)
+}
+
+func SetNetwork(cfg *t.StarkNodeKitConfig, network string) error {
+	switch network {
+	case "mainnet":
+		cfg.Network = "mainnet"
+		cfg.ConsensusCientSettings.ConsensusCheckpoint = "https://mainnet-checkpoint-sync.stakely.io/"
+		return nil
+	case "sepolia":
+		cfg.Network = "sepolia"
+		cfg.ConsensusCientSettings.ConsensusCheckpoint = "https://sepolia-checkpoint-sync.stakely.io/"
+		return nil
+	default:
+		return fmt.Errorf("Network %v not supported", network) 
+	}
 }

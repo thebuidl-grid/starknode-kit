@@ -28,9 +28,22 @@ func configCommand(cmd *cobra.Command, args []string) {
 	}
 
 	var configBytes []byte
+	network, _ := cmd.Flags().GetString("network")
 	all, _ := cmd.Flags().GetBool("all")
 	el, _ := cmd.Flags().GetBool("el")
 	cl, _ := cmd.Flags().GetBool("cl")
+
+	if network != "" {
+		err = utils.SetNetwork(&config, network)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		if err = utils.UpdateStarkNodeConfig(config); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 
 	if all {
 
@@ -48,11 +61,12 @@ func configCommand(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("=== Configuration ===")
-	fmt.Println()
-	fmt.Println(string(configBytes))
-	fmt.Println("=== === === === === ===")
-	return
+	if all || el || cl {
+		fmt.Println("=== Configuration ===")
+		fmt.Println()
+		fmt.Println(string(configBytes))
+		return
+	}
 }
 
 var setELCmd = &cobra.Command{
@@ -175,7 +189,6 @@ Supported consensus clients are:
 "unknown config key: %s", key
 Available keys you can set:
   - client           (client name)
-  - network          (client network)
   - port             (client ports, comma-separated)`, key)
 	}
 	return clientCfg, nil
@@ -199,6 +212,7 @@ func parsePorts(value string) ([]int, error) {
 }
 
 func init() {
+	ConfigCommand.Flags().StringP("network", "n", "", "Show all client settings")
 	ConfigCommand.Flags().Bool("all", false, "Show all client settings")
 	ConfigCommand.Flags().Bool("el", false, "Show execution client settings")
 	ConfigCommand.Flags().Bool("cl", false, "Show consensus client settings")
