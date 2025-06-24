@@ -39,13 +39,11 @@ func stopCommand(cmd *cobra.Command, args []string) {
 		if err != nil {
 			// Special case for already-finished process
 			if err.Error() == "os: process already finished" {
-				fmt.Printf("ℹ️  Client '%s' is already stopped.\n", client.Name)
+				fmt.Printf("✅ Client '%s' stopped successfully.\n", client.Name)
+
 			} else {
 				fmt.Printf("❌ Failed to stop client '%s': %v\n", client.Name, err)
-				continue
 			}
-		} else {
-			fmt.Printf("✅ Client '%s' stopped successfully.\n", client.Name)
 		}
 	}
 }
