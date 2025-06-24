@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"buidlguidl-go/pkg"
 	"fmt"
+	"starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -16,7 +16,7 @@ var (
 )
 
 func initCommand(cmd *cobra.Command, args []string) {
-	err := pkg.CreateStarkNodeConfig()
+	err := utils.CreateStarkNodeConfig()
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"starknode-kit/pkg/types"
+	"starknode-kit/pkg/versions"
 	"strings"
 	"testing"
 )
@@ -12,7 +14,7 @@ func TestCompareClientVersions(t *testing.T) {
 	installed := "1.2.3"
 
 	// We're testing the reth client which has a hardcoded LatestRethVersion
-	expectedVersion := LatestRethVersion
+	expectedVersion := versions.LatestRethVersion
 
 	isLatest, latest := CompareClientVersions("reth", installed)
 	if compareVersions(installed, expectedVersion) >= 0 && !isLatest {
@@ -90,13 +92,13 @@ func TestGetClientFileName(t *testing.T) {
 	installer := NewInstaller(installDir)
 
 	tests := []struct {
-		client  ClientType
+		client  types.ClientType
 		wantErr bool
 	}{
-		{ClientGeth, false},
-		{ClientReth, false},
-		{ClientLighthouse, false},
-		{ClientPrysm, false},
+		{types.ClientGeth, false},
+		{types.ClientReth, false},
+		{types.ClientLighthouse, false},
+		{types.ClientPrysm, false},
 		{"unknown", true},
 	}
 
@@ -120,14 +122,14 @@ func TestGetDownloadURL(t *testing.T) {
 	installer := NewInstaller(installDir)
 
 	tests := []struct {
-		client   ClientType
+		client   types.ClientType
 		fileName string
 		wantErr  bool
 	}{
-		{ClientGeth, "geth-linux-amd64-1.15.10-2bf8a789", false},
-		{ClientReth, "reth-v1.3.4-x86_64-unknown-linux-gnu", false},
-		{ClientLighthouse, "lighthouse-v7.0.1-x86_64-unknown-linux-gnu", false},
-		{ClientPrysm, "prysm.sh", false},
+		{types.ClientGeth, "geth-linux-amd64-1.15.10-2bf8a789", false},
+		{types.ClientReth, "reth-v1.3.4-x86_64-unknown-linux-gnu", false},
+		{types.ClientLighthouse, "lighthouse-v7.0.1-x86_64-unknown-linux-gnu", false},
+		{types.ClientPrysm, "prysm.sh", false},
 		{"unknown", "unknown", true},
 	}
 
@@ -190,17 +192,17 @@ func TestIsClientLatestVersion(t *testing.T) {
 	installer := NewInstaller(installDir)
 
 	tests := []struct {
-		client     ClientType
+		client     types.ClientType
 		version    string
 		wantLatest bool
 	}{
-		{ClientReth, "0.1.0", false},                      // Older version
-		{ClientReth, LatestRethVersion, true},             // Latest version
-		{ClientReth, "999.999.999", true},                 // Future version
-		{ClientGeth, "1.0.0", false},                      // Older version
-		{ClientGeth, LatestGethVersion, true},             // Latest version
-		{ClientLighthouse, "1.0.0", false},                // Older version
-		{ClientLighthouse, LatestLighthouseVersion, true}, // Latest version
+		{types.ClientReth, "0.1.0", false},                               // Older version
+		{types.ClientReth, versions.LatestRethVersion, true},             // Latest version
+		{types.ClientReth, "999.999.999", true},                          // Future version
+		{types.ClientGeth, "1.0.0", false},                               // Older version
+		{types.ClientGeth, versions.LatestGethVersion, true},             // Latest version
+		{types.ClientLighthouse, "1.0.0", false},                         // Older version
+		{types.ClientLighthouse, versions.LatestLighthouseVersion, true}, // Latest version
 	}
 
 	for _, tt := range tests {
@@ -222,7 +224,7 @@ type MockInstaller struct {
 }
 
 // Override RemoveClient for testing
-func (m *MockInstaller) RemoveClient(client ClientType) error {
+func (m *MockInstaller) RemoveClient(client types.ClientType) error {
 	m.RemoveClientCalled = true
 	return nil
 }

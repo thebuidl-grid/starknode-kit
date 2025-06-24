@@ -1,10 +1,10 @@
-package commands
+package cmd
 
 import (
-	"buidlguidl-go/cli/cmd/commands"
-	"buidlguidl-go/cli/cmd/options"
 	"fmt"
 	"os"
+	"starknode-kit/cli/cmd/commands"
+	"starknode-kit/cli/cmd/options"
 
 	"github.com/spf13/cobra"
 )
@@ -31,8 +31,11 @@ func Execute() {
 
 func init() {
 	options.InitGlobalOptions(rootCmd)
+	rootCmd.AddCommand(commands.MonitorCmd)
+	rootCmd.AddCommand(commands.ShowConfigCommand)
+	rootCmd.AddCommand(commands.StopCommand)
 	rootCmd.AddCommand(commands.InstallCommand)
-	rootCmd.AddCommand(commands.RunCommand)
+	rootCmd.AddCommand(commands.StartCommand)
 	rootCmd.AddCommand(commands.SetCommand)
 	rootCmd.AddCommand(commands.InitCommand)
 	rootCmd.AddCommand(commands.RemoveCommand)

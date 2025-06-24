@@ -1,7 +1,7 @@
 package main
 
-import "buidlguidl-go/cli/cmd"
+import "starknode-kit/cli/cmd"
 
 func main() {
-	commands.Execute()
+	cmd.Execute()
 }
