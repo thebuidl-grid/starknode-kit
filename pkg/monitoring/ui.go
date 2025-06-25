@@ -1,6 +1,7 @@
 package monitoring
 
 import (
+	"starknode-kit/pkg/utils"
 	"strings"
 	"time"
 
@@ -97,7 +98,7 @@ func (m *MonitorApp) restartClients() {
 	m.updateStatus("[yellow]Restarting all clients...[white]")
 
 	// Get running clients and restart them
-	clients := GetRunningClients()
+	clients := utils.GetRunningClients()
 	for _, client := range clients {
 		// Stop client first
 		if client.PID > 0 {
@@ -119,7 +120,7 @@ func (m *MonitorApp) stopClients() {
 	m.updateStatus("[yellow]Stopping all clients...[white]")
 
 	// Get running clients and stop them
-	clients := GetRunningClients()
+	clients := utils.GetRunningClients()
 	for _, client := range clients {
 		if client.PID > 0 {
 			m.updateStatus("[red]Stopping " + client.Name + "...[white]")

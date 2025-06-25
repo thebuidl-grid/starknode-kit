@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	"starknode-kit/cli/cmd/options"
-	"starknode-kit/pkg"
+	"starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -19,7 +19,7 @@ or deprovisioning resources.`,
 
 func removeCommand(cmd *cobra.Command, args []string) {
 	if options.ConsensusClient != "" {
-		client, err := pkg.GetConsensusClient(options.ConsensusClient)
+		client, err := utils.GetConsensusClient(options.ConsensusClient)
 		if err != nil {
 			fmt.Printf("Error: %v\n\n", err)
 			fmt.Println("Supported consensus clients are:")
@@ -34,7 +34,7 @@ func removeCommand(cmd *cobra.Command, args []string) {
 		}
 	}
 	if options.ExecutionClient != "" {
-		client, err := pkg.GetExecutionClient(options.ExecutionClient)
+		client, err := utils.GetExecutionClient(options.ExecutionClient)
 		if err != nil {
 			fmt.Printf("Error: %v\n\n", err)
 			fmt.Println("Supported execution clients are:")
@@ -49,7 +49,7 @@ func removeCommand(cmd *cobra.Command, args []string) {
 		}
 	}
 	if options.StarknetClient != "" {
-		client, err := pkg.GetStarknetClient(options.StarknetClient)
+		client, err := utils.GetStarknetClient(options.StarknetClient)
 		if err != nil {
 			fmt.Printf("Error: %v\n\n", err)
 			fmt.Println("Supported Starknet clients are:")

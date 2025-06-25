@@ -6,16 +6,18 @@ import (
 	"path/filepath"
 	"runtime"
 	"starknode-kit/pkg"
+	"starknode-kit/pkg/process"
 	"time"
 )
 
 // Configuration options for prysm
 type prysmConfig struct {
-	consensusPeerPorts  int
-	consensusPeerPorts2 int
+	port                []int // [quic/tcp, udp]
+	consensusCheckpoint string
+	network             string
 }
 
-func (p prysmConfig) getCommand() string {
+func (_ prysmConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
 		return filepath.Join(pkg.InstallClientsDir, "prysm", "prysm.exe")
@@ -24,19 +26,19 @@ func (p prysmConfig) getCommand() string {
 }
 
 // BuildGethArgs builds the arguments for the geth command
-func (p *prysmConfig) buildArgs() []string {
+func (c *prysmConfig) buildArgs() []string {
 	args := []string{
 		"beacon-chain",
-		"--mainnet",
-		fmt.Sprintf("--p2p-udp-port=%d", p.consensusPeerPorts2),
-		fmt.Sprintf("--p2p-quic-port=%d", p.consensusPeerPorts),
-		fmt.Sprintf("--p2p-tcp-port=%d", p.consensusPeerPorts),
+		fmt.Sprintf("--%s", c.network),
+		fmt.Sprintf("--p2p-udp-port=%d", c.port[1]),
+		fmt.Sprintf("--p2p-quic-port=%d", c.port[0]),
+		fmt.Sprintf("--p2p-tcp-port=%d", c.port[0]),
 		"--execution-endpoint",
 		"http://localhost:8551",
 		"--grpc-gateway-host=0.0.0.0",
 		"--grpc-gateway-port=5052",
-		fmt.Sprintf("--checkpoint-sync-url=%s", consensusCheckpoint),
-		fmt.Sprintf("--genesis-beacon-api-url=%s", consensusCheckpoint),
+		fmt.Sprintf("--checkpoint-sync-url=%s", c.consensusCheckpoint),
+		fmt.Sprintf("--genesis-beacon-api-url=%s", c.consensusCheckpoint),
 		"--accept-terms-of-use=true",
 		"--jwt-secret",
 		pkg.JWTPath,
@@ -54,24 +56,17 @@ func (p *prysmConfig) buildArgs() []string {
 	return args
 }
 
-func StartPrsym(port ...int) error {
-	config := prysmConfig{port[0], port[1]} // TODO change
-	args := config.buildArgs()
-	command := config.getCommand()
+// prysm.go
+func (c *prysmConfig) Start() error {
+	args := c.buildArgs()
+	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	logFilePath := filepath.Join(
-		pkg.InstallClientsDir,
-		"prysm",
-		"logs",
-		fmt.Sprintf("prysm_%s.log", timestamp))
-	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFilePath := filepath.Join(pkg.InstallClientsDir, "prysm", "logs", fmt.Sprintf("prysm_%s.log", timestamp))
+
+	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err
 	}
-	if err := pkg.StartProcess(command, logFile, args...); err != nil {
-		return err
-	}
-	return nil
-}
 
-// TODO add log rotation
+	return process.StartClient("prysm", command, logFile, args...)
+}

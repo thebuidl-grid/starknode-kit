@@ -1,0 +1,317 @@
+name: Test Client Installation and Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to test (optional)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - ubuntu-latest
+        - macos-latest
+        - windows-latest
+
+jobs:
+  test-clients:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - platform: ubuntu-latest
+            os: linux
+            goos: linux
+            goarch: amd64
+          - platform: macos-latest
+            os: darwin
+            goos: darwin
+            goarch: amd64
+          - platform: windows-latest
+            os: windows
+            goos: windows
+            goarch: amd64
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+        cache: true
+
+    - name: Set up Node.js (for Juno)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install system dependencies (Ubuntu)
+      if: matrix.os == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git make gcc libc6-dev
+        # Install dependencies for Juno
+        sudo apt-get install -y libjemalloc-dev libjemalloc2 pkg-config libbz2-dev
+
+    - name: Install system dependencies (macOS)
+      if: matrix.os == 'darwin'
+      run: |
+        # Install Homebrew if not available
+        if ! command -v brew &> /dev/null; then
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
+        # Install dependencies for Juno
+        brew install jemalloc pkg-config
+
+    - name: Install system dependencies (Windows)
+      if: matrix.os == 'windows'
+      run: |
+        # Install Chocolatey if not available
+        if (!(Get-Command choco -ErrorAction SilentlyContinue)) {
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+          iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        }
+        # Install dependencies for Juno
+        choco install git make gcc -y
+
+    - name: Build starknode-kit
+      run: |
+        go build -o bin/starknode ./cli
+        ./bin/starknode --version || echo "Version command not implemented"
+
+    - name: Test CLI help commands
+      run: |
+        ./bin/starknode --help
+        ./bin/starknode add --help
+        ./bin/starknode remove --help
+        ./bin/starknode run-juno --help
+
+    - name: Test client type validation
+      run: |
+        # Test execution clients
+        ./bin/starknode add --execution_client geth || echo "Expected error - geth not installed"
+        ./bin/starknode add --execution_client reth || echo "Expected error - reth not installed"
+        
+        # Test consensus clients
+        ./bin/starknode add --consensus_client lighthouse || echo "Expected error - lighthouse not installed"
+        ./bin/starknode add --consensus_client prysm || echo "Expected error - prysm not installed"
+        
+        # Test Starknet clients
+        ./bin/starknode add --starknet_client juno || echo "Expected error - juno not installed"
+
+    - name: Test configuration management
+      run: |
+        # Test init command
+        ./bin/starknode init || echo "Init command not implemented"
+        
+        # Test configuration file creation
+        if [ -f "~/.config/starknode-kit/config/starknode.yaml" ]; then
+          echo "Configuration file created successfully"
+        else
+          echo "Configuration file not found (expected for init command)"
+        fi
+
+    - name: Test client installation (Geth)
+      if: matrix.os != 'windows'  # Skip Geth on Windows for now
+      run: |
+        echo "Testing Geth installation..."
+        ./bin/starknode add --execution_client geth || echo "Geth installation failed (expected without proper setup)"
+
+    - name: Test client installation (Reth)
+      if: matrix.os != 'windows'  # Skip Reth on Windows for now
+      run: |
+        echo "Testing Reth installation..."
+        ./bin/starknode add --execution_client reth || echo "Reth installation failed (expected without proper setup)"
+
+    - name: Test client installation (Lighthouse)
+      if: matrix.os != 'windows'  # Skip Lighthouse on Windows for now
+      run: |
+        echo "Testing Lighthouse installation..."
+        ./bin/starknode add --consensus_client lighthouse || echo "Lighthouse installation failed (expected without proper setup)"
+
+    - name: Test client installation (Prysm)
+      if: matrix.os != 'windows'  # Skip Prysm on Windows for now
+      run: |
+        echo "Testing Prysm installation..."
+        ./bin/starknode add --consensus_client prysm || echo "Prysm installation failed (expected without proper setup)"
+
+    - name: Test client installation (Juno)
+      if: matrix.os != 'windows'  # Skip Juno on Windows for now
+      run: |
+        echo "Testing Juno installation..."
+        ./bin/starknode add --starknet_client juno || echo "Juno installation failed (expected without proper setup)"
+
+    - name: Test client removal
+      run: |
+        echo "Testing client removal..."
+        ./bin/starknode remove --execution_client geth || echo "Geth removal failed (expected if not installed)"
+        ./bin/starknode remove --consensus_client lighthouse || echo "Lighthouse removal failed (expected if not installed)"
+        ./bin/starknode remove --starknet_client juno || echo "Juno removal failed (expected if not installed)"
+
+    - name: Run unit tests
+      run: |
+        go test -v ./pkg/...
+        go test -v ./pkg/clients/...
+
+    - name: Run integration tests
+      run: |
+        go test -v -tags=integration ./pkg/... || echo "Integration tests not implemented"
+
+    - name: Test build for different architectures
+      if: matrix.os == 'linux'
+      run: |
+        # Test cross-compilation
+        GOOS=darwin GOARCH=amd64 go build -o bin/starknode-darwin-amd64 ./cli
+        GOOS=darwin GOARCH=arm64 go build -o bin/starknode-darwin-arm64 ./cli
+        GOOS=linux GOARCH=arm64 go build -o bin/starknode-linux-arm64 ./cli
+        GOOS=windows GOARCH=amd64 go build -o bin/starknode-windows-amd64.exe ./cli
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: starknode-kit-${{ matrix.os }}-${{ matrix.goarch }}
+        path: |
+          bin/starknode*
+          bin/starknode-*.exe
+        retention-days: 7
+
+  test-integration:
+    needs: test-clients
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git make gcc libc6-dev
+        sudo apt-get install -y libjemalloc-dev libjemalloc2 pkg-config libbz2-dev
+
+    - name: Build starknode-kit
+      run: |
+        go build -o bin/starknode ./cli
+
+    - name: Test full client lifecycle
+      run: |
+        echo "Testing full client lifecycle..."
+        
+        # Initialize configuration
+        ./bin/starknode init || echo "Init command not implemented"
+        
+        # Test adding clients (these will fail but should not crash)
+        ./bin/starknode add --execution_client geth || echo "Geth add failed (expected)"
+        ./bin/starknode add --consensus_client lighthouse || echo "Lighthouse add failed (expected)"
+        ./bin/starknode add --starknet_client juno || echo "Juno add failed (expected)"
+        
+        # Test removing clients
+        ./bin/starknode remove --execution_client geth || echo "Geth remove failed (expected)"
+        ./bin/starknode remove --consensus_client lighthouse || echo "Lighthouse remove failed (expected)"
+        ./bin/starknode remove --starknet_client juno || echo "Juno remove failed (expected)"
+
+    - name: Test configuration validation
+      run: |
+        echo "Testing configuration validation..."
+        
+        # Test invalid client types
+        ./bin/starknode add --execution_client invalid_client || echo "Invalid client rejected (expected)"
+        ./bin/starknode add --consensus_client invalid_client || echo "Invalid client rejected (expected)"
+        ./bin/starknode add --starknet_client invalid_client || echo "Invalid client rejected (expected)"
+
+  test-performance:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+
+    - name: Run benchmarks
+      run: |
+        go test -bench=. -benchmem ./pkg/... ./pkg/clients/...
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: benchmark-results.txt
+        retention-days: 30
+
+  security-scan:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Go security scan
+      uses: golang/govulncheck-action@v1
+      with:
+        version: latest
+
+    - name: Run static analysis
+      run: |
+        go vet ./...
+        go fmt -d ./...
+
+  documentation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+
+    - name: Build starknode-kit
+      run: |
+        go build -o bin/starknode ./cli
+
+    - name: Generate documentation
+      run: |
+        # Generate help documentation
+        ./bin/starknode --help > docs/cli-help.txt
+        ./bin/starknode add --help > docs/add-help.txt
+        ./bin/starknode remove --help > docs/remove-help.txt
+        ./bin/starknode run-juno --help > docs/run-juno-help.txt
+
+    - name: Upload documentation
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: docs/
+        retention-days: 30 

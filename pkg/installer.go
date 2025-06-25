@@ -9,15 +9,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"starknode-kit/pkg/types"
+	"starknode-kit/pkg/versions"
 	"strings"
-)
-
-// Version constants
-const (
-	LatestGethVersion       = "1.15.10"
-	LatestRethVersion       = "1.3.4"
-	LatestLighthouseVersion = "7.0.1"
-	LatestJunoVersion       = "v0.14.6"
 )
 
 var (
@@ -51,7 +45,7 @@ func NewInstaller(Installpath string) *installer {
 }
 
 // GetClientFileName returns the file name based on platform and architecture
-func (i *installer) getClientFileName(client ClientType) (string, error) {
+func (i *installer) getClientFileName(client types.ClientType) (string, error) {
 	// Get current OS and architecture
 	goos := runtime.GOOS     // "darwin", "linux", "windows"
 	goarch := runtime.GOARCH // "amd64", "arm64"
@@ -82,23 +76,23 @@ func (i *installer) getClientFileName(client ClientType) (string, error) {
 	// Determine filename based on client
 	var fileName string
 	switch client {
-	case ClientGeth:
+	case types.ClientGeth:
 		// Map Go arch back to geth arch names
 		gethArch := "amd64"
 		if goarch == "arm64" {
 			gethArch = "arm64"
 		}
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
-			goos, gethArch, LatestGethVersion, GethHash[LatestGethVersion])
-	case ClientReth:
-		fileName = fmt.Sprintf("reth-v%s-%s", LatestRethVersion, archName)
-	case ClientLighthouse:
-		fileName = fmt.Sprintf("lighthouse-v%s-%s", LatestLighthouseVersion, archName)
-	case ClientPrysm:
+			goos, gethArch, versions.LatestGethVersion, GethHash[versions.LatestGethVersion])
+	case types.ClientReth:
+		fileName = fmt.Sprintf("reth-v%s-%s", versions.LatestRethVersion, archName)
+	case types.ClientLighthouse:
+		fileName = fmt.Sprintf("lighthouse-v%s-%s", versions.LatestLighthouseVersion, archName)
+	case types.ClientPrysm:
 		fileName = "prysm.sh"
-	case ClientJuno:
+	case types.ClientJuno:
 		// Juno is a Go binary, we'll build it from source
-		fileName = fmt.Sprintf("juno-%s", LatestJunoVersion)
+		fileName = fmt.Sprintf("juno-%s", versions.LatestJunoVersion)
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -107,29 +101,29 @@ func (i *installer) getClientFileName(client ClientType) (string, error) {
 }
 
 // getDownloadURL returns the appropriate URL for downloading a client
-func (i *installer) getDownloadURL(client ClientType, fileName string) (string, error) {
+func (i *installer) getDownloadURL(client types.ClientType, fileName string) (string, error) {
 	switch client {
-	case ClientGeth:
+	case types.ClientGeth:
 		return fmt.Sprintf("https://gethstore.blob.core.windows.net/builds/%s.tar.gz", fileName), nil
-	case ClientReth:
+	case types.ClientReth:
 		return fmt.Sprintf("https://github.com/paradigmxyz/reth/releases/download/v%s/%s.tar.gz",
-			LatestRethVersion, fileName), nil
-	case ClientLighthouse:
+			versions.LatestRethVersion, fileName), nil
+	case types.ClientLighthouse:
 		return fmt.Sprintf("https://github.com/sigp/lighthouse/releases/download/v%s/%s.tar.gz",
-			LatestLighthouseVersion, fileName), nil
-	case ClientPrysm:
+			versions.LatestLighthouseVersion, fileName), nil
+	case types.ClientPrysm:
 		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
-	case ClientJuno:
-		return fmt.Sprintf("https://github.com/NethermindEth/juno/archive/refs/tags/%s.tar.gz", LatestJunoVersion), nil
+	case types.ClientJuno:
+		return fmt.Sprintf("https://github.com/NethermindEth/juno/archive/refs/tags/%s.tar.gz", versions.LatestJunoVersion), nil
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
 }
 
 // InstallClient installs the specified Ethereum client
-func (i *installer) InstallClient(client ClientType) error {
+func (i *installer) InstallClient(client types.ClientType) error {
 	// Handle Juno installation separately (npm-based)
-	if client == ClientJuno {
+	if client == types.ClientJuno {
 		return i.installJuno()
 	}
 
@@ -146,7 +140,7 @@ func (i *installer) InstallClient(client ClientType) error {
 
 	// Determine the path to the client binary/script
 	var clientPath string
-	if client == ClientPrysm {
+	if client == types.ClientPrysm {
 		clientPath = filepath.Join(clientDir, "prysm.sh")
 	} else {
 		clientPath = filepath.Join(clientDir, string(client))
@@ -174,7 +168,7 @@ func (i *installer) InstallClient(client ClientType) error {
 	}
 
 	// Handle installation differently based on client
-	if client == ClientPrysm {
+	if client == types.ClientPrysm {
 		fmt.Println("Downloading Prysm.")
 		if err := downloadFile(downloadURL, clientPath); err != nil {
 			return err
@@ -204,7 +198,7 @@ func (i *installer) InstallClient(client ClientType) error {
 		}
 
 		// For Geth, we need to move the binary from the extracted folder
-		if client == ClientGeth {
+		if client == types.ClientGeth {
 			extractedDir := filepath.Join(clientDir, fileName)
 			mvCmd := exec.Command("mv", filepath.Join(extractedDir, "geth"), clientDir)
 			if err := mvCmd.Run(); err != nil {
@@ -231,7 +225,7 @@ func (i *installer) InstallClient(client ClientType) error {
 // installJuno installs Juno by building from Go source code
 func (i *installer) installJuno() error {
 	//  Create Juno directory
-	junoBaseDir := filepath.Join(StarknetClientsDir, string(ClientJuno))
+	junoBaseDir := filepath.Join(StarknetClientsDir, string(types.ClientJuno))
 	junoRepoDir := filepath.Join(junoBaseDir, "juno")
 	databaseDir := filepath.Join(junoBaseDir, "database")
 	logsDir := filepath.Join(junoBaseDir, "logs")
@@ -239,7 +233,7 @@ func (i *installer) installJuno() error {
 	// Check if Juno is already installed
 	junoPath := filepath.Join(junoRepoDir, "juno")
 	if _, err := os.Stat(junoPath); err == nil {
-		fmt.Printf("%s is already installed.\n", ClientJuno)
+		fmt.Printf("%s is already installed.\n", types.ClientJuno)
 		return nil
 	}
 
@@ -327,13 +321,13 @@ func (i *installer) installJuno() error {
 	}
 
 	// Checkout specific version
-	fmt.Printf("Checking out version %s...\n", LatestJunoVersion)
-	checkoutCmd := exec.Command("git", "checkout", LatestJunoVersion)
+	fmt.Printf("Checking out version %s...\n", versions.LatestJunoVersion)
+	checkoutCmd := exec.Command("git", "checkout", versions.LatestJunoVersion)
 	checkoutCmd.Dir = junoRepoDir
 	checkoutCmd.Stdout = os.Stdout
 	checkoutCmd.Stderr = os.Stderr
 	if err := checkoutCmd.Run(); err != nil {
-		return fmt.Errorf("failed to checkout version %s: %w", LatestJunoVersion, err)
+		return fmt.Errorf("failed to checkout version %s: %w", versions.LatestJunoVersion, err)
 	}
 
 	// Install dependencies based on platform
@@ -393,7 +387,7 @@ func (i *installer) installJuno() error {
 		return fmt.Errorf("failed to clean up build directory: %w", err)
 	}
 
-	fmt.Printf("%s installed successfully.\n", ClientJuno)
+	fmt.Printf("%s installed successfully.\n", types.ClientJuno)
 	return nil
 }
 
@@ -401,12 +395,12 @@ func (i *installer) installJuno() error {
 func setupJWTSecret() error {
 
 	// Check if JWT already exists
-	if _, err := os.Stat(jwtDir); err == nil {
+	if _, err := os.Stat(JwtDir); err == nil {
 		return nil
 	}
 
 	// Create JWT directory
-	if err := os.MkdirAll(jwtDir, 0755); err != nil {
+	if err := os.MkdirAll(JwtDir, 0755); err != nil {
 		return fmt.Errorf("failed to create JWT directory: %w", err)
 	}
 
@@ -426,10 +420,10 @@ func setupJWTSecret() error {
 }
 
 // RemoveClient removes a client's installation
-func (i *installer) RemoveClient(client ClientType) error {
+func (i *installer) RemoveClient(client types.ClientType) error {
 	var clientDir string
-	if client == ClientJuno {
-		clientDir = filepath.Join(StarknetClientsDir, string(ClientJuno))
+	if client == types.ClientJuno {
+		clientDir = filepath.Join(StarknetClientsDir, string(types.ClientJuno))
 	} else {
 		clientDir = filepath.Join(i.InstallDir, string(client))
 	}
@@ -438,7 +432,7 @@ func (i *installer) RemoveClient(client ClientType) error {
 		fmt.Printf("Removing %s installation.\n", client)
 
 		// For Juno, we need to clean up Go build artifacts
-		if client == ClientJuno {
+		if client == types.ClientJuno {
 			currentDir, err := os.Getwd()
 			if err != nil {
 				return fmt.Errorf("failed to get current directory: %w", err)
@@ -464,19 +458,19 @@ func (i *installer) RemoveClient(client ClientType) error {
 }
 
 // GetClientVersion gets the installed version of a client
-func (i *installer) GetClientVersion(client ClientType) (string, error) {
+func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	var clientDir string
-	if client == ClientJuno {
-		clientDir = filepath.Join(StarknetClientsDir, string(ClientJuno))
+	if client == types.ClientJuno {
+		clientDir = filepath.Join(StarknetClientsDir, string(types.ClientJuno))
 	} else {
 		clientDir = filepath.Join(i.InstallDir, string(client))
 	}
 
 	// Check if client is installed
 	clientPath := filepath.Join(clientDir, string(client))
-	if client == ClientPrysm {
+	if client == types.ClientPrysm {
 		clientPath = filepath.Join(clientDir, "prysm.sh")
-	} else if client == ClientJuno {
+	} else if client == types.ClientJuno {
 		clientPath = filepath.Join(clientDir, "juno")
 	}
 
@@ -485,7 +479,7 @@ func (i *installer) GetClientVersion(client ClientType) (string, error) {
 	}
 
 	// Handle Juno version checking differently (npm-based)
-	if client == ClientJuno {
+	if client == types.ClientJuno {
 		return i.getJunoVersion(clientDir)
 	}
 
@@ -543,7 +537,7 @@ func (i *installer) getJunoVersion(junoDir string) (string, error) {
 }
 
 // IsClientLatestVersion checks if the installed client is the latest version
-func (i *installer) IsClientLatestVersion(client ClientType, version string) (bool, string) {
+func (i *installer) IsClientLatestVersion(client types.ClientType, version string) (bool, string) {
 	isLatest, latestVersion := CompareClientVersions(string(client), version)
 	return isLatest, latestVersion
 }
@@ -641,16 +635,16 @@ func CompareClientVersions(client, installedVersion string) (bool, string) {
 	var latestVersion string
 	switch client {
 	case "reth":
-		latestVersion = LatestRethVersion
+		latestVersion = versions.LatestRethVersion
 	case "geth":
-		latestVersion = LatestGethVersion
+		latestVersion = versions.LatestGethVersion
 	case "lighthouse":
-		latestVersion = LatestLighthouseVersion
+		latestVersion = versions.LatestLighthouseVersion
 	case "prysm":
 		// Just use a hard-coded latest version for Prysm
 		latestVersion = "4.0.5" // Replace with an appropriate version
 	case "juno":
-		latestVersion = LatestJunoVersion
+		latestVersion = versions.LatestJunoVersion
 	default:
 		fmt.Printf("Unknown client: %s\n", client)
 		return false, ""

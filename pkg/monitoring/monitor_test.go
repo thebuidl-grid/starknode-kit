@@ -1,12 +1,14 @@
-package monitoring
+package monitoring_test
 
 import (
+	"starknode-kit/pkg/monitoring"
+	"starknode-kit/pkg/utils"
 	"testing"
 	"time"
 )
 
 func TestNewMonitorApp(t *testing.T) {
-	app := NewMonitorApp()
+	app := monitoring.NewMonitorApp()
 	if app == nil {
 		t.Fatal("NewMonitorApp returned nil")
 	}
@@ -23,7 +25,7 @@ func TestNewMonitorApp(t *testing.T) {
 }
 
 func TestMonitorAppStartStop(t *testing.T) {
-	app := NewMonitorApp()
+	app := monitoring.NewMonitorApp()
 
 	// Test that we can create the app without errors
 	if app == nil {
@@ -56,7 +58,7 @@ func TestMonitorAppStartStop(t *testing.T) {
 
 func TestGetRunningClients(t *testing.T) {
 	// This test just ensures the function doesn't panic
-	clients := GetRunningClients()
+	clients := utils.GetRunningClients()
 	// It's ok if there are no running clients, we just test that the function works
 	// and returns a valid slice (even if empty)
 	if clients == nil {
@@ -68,7 +70,7 @@ func TestGetRunningClients(t *testing.T) {
 
 func TestGetEthereumMetrics(t *testing.T) {
 	// This test just ensures the function doesn't panic
-	metrics := GetEthereumMetrics()
+	metrics := monitoring.GetEthereumMetrics()
 	// We can check if the struct has valid data
 	if metrics.NetworkName == "" {
 		t.Log("No network name returned (expected if no client is running)")

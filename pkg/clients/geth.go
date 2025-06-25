@@ -1,23 +1,24 @@
 package clients
 
 import (
-	"starknode-kit/pkg"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"starknode-kit/pkg"
+	"starknode-kit/pkg/process"
 	"time"
 )
 
 // Configuration options for Geth
-type GethConfig struct {
-	ExecutionType     string
-	ExecutionPeerPort int
-	LogFilePath       string
+type gethConfig struct {
+	port          int
+	executionType string
+	network       string
 }
 
 // GetGethCommand returns the geth command path based on platform
-func GetGethCommand() string {
+func (_ gethConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
 		return filepath.Join(pkg.InstallClientsDir, "geth", "geth.exe")
@@ -26,11 +27,11 @@ func GetGethCommand() string {
 }
 
 // BuildGethArgs builds the arguments for the geth command
-func buildGethArgs(config *GethConfig) []string {
+func (c *gethConfig) buildArgs() []string {
 	args := []string{
-		"--mainnet",
-		fmt.Sprintf("--port=%d", config.ExecutionPeerPort),
-		fmt.Sprintf("--discovery.port=%d", config.ExecutionPeerPort),
+		fmt.Sprintf("--%s", c.network),
+		fmt.Sprintf("--port=%d", c.port),
+		fmt.Sprintf("--discovery.port=%d", c.port),
 		"--http",
 		"--http.api=eth,net,engine,admin",
 		"--http.corsdomain=*",
@@ -46,9 +47,9 @@ func buildGethArgs(config *GethConfig) []string {
 	}
 
 	// Add execution type specific arguments
-	if config.ExecutionType == "full" {
+	if c.executionType == "full" {
 		args = append(args, "--syncmode=snap")
-	} else if config.ExecutionType == "archive" {
+	} else if c.executionType == "archive" {
 		args = append(args, "--syncmode=full", "--gcmode=archive")
 	}
 
@@ -58,22 +59,20 @@ func buildGethArgs(config *GethConfig) []string {
 
 	return args
 }
-func StartGeth(executionType string, port []int) error {
-	config := GethConfig{ExecutionPeerPort: port[0], ExecutionType: executionType}
-	args := buildGethArgs(&config)
-	command := GetGethCommand()
+
+func (c *gethConfig) Start() error {
+	args := c.buildArgs()
+	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
 		pkg.InstallClientsDir,
 		"geth",
 		"logs",
 		fmt.Sprintf("geth_%s.log", timestamp))
-	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err
 	}
-	if err := pkg.StartProcess(command, logFile, args...); err != nil {
-		return err
-	}
-	return nil
+
+	return process.StartClient("lighthouse", command, logFile, args...)
 }
