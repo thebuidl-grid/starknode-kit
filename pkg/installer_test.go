@@ -97,6 +97,7 @@ func TestGetClientFileName(t *testing.T) {
 		{ClientReth, false},
 		{ClientLighthouse, false},
 		{ClientPrysm, false},
+		{ClientJuno, false},
 		{"unknown", true},
 	}
 
@@ -128,6 +129,7 @@ func TestGetDownloadURL(t *testing.T) {
 		{ClientReth, "reth-v1.3.4-x86_64-unknown-linux-gnu", false},
 		{ClientLighthouse, "lighthouse-v7.0.1-x86_64-unknown-linux-gnu", false},
 		{ClientPrysm, "prysm.sh", false},
+		{ClientJuno, "juno-" + LatestJunoVersion, false},
 		{"unknown", "unknown", true},
 	}
 

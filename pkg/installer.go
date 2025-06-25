@@ -17,7 +17,7 @@ const (
 	LatestGethVersion       = "1.15.10"
 	LatestRethVersion       = "1.3.4"
 	LatestLighthouseVersion = "7.0.1"
-	LatestJunoVersion       = "0.0.51"
+	LatestJunoVersion       = "v0.14.6"
 )
 
 var (
@@ -32,6 +32,9 @@ var (
 		"1.14.12": "293a300d",
 		"1.15.10": "2bf8a789",
 	}
+
+	// Add a new variable for Starknet clients dir
+	StarknetClientsDir = filepath.Join(InstallDir, "starknet_clients")
 )
 
 // installer manages Ethereum client installation
@@ -227,20 +230,21 @@ func (i *installer) InstallClient(client ClientType) error {
 
 // installJuno installs Juno by building from Go source code
 func (i *installer) installJuno() error {
-	// Create Juno directory
-	junoDir := filepath.Join(i.InstallDir, string(ClientJuno))
-	databaseDir := filepath.Join(junoDir, "database")
-	logsDir := filepath.Join(junoDir, "logs")
+	//  Create Juno directory
+	junoBaseDir := filepath.Join(StarknetClientsDir, string(ClientJuno))
+	junoRepoDir := filepath.Join(junoBaseDir, "juno")
+	databaseDir := filepath.Join(junoBaseDir, "database")
+	logsDir := filepath.Join(junoBaseDir, "logs")
 
 	// Check if Juno is already installed
-	junoPath := filepath.Join(junoDir, "juno")
+	junoPath := filepath.Join(junoRepoDir, "juno")
 	if _, err := os.Stat(junoPath); err == nil {
 		fmt.Printf("%s is already installed.\n", ClientJuno)
 		return nil
 	}
 
 	// Create directories
-	fmt.Printf("Creating '%s'\n", junoDir)
+	fmt.Printf("Creating '%s'\n", junoBaseDir)
 	if err := os.MkdirAll(databaseDir, 0755); err != nil {
 		return fmt.Errorf("failed to create database directory: %w", err)
 	}
@@ -263,29 +267,69 @@ func (i *installer) installJuno() error {
 		return fmt.Errorf("git is not installed. Please install git first: %w", err)
 	}
 
-	// Change to Juno directory
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("failed to get current directory: %w", err)
-	}
-
-	if err := os.Chdir(junoDir); err != nil {
-		return fmt.Errorf("failed to change to Juno directory: %w", err)
-	}
-	defer os.Chdir(currentDir) // Return to original directory when done
-
-	// Clone Juno repository
-	fmt.Printf("Cloning Juno repository...\n")
-	cloneCmd := exec.Command("git", "clone", "https://github.com/NethermindEth/juno.git", ".")
-	cloneCmd.Stdout = os.Stdout
-	cloneCmd.Stderr = os.Stderr
-	if err := cloneCmd.Run(); err != nil {
-		return fmt.Errorf("failed to clone Juno repository: %w", err)
+	// Clone or pull Juno repository
+	if _, err := os.Stat(junoRepoDir); os.IsNotExist(err) {
+		fmt.Printf("Cloning Juno repository...\n")
+		cloneCmd := exec.Command("git", "clone", "https://github.com/NethermindEth/juno.git", "juno")
+		cloneCmd.Dir = junoBaseDir
+		cloneCmd.Stdout = os.Stdout
+		cloneCmd.Stderr = os.Stderr
+		if err := cloneCmd.Run(); err != nil {
+			return fmt.Errorf("failed to clone Juno repository: %w", err)
+		}
+	} else {
+		fmt.Printf("Juno repository already exists, pulling latest...\n")
+		pullCmd := exec.Command("git", "pull")
+		pullCmd.Dir = junoRepoDir
+		pullCmd.Stdout = os.Stdout
+		pullCmd.Stderr = os.Stderr
+		if err := pullCmd.Run(); err != nil {
+			// Always try to recover by checking out main or master
+			fmt.Printf("git pull failed, attempting to recover by checking out main or master...\n")
+			fetchCmd := exec.Command("git", "fetch")
+			fetchCmd.Dir = junoRepoDir
+			fetchCmd.Stdout = os.Stdout
+			fetchCmd.Stderr = os.Stderr
+			if err := fetchCmd.Run(); err != nil {
+				return fmt.Errorf("failed to fetch in Juno repo: %w", err)
+			}
+			checkoutMainCmd := exec.Command("git", "checkout", "main")
+			checkoutMainCmd.Dir = junoRepoDir
+			checkoutMainCmd.Stdout = os.Stdout
+			checkoutMainCmd.Stderr = os.Stderr
+			if err := checkoutMainCmd.Run(); err == nil {
+				pullMainCmd := exec.Command("git", "pull", "origin", "main")
+				pullMainCmd.Dir = junoRepoDir
+				pullMainCmd.Stdout = os.Stdout
+				pullMainCmd.Stderr = os.Stderr
+				if err := pullMainCmd.Run(); err != nil {
+					return fmt.Errorf("failed to pull origin main in Juno repo: %w", err)
+				}
+			} else {
+				// Try master as fallback
+				checkoutMasterCmd := exec.Command("git", "checkout", "master")
+				checkoutMasterCmd.Dir = junoRepoDir
+				checkoutMasterCmd.Stdout = os.Stdout
+				checkoutMasterCmd.Stderr = os.Stderr
+				if err := checkoutMasterCmd.Run(); err == nil {
+					pullMasterCmd := exec.Command("git", "pull", "origin", "master")
+					pullMasterCmd.Dir = junoRepoDir
+					pullMasterCmd.Stdout = os.Stdout
+					pullMasterCmd.Stderr = os.Stderr
+					if err := pullMasterCmd.Run(); err != nil {
+						return fmt.Errorf("failed to pull origin master in Juno repo: %w", err)
+					}
+				} else {
+					return fmt.Errorf("failed to pull Juno repository and could not recover by checking out main or master: %w", err)
+				}
+			}
+		}
 	}
 
 	// Checkout specific version
 	fmt.Printf("Checking out version %s...\n", LatestJunoVersion)
 	checkoutCmd := exec.Command("git", "checkout", LatestJunoVersion)
+	checkoutCmd.Dir = junoRepoDir
 	checkoutCmd.Stdout = os.Stdout
 	checkoutCmd.Stderr = os.Stderr
 	if err := checkoutCmd.Run(); err != nil {
@@ -315,6 +359,7 @@ func (i *installer) installJuno() error {
 	// Install Go dependencies
 	fmt.Printf("Installing Go dependencies...\n")
 	installDepsCmd := exec.Command("make", "install-deps")
+	installDepsCmd.Dir = junoRepoDir
 	installDepsCmd.Stdout = os.Stdout
 	installDepsCmd.Stderr = os.Stderr
 	if err := installDepsCmd.Run(); err != nil {
@@ -324,6 +369,7 @@ func (i *installer) installJuno() error {
 	// Build Juno
 	fmt.Printf("Building Juno...\n")
 	buildCmd := exec.Command("make", "juno")
+	buildCmd.Dir = junoRepoDir
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
 	if err := buildCmd.Run(); err != nil {
@@ -331,7 +377,7 @@ func (i *installer) installJuno() error {
 	}
 
 	// Move the built binary to the correct location
-	buildPath := filepath.Join(junoDir, "build", "juno")
+	buildPath := filepath.Join(junoRepoDir, "build", "juno")
 	if err := os.Rename(buildPath, junoPath); err != nil {
 		return fmt.Errorf("failed to move Juno binary: %w", err)
 	}
@@ -343,7 +389,7 @@ func (i *installer) installJuno() error {
 
 	// Clean up build artifacts
 	fmt.Printf("Cleaning up build artifacts...\n")
-	if err := os.RemoveAll(filepath.Join(junoDir, "build")); err != nil {
+	if err := os.RemoveAll(filepath.Join(junoRepoDir, "build")); err != nil {
 		return fmt.Errorf("failed to clean up build directory: %w", err)
 	}
 
@@ -381,14 +427,18 @@ func setupJWTSecret() error {
 
 // RemoveClient removes a client's installation
 func (i *installer) RemoveClient(client ClientType) error {
-	clientDir := filepath.Join(i.InstallDir, string(client))
+	var clientDir string
+	if client == ClientJuno {
+		clientDir = filepath.Join(StarknetClientsDir, string(ClientJuno))
+	} else {
+		clientDir = filepath.Join(i.InstallDir, string(client))
+	}
 
 	if _, err := os.Stat(clientDir); err == nil {
 		fmt.Printf("Removing %s installation.\n", client)
 
 		// For Juno, we need to clean up Go build artifacts
 		if client == ClientJuno {
-			// Change to Juno directory for cleanup
 			currentDir, err := os.Getwd()
 			if err != nil {
 				return fmt.Errorf("failed to get current directory: %w", err)
@@ -397,9 +447,8 @@ func (i *installer) RemoveClient(client ClientType) error {
 			if err := os.Chdir(clientDir); err != nil {
 				return fmt.Errorf("failed to change to Juno directory: %w", err)
 			}
-			defer os.Chdir(currentDir) // Return to original directory when done
+			defer os.Chdir(currentDir)
 
-			// Remove git repository and build artifacts
 			if err := os.RemoveAll(".git"); err != nil {
 				return fmt.Errorf("failed to remove git repository: %w", err)
 			}
@@ -416,7 +465,12 @@ func (i *installer) RemoveClient(client ClientType) error {
 
 // GetClientVersion gets the installed version of a client
 func (i *installer) GetClientVersion(client ClientType) (string, error) {
-	clientDir := filepath.Join(i.InstallDir, string(client))
+	var clientDir string
+	if client == ClientJuno {
+		clientDir = filepath.Join(StarknetClientsDir, string(ClientJuno))
+	} else {
+		clientDir = filepath.Join(i.InstallDir, string(client))
+	}
 
 	// Check if client is installed
 	clientPath := filepath.Join(clientDir, string(client))
@@ -435,17 +489,15 @@ func (i *installer) GetClientVersion(client ClientType) (string, error) {
 		return i.getJunoVersion(clientDir)
 	}
 
-	// Get the current directory to return to it later
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return "", fmt.Errorf("failed to get current directory: %w", err)
 	}
 
-	// Change to the installation directory
 	if err := os.Chdir(i.InstallDir); err != nil {
 		return "", fmt.Errorf("failed to change to installation directory: %w", err)
 	}
-	defer os.Chdir(currentDir) // Return to original directory when done
+	defer os.Chdir(currentDir)
 
 	version := GetVersionNumber(string(client))
 	if version == "" {
@@ -457,35 +509,30 @@ func (i *installer) GetClientVersion(client ClientType) (string, error) {
 
 // getJunoVersion gets the installed version of Juno via the binary
 func (i *installer) getJunoVersion(junoDir string) (string, error) {
-	// Get Juno binary path
+	// junoDir will be passed as StarknetClientsDir/juno by GetClientVersion
 	junoPath := filepath.Join(junoDir, "juno")
 
-	// Check if binary exists
 	if _, err := os.Stat(junoPath); os.IsNotExist(err) {
 		return "", fmt.Errorf("Juno binary not found")
 	}
 
-	// Run Juno with --version flag
 	cmd := exec.Command(junoPath, "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get Juno version: %w", err)
 	}
 
-	// Parse version from output
 	versionOutput := strings.TrimSpace(string(output))
 	versionMatch := regexp.MustCompile(`juno version (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
 	if len(versionMatch) > 1 {
 		return versionMatch[1], nil
 	}
 
-	// Fallback: try to get version from git tag
 	gitCmd := exec.Command("git", "describe", "--tags", "--abbrev=0")
 	gitCmd.Dir = junoDir
 	gitOutput, err := gitCmd.Output()
 	if err == nil {
 		gitVersion := strings.TrimSpace(string(gitOutput))
-		// Remove 'v' prefix if present
 		if strings.HasPrefix(gitVersion, "v") {
 			gitVersion = gitVersion[1:]
 		}

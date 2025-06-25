@@ -54,7 +54,7 @@ func NewJunoClient(config *JunoConfig) (*JunoClient, error) {
 	// Get Juno binary path
 	junoPath := getJunoPath()
 	if junoPath == "" {
-		return nil, fmt.Errorf("Juno is not installed. Please install it first using 'starknode add --client juno'")
+		return nil, fmt.Errorf("Juno is not installed. Please install it first using 'starknode add -s juno'")
 	}
 
 	return &JunoClient{
