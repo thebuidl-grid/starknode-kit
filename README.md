@@ -22,6 +22,7 @@
 | -------------------------- | ------------------------------------------------------ |
 | `-c`, `--consensus_client` | Specify the consensus client (e.g., Lighthouse, Prysm) |
 | `-e`, `--execution_client` | Specify the execution client (e.g., Geth, Reth)        |
+| `-s`, `--starknet_client`  | Specify the Starknet client (e.g., Juno)               |
 | `-h`, `--help`             | Show help for the `starknode` command                  |
 
 ---
@@ -40,16 +41,29 @@ starknode init
 starknode add --consensus_client lighthouse --execution_client geth
 ```
 
+#### Add a Starknet client
+
+```bash
+starknode add --starknet_client juno
+```
+
 #### Remove a configured client
 
 ```bash
 starknode remove --consensus_client lighthouse
+starknode remove --starknet_client juno
 ```
 
 #### Set an execution client
 
 ```bash
 starknodekit set el client=reth network=mainnet port=9000,9001
+```
+
+#### Run a Juno Starknet node
+
+```bash
+starknode run-juno --network mainnet --port 6060 --data-dir ./juno-data
 ```
 
 #### Generate bash completion script
