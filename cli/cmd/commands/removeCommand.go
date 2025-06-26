@@ -65,3 +65,7 @@ func removeCommand(cmd *cobra.Command, args []string) {
 
 	return
 }
+
+func init(){
+  options.InitGlobalOptions(RemoveCommand)
+}

@@ -177,6 +177,21 @@ func ParseHexInt(hexStr string) (uint64, error) {
 	return strconv.ParseUint(hexStr, 16, 64)
 }
 
+
+func SetNetwork(cfg *t.StarkNodeKitConfig, network string) error {
+	switch network {
+	case "mainnet":
+		cfg.Network = "mainnet"
+		cfg.ConsensusCientSettings.ConsensusCheckpoint = "https://mainnet-checkpoint-sync.stakely.io/"
+		return nil
+	case "sepolia":
+		cfg.Network = "sepolia"
+		cfg.ConsensusCientSettings.ConsensusCheckpoint = "https://sepolia-checkpoint-sync.stakely.io/"
+		return nil
+	default:
+		return fmt.Errorf("Network %v not supported", network) 
+	}
+
 func GetStarknetClient(c string) (t.ClientType, error) {
 	sprtClients := map[string]t.ClientType{
 		"juno": t.ClientJuno,
@@ -195,4 +210,5 @@ func ViewConfig() error {
 	}
 	fmt.Println(cfg)
 	return nil
+
 }

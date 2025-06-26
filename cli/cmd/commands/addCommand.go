@@ -58,3 +58,7 @@ func installCommand(cmd *cobra.Command, args []string) {
 
 	return
 }
+
+func init() {
+	options.InitGlobalOptions(InstallCommand)
+}
