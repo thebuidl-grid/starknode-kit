@@ -11,10 +11,10 @@ import (
 // TODO use loggers and not print
 var InstallCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add an Ethereum client to the config",
-	Long: `The add command registers a new Ethereum client (such as Prysm, Lighthouse, Geth, etc.)
+	Short: "Add an Ethereum or Starknet client to the config",
+	Long: `The add command registers a new client (such as Prysm, Lighthouse, Geth, Reth, or Juno)
 to the local configuration. This sets up the necessary parameters for managing and running
-the client as part of your node stark.`,
+the client as part of your node setup.`,
 	Run: installCommand,
 }
 
@@ -43,6 +43,22 @@ func installCommand(cmd *cobra.Command, args []string) {
 			return
 		}
 	}
+	if options.StarknetClient != "" {
+		client, err := utils.GetStarknetClient(options.StarknetClient)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		err = installer.InstallClient(client)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 
 	return
+}
+
+func init() {
+	options.InitGlobalOptions(InstallCommand)
 }
