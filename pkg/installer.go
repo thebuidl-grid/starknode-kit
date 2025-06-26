@@ -14,8 +14,6 @@ import (
 	"strings"
 )
 
-// Version constants
-
 var (
 	// execCommand allows mocking exec.Command in tests
 	execCommand = exec.Command
@@ -28,6 +26,9 @@ var (
 		"1.14.12": "293a300d",
 		"1.15.10": "2bf8a789",
 	}
+
+	// Add a new variable for Starknet clients dir
+	StarknetClientsDir = filepath.Join(InstallDir, "starknet_clients")
 )
 
 // installer manages Ethereum client installation
@@ -89,6 +90,9 @@ func (i *installer) getClientFileName(client types.ClientType) (string, error) {
 		fileName = fmt.Sprintf("lighthouse-v%s-%s", versions.LatestLighthouseVersion, archName)
 	case types.ClientPrysm:
 		fileName = "prysm.sh"
+	case types.ClientJuno:
+		// Juno is a Go binary, we'll build it from source
+		fileName = fmt.Sprintf("juno-%s", versions.LatestJunoVersion)
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -109,6 +113,8 @@ func (i *installer) getDownloadURL(client types.ClientType, fileName string) (st
 			versions.LatestLighthouseVersion, fileName), nil
 	case types.ClientPrysm:
 		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
+	case types.ClientJuno:
+		return fmt.Sprintf("https://github.com/NethermindEth/juno/archive/refs/tags/%s.tar.gz", versions.LatestJunoVersion), nil
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -116,6 +122,11 @@ func (i *installer) getDownloadURL(client types.ClientType, fileName string) (st
 
 // InstallClient installs the specified Ethereum client
 func (i *installer) InstallClient(client types.ClientType) error {
+	// Handle Juno installation separately (npm-based)
+	if client == types.ClientJuno {
+		return i.installJuno()
+	}
+
 	// Get client file name
 	fileName, err := i.getClientFileName(client)
 	if err != nil {
@@ -211,6 +222,175 @@ func (i *installer) InstallClient(client types.ClientType) error {
 	return nil
 }
 
+// installJuno installs Juno by building from Go source code
+func (i *installer) installJuno() error {
+	//  Create Juno directory
+	junoBaseDir := filepath.Join(StarknetClientsDir, string(types.ClientJuno))
+	junoRepoDir := filepath.Join(junoBaseDir, "juno")
+	databaseDir := filepath.Join(junoBaseDir, "database")
+	logsDir := filepath.Join(junoBaseDir, "logs")
+
+	// Check if Juno is already installed
+	junoPath := filepath.Join(junoRepoDir, "juno")
+	if _, err := os.Stat(junoPath); err == nil {
+		fmt.Printf("%s is already installed.\n", types.ClientJuno)
+		return nil
+	}
+
+	// Create directories
+	fmt.Printf("Creating '%s'\n", junoBaseDir)
+	if err := os.MkdirAll(databaseDir, 0755); err != nil {
+		return fmt.Errorf("failed to create database directory: %w", err)
+	}
+	if err := os.MkdirAll(logsDir, 0755); err != nil {
+		return fmt.Errorf("failed to create logs directory: %w", err)
+	}
+
+	// Check if Go is available
+	if _, err := exec.LookPath("go"); err != nil {
+		return fmt.Errorf("Go is not installed. Please install Go 1.24 or higher first: %w", err)
+	}
+
+	// Check if make is available
+	if _, err := exec.LookPath("make"); err != nil {
+		return fmt.Errorf("make is not installed. Please install make first: %w", err)
+	}
+
+	// Check if git is available
+	if _, err := exec.LookPath("git"); err != nil {
+		return fmt.Errorf("git is not installed. Please install git first: %w", err)
+	}
+
+	// Clone or pull Juno repository
+	if _, err := os.Stat(junoRepoDir); os.IsNotExist(err) {
+		fmt.Printf("Cloning Juno repository...\n")
+		cloneCmd := exec.Command("git", "clone", "https://github.com/NethermindEth/juno.git", "juno")
+		cloneCmd.Dir = junoBaseDir
+		cloneCmd.Stdout = os.Stdout
+		cloneCmd.Stderr = os.Stderr
+		if err := cloneCmd.Run(); err != nil {
+			return fmt.Errorf("failed to clone Juno repository: %w", err)
+		}
+	} else {
+		fmt.Printf("Juno repository already exists, pulling latest...\n")
+		pullCmd := exec.Command("git", "pull")
+		pullCmd.Dir = junoRepoDir
+		pullCmd.Stdout = os.Stdout
+		pullCmd.Stderr = os.Stderr
+		if err := pullCmd.Run(); err != nil {
+			// Always try to recover by checking out main or master
+			fmt.Printf("git pull failed, attempting to recover by checking out main or master...\n")
+			fetchCmd := exec.Command("git", "fetch")
+			fetchCmd.Dir = junoRepoDir
+			fetchCmd.Stdout = os.Stdout
+			fetchCmd.Stderr = os.Stderr
+			if err := fetchCmd.Run(); err != nil {
+				return fmt.Errorf("failed to fetch in Juno repo: %w", err)
+			}
+			checkoutMainCmd := exec.Command("git", "checkout", "main")
+			checkoutMainCmd.Dir = junoRepoDir
+			checkoutMainCmd.Stdout = os.Stdout
+			checkoutMainCmd.Stderr = os.Stderr
+			if err := checkoutMainCmd.Run(); err == nil {
+				pullMainCmd := exec.Command("git", "pull", "origin", "main")
+				pullMainCmd.Dir = junoRepoDir
+				pullMainCmd.Stdout = os.Stdout
+				pullMainCmd.Stderr = os.Stderr
+				if err := pullMainCmd.Run(); err != nil {
+					return fmt.Errorf("failed to pull origin main in Juno repo: %w", err)
+				}
+			} else {
+				// Try master as fallback
+				checkoutMasterCmd := exec.Command("git", "checkout", "master")
+				checkoutMasterCmd.Dir = junoRepoDir
+				checkoutMasterCmd.Stdout = os.Stdout
+				checkoutMasterCmd.Stderr = os.Stderr
+				if err := checkoutMasterCmd.Run(); err == nil {
+					pullMasterCmd := exec.Command("git", "pull", "origin", "master")
+					pullMasterCmd.Dir = junoRepoDir
+					pullMasterCmd.Stdout = os.Stdout
+					pullMasterCmd.Stderr = os.Stderr
+					if err := pullMasterCmd.Run(); err != nil {
+						return fmt.Errorf("failed to pull origin master in Juno repo: %w", err)
+					}
+				} else {
+					return fmt.Errorf("failed to pull Juno repository and could not recover by checking out main or master: %w", err)
+				}
+			}
+		}
+	}
+
+	// Checkout specific version
+	fmt.Printf("Checking out version %s...\n", versions.LatestJunoVersion)
+	checkoutCmd := exec.Command("git", "checkout", versions.LatestJunoVersion)
+	checkoutCmd.Dir = junoRepoDir
+	checkoutCmd.Stdout = os.Stdout
+	checkoutCmd.Stderr = os.Stderr
+	if err := checkoutCmd.Run(); err != nil {
+		return fmt.Errorf("failed to checkout version %s: %w", versions.LatestJunoVersion, err)
+	}
+
+	// Install dependencies based on platform
+	fmt.Printf("Installing dependencies...\n")
+	if runtime.GOOS == "darwin" {
+		// macOS dependencies
+		brewCmd := exec.Command("brew", "install", "jemalloc", "pkg-config")
+		brewCmd.Stdout = os.Stdout
+		brewCmd.Stderr = os.Stderr
+		if err := brewCmd.Run(); err != nil {
+			return fmt.Errorf("failed to install macOS dependencies: %w", err)
+		}
+	} else if runtime.GOOS == "linux" {
+		// Linux dependencies
+		aptCmd := exec.Command("sudo", "apt-get", "install", "-y", "libjemalloc-dev", "libjemalloc2", "pkg-config", "libbz2-dev")
+		aptCmd.Stdout = os.Stdout
+		aptCmd.Stderr = os.Stderr
+		if err := aptCmd.Run(); err != nil {
+			return fmt.Errorf("failed to install Linux dependencies: %w", err)
+		}
+	}
+
+	// Install Go dependencies
+	fmt.Printf("Installing Go dependencies...\n")
+	installDepsCmd := exec.Command("make", "install-deps")
+	installDepsCmd.Dir = junoRepoDir
+	installDepsCmd.Stdout = os.Stdout
+	installDepsCmd.Stderr = os.Stderr
+	if err := installDepsCmd.Run(); err != nil {
+		return fmt.Errorf("failed to install Go dependencies: %w", err)
+	}
+
+	// Build Juno
+	fmt.Printf("Building Juno...\n")
+	buildCmd := exec.Command("make", "juno")
+	buildCmd.Dir = junoRepoDir
+	buildCmd.Stdout = os.Stdout
+	buildCmd.Stderr = os.Stderr
+	if err := buildCmd.Run(); err != nil {
+		return fmt.Errorf("failed to build Juno: %w", err)
+	}
+
+	// Move the built binary to the correct location
+	buildPath := filepath.Join(junoRepoDir, "build", "juno")
+	if err := os.Rename(buildPath, junoPath); err != nil {
+		return fmt.Errorf("failed to move Juno binary: %w", err)
+	}
+
+	// Make the binary executable
+	if err := os.Chmod(junoPath, 0755); err != nil {
+		return fmt.Errorf("failed to make Juno binary executable: %w", err)
+	}
+
+	// Clean up build artifacts
+	fmt.Printf("Cleaning up build artifacts...\n")
+	if err := os.RemoveAll(filepath.Join(junoRepoDir, "build")); err != nil {
+		return fmt.Errorf("failed to clean up build directory: %w", err)
+	}
+
+	fmt.Printf("%s installed successfully.\n", types.ClientJuno)
+	return nil
+}
+
 // setupJWTSecret creates a JWT secret file for client authentication
 func setupJWTSecret() error {
 
@@ -241,10 +421,36 @@ func setupJWTSecret() error {
 
 // RemoveClient removes a client's installation
 func (i *installer) RemoveClient(client types.ClientType) error {
-	clientDir := filepath.Join(i.InstallDir, string(client))
+	var clientDir string
+	if client == types.ClientJuno {
+		clientDir = filepath.Join(StarknetClientsDir, string(types.ClientJuno))
+	} else {
+		clientDir = filepath.Join(i.InstallDir, string(client))
+	}
 
 	if _, err := os.Stat(clientDir); err == nil {
 		fmt.Printf("Removing %s installation.\n", client)
+
+		// For Juno, we need to clean up Go build artifacts
+		if client == types.ClientJuno {
+			currentDir, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("failed to get current directory: %w", err)
+			}
+
+			if err := os.Chdir(clientDir); err != nil {
+				return fmt.Errorf("failed to change to Juno directory: %w", err)
+			}
+			defer os.Chdir(currentDir)
+
+			if err := os.RemoveAll(".git"); err != nil {
+				return fmt.Errorf("failed to remove git repository: %w", err)
+			}
+			if err := os.RemoveAll("build"); err != nil && !os.IsNotExist(err) {
+				return fmt.Errorf("failed to remove build directory: %w", err)
+			}
+		}
+
 		return os.RemoveAll(clientDir)
 	}
 
@@ -253,29 +459,39 @@ func (i *installer) RemoveClient(client types.ClientType) error {
 
 // GetClientVersion gets the installed version of a client
 func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
-	clientDir := filepath.Join(i.InstallDir, string(client))
+	var clientDir string
+	if client == types.ClientJuno {
+		clientDir = filepath.Join(StarknetClientsDir, string(types.ClientJuno))
+	} else {
+		clientDir = filepath.Join(i.InstallDir, string(client))
+	}
 
 	// Check if client is installed
 	clientPath := filepath.Join(clientDir, string(client))
 	if client == types.ClientPrysm {
 		clientPath = filepath.Join(clientDir, "prysm.sh")
+	} else if client == types.ClientJuno {
+		clientPath = filepath.Join(clientDir, "juno")
 	}
 
 	if _, err := os.Stat(clientPath); os.IsNotExist(err) {
 		return "", fmt.Errorf("%s is not installed", client)
 	}
 
-	// Get the current directory to return to it later
+	// Handle Juno version checking differently (npm-based)
+	if client == types.ClientJuno {
+		return i.getJunoVersion(clientDir)
+	}
+
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return "", fmt.Errorf("failed to get current directory: %w", err)
 	}
 
-	// Change to the installation directory
 	if err := os.Chdir(i.InstallDir); err != nil {
 		return "", fmt.Errorf("failed to change to installation directory: %w", err)
 	}
-	defer os.Chdir(currentDir) // Return to original directory when done
+	defer os.Chdir(currentDir)
 
 	version := GetVersionNumber(string(client))
 	if version == "" {
@@ -283,6 +499,41 @@ func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	}
 
 	return version, nil
+}
+
+// getJunoVersion gets the installed version of Juno via the binary
+func (i *installer) getJunoVersion(junoDir string) (string, error) {
+	// junoDir will be passed as StarknetClientsDir/juno by GetClientVersion
+	junoPath := filepath.Join(junoDir, "juno")
+
+	if _, err := os.Stat(junoPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("Juno binary not found")
+	}
+
+	cmd := exec.Command(junoPath, "--version")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get Juno version: %w", err)
+	}
+
+	versionOutput := strings.TrimSpace(string(output))
+	versionMatch := regexp.MustCompile(`juno version (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
+	if len(versionMatch) > 1 {
+		return versionMatch[1], nil
+	}
+
+	gitCmd := exec.Command("git", "describe", "--tags", "--abbrev=0")
+	gitCmd.Dir = junoDir
+	gitOutput, err := gitCmd.Output()
+	if err == nil {
+		gitVersion := strings.TrimSpace(string(gitOutput))
+		if strings.HasPrefix(gitVersion, "v") {
+			gitVersion = gitVersion[1:]
+		}
+		return gitVersion, nil
+	}
+
+	return "", fmt.Errorf("unable to determine Juno version")
 }
 
 // IsClientLatestVersion checks if the installed client is the latest version
@@ -392,6 +643,8 @@ func CompareClientVersions(client, installedVersion string) (bool, string) {
 	case "prysm":
 		// Just use a hard-coded latest version for Prysm
 		latestVersion = "4.0.5" // Replace with an appropriate version
+	case "juno":
+		latestVersion = versions.LatestJunoVersion
 	default:
 		fmt.Printf("Unknown client: %s\n", client)
 		return false, ""

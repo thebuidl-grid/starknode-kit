@@ -177,6 +177,7 @@ func ParseHexInt(hexStr string) (uint64, error) {
 	return strconv.ParseUint(hexStr, 16, 64)
 }
 
+
 func SetNetwork(cfg *t.StarkNodeKitConfig, network string) error {
 	switch network {
 	case "mainnet":
@@ -190,4 +191,24 @@ func SetNetwork(cfg *t.StarkNodeKitConfig, network string) error {
 	default:
 		return fmt.Errorf("Network %v not supported", network) 
 	}
+
+func GetStarknetClient(c string) (t.ClientType, error) {
+	sprtClients := map[string]t.ClientType{
+		"juno": t.ClientJuno,
+	}
+	client, ok := sprtClients[c]
+	if !ok {
+		return "", fmt.Errorf("starknet client %s not supported", c)
+	}
+	return client, nil
+}
+
+func ViewConfig() error {
+	cfg, err := LoadConfig()
+	if err != nil {
+		return err
+	}
+	fmt.Println(cfg)
+	return nil
+
 }
