@@ -338,7 +338,14 @@ func (i *installer) installJuno() error {
 		brewCmd.Stdout = os.Stdout
 		brewCmd.Stderr = os.Stderr
 		if err := brewCmd.Run(); err != nil {
-			return fmt.Errorf("failed to install macOS dependencies: %w", err)
+			// If brew install fails, try with arch -arm64 for Apple Silicon
+			fmt.Printf("brew install failed, trying with arch -arm64...\n")
+			brewCmdARM := exec.Command("arch", "-arm64", "brew", "install", "jemalloc", "pkg-config")
+			brewCmdARM.Stdout = os.Stdout
+			brewCmdARM.Stderr = os.Stderr
+			if err := brewCmdARM.Run(); err != nil {
+				return fmt.Errorf("failed to install macOS dependencies: %w", err)
+			}
 		}
 	} else if runtime.GOOS == "linux" {
 		// Linux dependencies
