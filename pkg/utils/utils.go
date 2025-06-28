@@ -14,6 +14,7 @@ import (
 
 	"github.com/NethermindEth/juno/core/felt"
 	envsubt "github.com/emperorsixpacks/envsubst"
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
 )
 
@@ -55,6 +56,10 @@ func IsInstalled(c t.ClientType) bool {
 func LoadConfig() (t.StarkNodeKitConfig, error) {
 	var cfg t.StarkNodeKitConfig
 	cfgByt, err := os.ReadFile(pkg.ConfigPath)
+	if err != nil {
+		return t.StarkNodeKitConfig{}, err
+	}
+	err = godotenv.Load(pkg.EnvFIlePath)
 	if err != nil {
 		return t.StarkNodeKitConfig{}, err
 	}
