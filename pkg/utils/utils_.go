@@ -179,9 +179,12 @@ func GetPrysmSyncStatus() t.SyncInfo {
 
 	return syncInfo
 }
+
 func defaultConfig() t.StarkNodeKitConfig {
 	return t.StarkNodeKitConfig{
-		Network: "mainnet",
+		WalletAddress: "${STARKNET_WALLET}",
+		PrivateKey:    "${STARKNET_PRIVATE_KEY}",
+		Network:       "mainnet",
 		ExecutionCientSettings: t.ClientConfig{
 			Name:          t.ClientGeth,
 			Port:          []int{30303},
