@@ -3,9 +3,17 @@ module starknode-kit
 go 1.24.2
 
 require (
+<<<<<<< Updated upstream
 	github.com/NethermindEth/juno v0.14.7
 	github.com/NethermindEth/starknet.go v0.13.0
 	github.com/emperorsixpacks/envsubst v1.0.3
+||||||| Stash base
+	github.com/docker/docker v24.0.9+incompatible
+	github.com/docker/go-connections v0.4.0
+=======
+	github.com/NethermindEth/juno v0.14.7
+	github.com/NethermindEth/starknet.go v0.13.0
+>>>>>>> Stashed changes
 	github.com/gdamore/tcell/v2 v2.7.1
 	github.com/rivo/tview v0.0.0-20250501113434-0c592cd31026
 	github.com/shirou/gopsutil/v3 v3.24.5
@@ -25,6 +33,7 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
