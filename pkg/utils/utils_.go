@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"starknode-kit/pkg"
 	t "starknode-kit/pkg/types"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func GetGethSyncStatus() t.SyncInfo {
@@ -179,9 +182,12 @@ func GetPrysmSyncStatus() t.SyncInfo {
 
 	return syncInfo
 }
+
 func defaultConfig() t.StarkNodeKitConfig {
 	return t.StarkNodeKitConfig{
-		Network: "mainnet",
+		WalletAddress: "${STARKNET_WALLET}",
+		PrivateKey:    "${STARKNET_PRIVATE_KEY}",
+		Network:       "mainnet",
 		ExecutionCientSettings: t.ClientConfig{
 			Name:          t.ClientGeth,
 			Port:          []int{30303},
@@ -193,4 +199,9 @@ func defaultConfig() t.StarkNodeKitConfig {
 			ConsensusCheckpoint: "https://mainnet-checkpoint-sync.stakely.io/",
 		},
 	}
+}
+
+func writeToENV(ks map[string]string) error {
+	err := godotenv.Write(ks, pkg.EnvFIlePath)
+	return err
 }
