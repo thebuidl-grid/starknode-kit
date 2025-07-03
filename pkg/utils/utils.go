@@ -86,6 +86,10 @@ func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
 }
 
 func CreateStarkNodeConfig() error {
+	if _, err := os.Stat(pkg.ConfigDir); err == nil {
+		return fmt.Errorf("Starknode-kit already initialized at %s", pkg.ConfigDir)
+	}
+
 	default_config := defaultConfig()
 	if err := os.MkdirAll(pkg.ConfigDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
