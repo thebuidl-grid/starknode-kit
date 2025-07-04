@@ -14,6 +14,7 @@ var (
 	JwtDir      = path.Join(InstallDir, "ethereum_clients", "jwt")
 	JWTPath     = path.Join(JwtDir, "jwt.hex")
 	ConfigDir   = path.Join(InstallDir, "config")
+	JunoDataDir = path.Join(InstallDir, "juno-data")
 	ConfigPath  = fmt.Sprintf("%s/starknode.yaml", ConfigDir)
 	EnvFIlePath = fmt.Sprintf("%s/.starknode.env", ConfigDir)
 )
