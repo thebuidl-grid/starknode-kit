@@ -27,7 +27,7 @@ func DefaultJunoConfig() *JunoConfig {
 		Network:     "mainnet",
 		Port:        "6060",
 		UseSnapshot: true,
-		DataDir:     "./juno-data",
+		DataDir:     pkg.JunoDataDir,
 		EthNode:     "ws://localhost:8546",
 		Environment: []string{
 			"JUNO_NETWORK=mainnet",
