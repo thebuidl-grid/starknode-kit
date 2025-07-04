@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path"
+
+	"github.com/common-nighthawk/go-figure"
 )
 
 var (
@@ -17,6 +19,7 @@ var (
 	JunoDataDir = path.Join(InstallDir, "juno-data")
 	ConfigPath  = fmt.Sprintf("%s/starknode.yaml", ConfigDir)
 	EnvFIlePath = fmt.Sprintf("%s/.starknode.env", ConfigDir)
+	Banner      = figure.NewColorFigure("Starknode kit", "slant", "green", true)
 )
 
 func getHomeDir() string {
