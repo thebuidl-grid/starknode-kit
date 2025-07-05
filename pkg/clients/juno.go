@@ -27,7 +27,7 @@ func DefaultJunoConfig() *JunoConfig {
 		Network:     "mainnet",
 		Port:        "6060",
 		UseSnapshot: true,
-		DataDir:     "./juno-data",
+		DataDir:     pkg.JunoDataDir,
 		EthNode:     "ws://localhost:8546",
 		Environment: []string{
 			"JUNO_NETWORK=mainnet",
@@ -66,7 +66,7 @@ func NewJunoClient(config *JunoConfig) (*JunoClient, error) {
 // getJunoPath returns the path to the Juno binary
 func getJunoPath() string {
 	// Check if Juno is installed in the starknode-kit directory
-	junoDir := filepath.Join(pkg.InstallClientsDir, "juno")
+	junoDir := filepath.Join(pkg.InstallStarknetDir, "juno")
 	junoPath := filepath.Join(junoDir, "juno")
 
 	if _, err := os.Stat(junoPath); err == nil {
