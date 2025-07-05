@@ -48,6 +48,24 @@ func removeCommand(cmd *cobra.Command, args []string) {
 			return
 		}
 	}
+	if options.StarknetClient != "" {
+		client, err := utils.GetStarknetClient(options.StarknetClient)
+		if err != nil {
+			fmt.Printf("Error: %v\n\n", err)
+			fmt.Println("Supported Starknet clients are:")
+			fmt.Println("  - juno")
+			return
+		}
+		err = installer.RemoveClient(client)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 
 	return
+}
+
+func init(){
+  options.InitGlobalOptions(RemoveCommand)
 }
