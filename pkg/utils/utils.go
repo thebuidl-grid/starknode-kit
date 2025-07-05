@@ -12,6 +12,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/NethermindEth/juno/core/felt"
+	envsubt "github.com/emperorsixpacks/envsubst"
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
 )
 
@@ -56,7 +59,11 @@ func LoadConfig() (t.StarkNodeKitConfig, error) {
 	if err != nil {
 		return t.StarkNodeKitConfig{}, err
 	}
-	err = yaml.Unmarshal(cfgByt, &cfg)
+	err = godotenv.Load(pkg.EnvFIlePath)
+	if err != nil {
+		return t.StarkNodeKitConfig{}, err
+	}
+	err = envsubt.Unmarshal(cfgByt, &cfg)
 	if err != nil {
 		return t.StarkNodeKitConfig{}, err
 	}
@@ -211,4 +218,35 @@ func ViewConfig() error {
 	fmt.Println(cfg)
 	return nil
 
+}
+
+// PadZerosInFelt pads a felt value to 66 characters with leading zeros
+// This ensures consistent formatting for Starknet addresses and hashes
+func PadZerosInFelt(hexFelt *felt.Felt) string {
+	const targetLength = 66
+	hexStr := hexFelt.String()
+
+	// Check if the hex value is already of the desired length
+	if len(hexStr) >= targetLength {
+		return hexStr
+	}
+
+	// Extract the hex value without the "0x" prefix
+	hexValue := hexStr[2:]
+
+	// Pad zeros after the "0x" prefix
+	paddedHexValue := fmt.Sprintf("%0*s", targetLength-2, hexValue)
+
+	// Add back the "0x" prefix to the padded hex value
+	return "0x" + paddedHexValue
+}
+
+// FormatStarknetAddress formats a felt address with proper padding
+func FormatStarknetAddress(addr *felt.Felt) string {
+	return PadZerosInFelt(addr)
+}
+
+// FormatTransactionHash formats a transaction hash with proper padding
+func FormatTransactionHash(hash *felt.Felt) string {
+	return PadZerosInFelt(hash)
 }
