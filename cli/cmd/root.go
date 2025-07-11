@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"starknode-kit/cli/cmd/commands"
+	initcommand "starknode-kit/cli/cmd/commands/initCommand"
 
 	"github.com/spf13/cobra"
 )
@@ -34,7 +35,7 @@ func init() {
 	rootCmd.AddCommand(commands.StopCommand)
 	rootCmd.AddCommand(commands.InstallCommand)
 	rootCmd.AddCommand(commands.StartCommand)
-	rootCmd.AddCommand(commands.InitCommand)
+	rootCmd.AddCommand(initcommand.InitCommand)
 	rootCmd.AddCommand(commands.RemoveCommand)
 	rootCmd.AddCommand(commands.RunCmd)
 }

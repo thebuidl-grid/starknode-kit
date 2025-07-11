@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"starknode-kit/cli/cmd/options"
+	"starknode-kit/pkg/styles"
 	"starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -22,40 +23,40 @@ func installCommand(cmd *cobra.Command, args []string) {
 	if options.ConsensusClient != "" {
 		client, err := utils.GetConsensusClient(options.ConsensusClient)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(styles.Danger.Render(err.Error()))
 			return
 		}
 		err = installer.InstallClient(client)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(styles.Danger.Render(err.Error()))
 			return
 		}
 	}
 	if options.ExecutionClient != "" {
 		client, err := utils.GetExecutionClient(options.ExecutionClient)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(styles.Danger.Render(err.Error()))
 			return
 		}
 		err = installer.InstallClient(client)
 		if err != nil {
-			fmt.Println(err)
+
+			fmt.Println(styles.Danger.Render(err.Error()))
 			return
 		}
 	}
 	if options.StarknetClient != "" {
 		client, err := utils.GetStarknetClient(options.StarknetClient)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(styles.Danger.Render(err.Error()))
 			return
 		}
 		err = installer.InstallClient(client)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(styles.Danger.Render(err.Error()))
 			return
 		}
 	}
-
 	return
 }
 
