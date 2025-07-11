@@ -1,6 +1,8 @@
 package main
 
-import "starknode-kit/cli/cmd"
+import (
+	"starknode-kit/cli/cmd"
+)
 
 func main() {
 	cmd.Execute()
