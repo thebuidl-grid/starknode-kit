@@ -2,6 +2,10 @@ package types
 
 type ClientType string
 
+func (c ClientType) String() string {
+	return string(c)
+}
+
 const (
 	ClientGeth       ClientType = "geth"
 	ClientReth       ClientType = "reth"

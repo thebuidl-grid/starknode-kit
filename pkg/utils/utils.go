@@ -86,7 +86,7 @@ func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
 }
 
 func CreateStarkNodeConfig() error {
-	if _, err := os.Stat(pkg.ConfigDir); err == nil {
+	if _, err := os.Stat(pkg.ConfigDir); !os.IsNotExist(err) {
 		return fmt.Errorf("Starknode-kit already initialized at %s", pkg.ConfigDir)
 	}
 
@@ -253,4 +253,8 @@ func FormatStarknetAddress(addr *felt.Felt) string {
 // FormatTransactionHash formats a transaction hash with proper padding
 func FormatTransactionHash(hash *felt.Felt) string {
 	return PadZerosInFelt(hash)
+}
+
+func ClearScreen() {
+	fmt.Print("\033[H\033[2J")
 }
