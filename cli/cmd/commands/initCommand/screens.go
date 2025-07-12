@@ -1,7 +1,10 @@
 package initcommand
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"time"
 
 	"starknode-kit/cli/cmd/commands"
 	"starknode-kit/pkg"
@@ -213,34 +216,116 @@ func (m *FullNodeConfigScreen) Enter() {
 }
 
 type InstallationScreen struct {
-	config types.StarkNodeKitConfig
-	*Screen
+	config     types.StarkNodeKitConfig
+	step       int
+	output     string
+	outputChan <-chan string
 }
 
-func NewInstallationScreen() *Screen {
-	s := &Screen{
-		numChoice: 0,
-		step:      stepInstallClClient,
-		choice:    0,
-	}
-	config, _ := utils.LoadConfig()
-	installScreen := &InstallationScreen{Screen: s, config: config}
-	s.SetScene(installScreen)
-	return s
+func NewInstallationScreen(config types.StarkNodeKitConfig) *InstallationScreen {
+	installScreen := &InstallationScreen{config: config, step: stepInstallClClient}
+	return installScreen
 
 }
 
-func (m *InstallationScreen) Enter() {}
-func (m *InstallationScreen) View() string {
+type installMsg struct {
+	output     string
+	done       bool
+	err        error
+	outputChan <-chan string
+}
+
+func (m *InstallationScreen) Init() tea.Cmd {
 	switch m.step {
 	case stepInstallClClient:
-		_ = commands.Installer.InstallClient(m.config.ConsensusCientSettings.Name)
-		m.step = stepInstallElClient
-		return ""
+		return m.installClientCmd(m.config.ConsensusCientSettings.Name)
 	case stepInstallElClient:
-		_ = commands.Installer.InstallClient(m.config.ExecutionCientSettings.Name)
-		return ""
-	default:
-		return ""
+		return m.installClientCmd(m.config.ExecutionCientSettings.Name)
+	}
+	return nil
+}
+
+func (m *InstallationScreen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case installMsg:
+		if msg.outputChan != nil {
+			m.outputChan = msg.outputChan
+			return m, m.readFromChannelCmd()
+		}
+
+		if msg.output != "" {
+			m.output += msg.output
+		}
+
+		if msg.done {
+			m.step++
+			m.outputChan = nil
+			return m, m.Init() // Start next installation
+		}
+	}
+	return m, nil
+}
+
+func (m *InstallationScreen) readFromChannelCmd() tea.Cmd {
+	return func() tea.Msg {
+		if m.outputChan == nil {
+			return installMsg{done: true}
+		}
+
+		select {
+		case line, ok := <-m.outputChan:
+			if !ok {
+				return installMsg{done: true}
+			}
+			return installMsg{output: line}
+		default:
+			// No output available, try again shortly
+			return tea.Tick(time.Millisecond*50, func(t time.Time) tea.Msg {
+				return m.readFromChannelCmd()()
+			})
+		}
+	}
+}
+
+func (m InstallationScreen) View() string {
+	return m.output
+}
+
+func (m *InstallationScreen) installClientCmd(clientName types.ClientType) tea.Cmd {
+	return func() tea.Msg {
+		// Create pipe for capturing output
+		r, w, err := os.Pipe()
+		if err != nil {
+			return installMsg{err: err}
+		}
+
+		// Save and redirect stdout
+		originalStdout := os.Stdout
+		os.Stdout = w
+
+		// Channel to collect output
+		outputChan := make(chan string, 100)
+
+		// Start reader goroutine
+		go func() {
+			defer close(outputChan)
+			scanner := bufio.NewScanner(r)
+			for scanner.Scan() {
+				outputChan <- scanner.Text() + "\n"
+			}
+		}()
+
+		// Start installation goroutine
+		go func() {
+			defer w.Close()
+			defer func() { os.Stdout = originalStdout }()
+			_ = commands.Installer.InstallClient(clientName)
+		}()
+
+		// Return the channel immediately
+		return installMsg{
+			outputChan: outputChan,
+			done:       false,
+		}
 	}
 }
