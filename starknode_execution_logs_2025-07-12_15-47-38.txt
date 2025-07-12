@@ -1,0 +1,2 @@
+Reth v1.3.12
+2025-07-12T15:47:22.456057Z [green][bold]INFO[white] Canonical chain committed [green][bold]number[white]=22675215 [green][bold]hash[white]=0x42e0c59670d0aae3e65fc1109baec597207bb20eacceab850374b706 [green][bold]elapsed[white]=796.542μs

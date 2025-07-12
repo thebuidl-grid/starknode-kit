@@ -18,6 +18,7 @@ func NewMonitorApp() *MonitorApp {
 		// New channels matching JavaScript components
 		ExecutionLogChan: make(chan string, 100),
 		ConsensusLogChan: make(chan string, 100),
+		JunoLogChan:      make(chan string, 100),
 		StatusChan:       make(chan string, 10),
 		ChainInfoChan:    make(chan string, 10),
 		SystemStatsChan:  make(chan string, 10),
@@ -51,6 +52,7 @@ func (m *MonitorApp) Start(ctx context.Context) error {
 	// Start new update goroutines matching JavaScript components exactly
 	go m.updateExecutionLogs(ctx)    // executionLog.js equivalent
 	go m.updateConsensusLogs(ctx)    // consensusLog.js equivalent
+	go m.updateJunoLogs(ctx)         // junoLog.js equivalent (Starknet client)
 	go m.updateStatusBox(ctx)        // statusBox.js equivalent
 	go m.updateChainInfoBox(ctx)     // chainInfoBox.js equivalent
 	go m.updateSystemStatsGauge(ctx) // systemStatsGauge.js equivalent
@@ -89,6 +91,11 @@ func (m *MonitorApp) handleUpdates(ctx context.Context) {
 			m.App.QueueUpdateDraw(func() {
 				m.ConsensusLogBox.SetText(text)
 				m.ConsensusLogBox.ScrollToEnd()
+			})
+		case text := <-m.JunoLogChan:
+			m.App.QueueUpdateDraw(func() {
+				m.JunoLogBox.SetText(text)
+				m.JunoLogBox.ScrollToEnd()
 			})
 		case text := <-m.StatusChan:
 			m.App.QueueUpdateDraw(func() {

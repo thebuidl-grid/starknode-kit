@@ -428,6 +428,99 @@ func (m *MonitorApp) updateRPCInfo(ctx context.Context) {
 	}
 }
 
+// Update Juno client logs (matching Starknet node logs)
+func (m *MonitorApp) updateJunoLogs(ctx context.Context) {
+	ticker := time.NewTicker(3 * time.Second)
+	defer ticker.Stop()
+
+	// Realistic Juno logs matching typical Starknet node output
+	junoLogs := []string{
+		"Juno v0.12.1 - Starknet Full Node",
+		"INFO [12-07|15:32:37.437] Starting Juno node syncing with Starknet Mainnet",
+		"INFO [12-07|15:32:38.234] Connected to Starknet sequencer endpoint=https://alpha-mainnet.starknet.io",
+		"INFO [12-07|15:32:39.156] Block received block_number=650328 block_hash=0x42e0c59670d0aae3e65fc1109baec597207bb20eacceab850374b706",
+		"INFO [12-07|15:32:40.789] State root updated new_root=0x37fcdd548d484c536158b0855e2497e03da5e7503 elapsed=1.0734ms",
+		"INFO [12-07|15:32:41.234] Processing block transactions count=15 gas_used=847329",
+		"INFO [12-07|15:32:42.567] Block committed to database block_number=650329 elapsed=423.17ms",
+		"INFO [12-07|15:32:43.891] Syncing with network latest_block=650335 local_block=650329 behind=6",
+		"INFO [12-07|15:32:44.456] State verification completed block_number=650330 state_root=0x6660c6f5c489bbdc35507dfb74b016139c883f3b52",
+		"INFO [12-07|15:32:45.123] Transaction pool updated pending=42 queued=18 pool_size=60",
+		"INFO [12-07|15:32:46.789] Block received block_number=650331 block_hash=0xca5d0e5dbdc9f6fab2be1b4f8b9c6cc76fbd09ce3dbbdb6",
+		"INFO [12-07|15:32:47.234] Processing Cairo 1.0 contracts calls=8 execution_time=156ms",
+		"INFO [12-07|15:32:48.567] L1 settlement verified block_range=650320-650330 l1_tx=0x9d1329711ce559e1f47bd499d0ae2be3f3ae4560e0bb0aded6b10dd312df78",
+		"INFO [12-07|15:32:49.891] State diff applied additions=145 modifications=78 deletions=2",
+		"INFO [12-07|15:32:50.345] Mempool synchronization active peers=12 pending_tx=38",
+	}
+
+	var logBuffer []string
+	logIndex := 0
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-m.StopChan:
+			return
+		case <-ticker.C:
+			if m.paused {
+				continue
+			}
+
+			if logIndex < len(junoLogs) {
+				currentEntry := junoLogs[logIndex]
+
+				// Dynamic updates for realistic logs
+				if strings.Contains(currentEntry, "block_number=") {
+					// Update block numbers progressively
+					baseBlock := 650328
+					currentBlock := baseBlock + int(time.Now().Unix()%100)
+					currentEntry = strings.ReplaceAll(currentEntry, "650328", fmt.Sprintf("%d", currentBlock))
+					currentEntry = strings.ReplaceAll(currentEntry, "650329", fmt.Sprintf("%d", currentBlock+1))
+					currentEntry = strings.ReplaceAll(currentEntry, "650330", fmt.Sprintf("%d", currentBlock+2))
+					currentEntry = strings.ReplaceAll(currentEntry, "650331", fmt.Sprintf("%d", currentBlock+3))
+					currentEntry = strings.ReplaceAll(currentEntry, "650335", fmt.Sprintf("%d", currentBlock+7))
+				}
+
+				// Update timestamps to current time
+				if strings.Contains(currentEntry, "15:32:") {
+					now := time.Now()
+					timeStr := now.Format("15:04:05")
+					// Replace the timestamp part
+					parts := strings.Split(currentEntry, "] ")
+					if len(parts) >= 2 {
+						parts[0] = fmt.Sprintf("INFO [12-07|%s.%03d", timeStr, now.Nanosecond()/1000000)
+						currentEntry = strings.Join(parts, "] ")
+					}
+				}
+
+				// Format the log line
+				formattedLine := formatLogLines(currentEntry)
+
+				// Add to buffer
+				logBuffer = append(logBuffer, formattedLine)
+
+				// Keep buffer size manageable
+				if len(logBuffer) > 50 {
+					logBuffer = logBuffer[len(logBuffer)-45:]
+				}
+
+				// Send to Juno log channel
+				content := strings.Join(logBuffer, "\n")
+				select {
+				case m.JunoLogChan <- content:
+				default:
+					// Channel full, skip update
+				}
+
+				logIndex++
+			} else {
+				// Reset to beginning for continuous simulation
+				logIndex = 0
+			}
+		}
+	}
+}
+
 // Legacy update methods for backward compatibility
 
 func (m *MonitorApp) updateSystemStats(ctx context.Context) {

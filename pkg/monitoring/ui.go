@@ -33,6 +33,13 @@ func (m *MonitorApp) setupUI() {
 		SetTitle(" Lighthouse ").
 		SetTitleAlign(tview.AlignLeft)
 
+	// Create Juno Starknet client log panel
+	m.JunoLogBox = m.createVibrantPanel("Juno", tcell.ColorPurple)
+	m.JunoLogBox.SetBorder(true).
+		SetBorderColor(tcell.ColorPurple).
+		SetTitle(" Juno ").
+		SetTitleAlign(tview.AlignLeft)
+
 	// Create status box (matching statusBox.js)
 	m.StatusBox = m.createVibrantPanel("Status", tcell.ColorTeal)
 	m.StatusBox.SetText("INITIALIZING...")
@@ -47,19 +54,22 @@ func (m *MonitorApp) setupUI() {
 	m.RPCInfoBox = m.createVibrantPanel("RPC Info", tcell.ColorTeal)
 
 	// Perfect LEFT/RIGHT split layout
-	// LEFT side (60%): Execution logs (top half) + Consensus logs (bottom half) - EQUAL SIZES
+	// LEFT side (60%): Execution logs (top) + Consensus logs (middle) + Juno logs (bottom) - EQUAL SIZES
 	// RIGHT side (40%): Status, Chain Info, RPC Info, System Stats - STACKED VERTICALLY
 
-	m.Grid.SetRows(-1, -1). // 2 rows: left-top(1), left-bottom(1) - FULL TERMINAL HEIGHT
-				SetColumns(-3, -2). // 2 columns: LEFT(60%), RIGHT(40%)
-				SetBorders(false).
-				SetGap(0, 0) // No gaps for maximum space usage
+	m.Grid.SetRows(-1, -1, -1). // 3 rows: execution(1), consensus(1), juno(1) - FULL TERMINAL HEIGHT
+					SetColumns(-3, -2). // 2 columns: LEFT(60%), RIGHT(40%)
+					SetBorders(false).
+					SetGap(0, 0) // No gaps for maximum space usage
 
-	// LEFT SIDE - Execution logs (top half of left side)
+	// LEFT SIDE - Execution logs (top third of left side)
 	m.Grid.AddItem(m.ExecutionLogBox, 0, 0, 1, 1, 0, 0, false) // Row 0, left col - Execution logs
 
-	// LEFT SIDE - Consensus logs (bottom half of left side)
+	// LEFT SIDE - Consensus logs (middle third of left side)
 	m.Grid.AddItem(m.ConsensusLogBox, 1, 0, 1, 1, 0, 0, false) // Row 1, left col - Consensus logs
+
+	// LEFT SIDE - Juno logs (bottom third of left side)
+	m.Grid.AddItem(m.JunoLogBox, 2, 0, 1, 1, 0, 0, false) // Row 2, left col - Juno logs
 
 	// RIGHT SIDE - Create a sub-grid for the 4 panels stacked vertically
 	rightGrid := tview.NewGrid().
@@ -74,8 +84,8 @@ func (m *MonitorApp) setupUI() {
 	rightGrid.AddItem(m.RPCInfoBox, 2, 0, 1, 1, 0, 0, false)     // RPC Info
 	rightGrid.AddItem(m.SystemStatsBox, 3, 0, 1, 1, 0, 0, false) // System Stats
 
-	// Add the right side sub-grid to main grid (spans both rows on right)
-	m.Grid.AddItem(rightGrid, 0, 1, 2, 1, 0, 0, false) // Spans rows 0-1 on right column
+	// Add the right side sub-grid to main grid (spans all 3 rows on right)
+	m.Grid.AddItem(rightGrid, 0, 1, 3, 1, 0, 0, false) // Spans rows 0-2 on right column
 
 	// NO HELP BAR - MONITOR FILLS 100% OF TERMINAL HEIGHT
 
