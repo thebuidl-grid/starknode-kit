@@ -13,13 +13,15 @@ import (
 const (
 	stepSelectNodeType = iota
 	stepFullNodeSetup
+	stepClientInstallation
 )
 
 type InitFlowModel struct {
-	isQuitting          bool
-	currentStep         int
-	selectNodeScreen    tea.Model
-	fullNodeSetupScreen tea.Model
+	isQuitting               bool
+	currentStep              int
+	selectNodeScreen         tea.Model
+	fullNodeSetupScreen      tea.Model
+	clientInstallationScreen tea.Model
 }
 
 func (m InitFlowModel) Init() tea.Cmd {
@@ -35,6 +37,8 @@ func (m InitFlowModel) View() string {
 		return m.selectNodeScreen.View()
 	case stepFullNodeSetup:
 		return m.fullNodeSetupScreen.View()
+	case stepClientInstallation:
+		return m.selectNodeScreen.View()
 	default:
 		return "Unknown step"
 	}
@@ -70,6 +74,17 @@ func (m InitFlowModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if model, ok := updated.(*Screen); ok {
 			m.fullNodeSetupScreen = model
 			if model.done {
+				m.currentStep = stepClientInstallation // TODO we need to use a slise to store screens
+				return m, tea.Quit
+			}
+		}
+		return m, cmd
+
+	case stepClientInstallation:
+		updated, cmd := m.clientInstallationScreen.Update(msg)
+		if model, ok := updated.(*Screen); ok {
+			m.clientInstallationScreen = model
+			if model.done {
 				return m, tea.Quit
 			}
 		}
@@ -94,12 +109,16 @@ func runInitFlow(cmd *cobra.Command, args []string) {
 	// Init select screen
 	selectNodeModel := NewNodeSelectionScreen()
 
+	// Init client installation screen
+	clientInstallationModel := NewInstallationScreen()
+
 	// Create root program model
 	programModel := InitFlowModel{
-		isQuitting:          false,
-		fullNodeSetupScreen: fullNodeSetupModel,
-		selectNodeScreen:    selectNodeModel,
-		currentStep:         stepSelectNodeType,
+		isQuitting:               false,
+		fullNodeSetupScreen:      fullNodeSetupModel,
+		selectNodeScreen:         selectNodeModel,
+		currentStep:              stepSelectNodeType,
+		clientInstallationScreen: clientInstallationModel,
 	}
 
 	p := tea.NewProgram(programModel)

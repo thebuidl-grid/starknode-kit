@@ -3,6 +3,7 @@ package initcommand
 import (
 	"fmt"
 
+	"starknode-kit/cli/cmd/commands"
 	"starknode-kit/pkg"
 	"starknode-kit/pkg/styles"
 	"starknode-kit/pkg/types"
@@ -15,11 +16,18 @@ import (
 // Constants and Types
 type Step int
 
+// Select network Steps
 const (
 	stepSelectNetwork Step = iota
 	stepSelectElClient
 	stepSelectClClient
-	stepInstall
+	stepAcceptConfig
+)
+
+// Install Client Steps
+const (
+	stepInstallClClient = iota
+	stepInstallElClient
 )
 
 const (
@@ -142,7 +150,7 @@ func (m *FullNodeConfigScreen) View() string {
 		return m.renderSelectionScreen("Which execution client do you want to use?", clientTypesToStrings(elClientOptions))
 	case stepSelectClClient:
 		return m.renderSelectionScreen("Which consensus client do you want to use?", clientTypesToStrings(clClientOptions))
-	case stepInstall:
+	case stepAcceptConfig:
 		return m.renderConfigurationScreen()
 	default:
 		return ""
@@ -196,10 +204,43 @@ func (m *FullNodeConfigScreen) Enter() {
 
 	case stepSelectClClient:
 		m.clClient = clClientOptions[m.choice]
-		m.step = stepInstall
+		m.step = stepAcceptConfig
 		m.numChoice = 0
 
-	case stepInstall:
+	case stepAcceptConfig:
 		m.done = true
+	}
+}
+
+type InstallationScreen struct {
+	config types.StarkNodeKitConfig
+	*Screen
+}
+
+func NewInstallationScreen() *Screen {
+	s := &Screen{
+		numChoice: 0,
+		step:      stepInstallClClient,
+		choice:    0,
+	}
+	config, _ := utils.LoadConfig()
+	installScreen := &InstallationScreen{Screen: s, config: config}
+	s.SetScene(installScreen)
+	return s
+
+}
+
+func (m *InstallationScreen) Enter() {}
+func (m *InstallationScreen) View() string {
+	switch m.step {
+	case stepInstallClClient:
+		_ = commands.Installer.InstallClient(m.config.ConsensusCientSettings.Name)
+		m.step = stepInstallElClient
+		return ""
+	case stepInstallElClient:
+		_ = commands.Installer.InstallClient(m.config.ExecutionCientSettings.Name)
+		return ""
+	default:
+		return ""
 	}
 }
