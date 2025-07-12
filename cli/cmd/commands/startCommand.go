@@ -70,5 +70,6 @@ func startCommand(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("Clients started, run: `starknode monitor` to view logs")
 	return
 }
