@@ -101,6 +101,13 @@ var InitCommand = &cobra.Command{
 }
 
 func runInitFlow(cmd *cobra.Command, args []string) {
+	config, err := utils.LoadConfig()
+
+	if err != nil {
+		fmt.Println(styles.Danger.Render(err.Error()))
+		return
+	}
+
 	utils.ClearScreen()
 
 	// Init full node screen
@@ -110,7 +117,7 @@ func runInitFlow(cmd *cobra.Command, args []string) {
 	selectNodeModel := NewNodeSelectionScreen()
 
 	// Init client installation screen
-	clientInstallationModel := NewInstallationScreen()
+	clientInstallationModel := NewInstallationScreen(config)
 
 	// Create root program model
 	programModel := InitFlowModel{
