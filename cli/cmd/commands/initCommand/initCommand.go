@@ -38,7 +38,7 @@ func (m InitFlowModel) View() string {
 	case stepFullNodeSetup:
 		return m.fullNodeSetupScreen.View()
 	case stepClientInstallation:
-		return m.selectNodeScreen.View()
+		return m.clientInstallationScreen.View()
 	default:
 		return "Unknown step"
 	}
