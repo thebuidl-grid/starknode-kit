@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"starknode-kit/pkg/stats"
+	"starknode-kit/pkg/types"
+	"starknode-kit/pkg/utils"
 )
 
 // Format log lines exactly like the JavaScript helperFunctions.js
@@ -52,12 +54,12 @@ func formatLogLines(line string) string {
 	return line
 }
 
-// Update execution client logs (matching updateLogic.js setupLogStreaming)
+// Update execution client logs dynamically based on running clients
 func (m *MonitorApp) updateExecutionLogs(ctx context.Context) {
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
-	// Realistic Reth logs matching the JavaScript format exactly
+	// Default to Reth logs if no execution client is detected
 	rethLogs := []string{
 		"Reth v1.3.12",
 		"2025-06-15T13:50:49.381500Z INFO Canonical chain committed number=22674573 hash=0x42e0c59670d0aae3e65fc1109baec597207bb20eacceab850374b706 elapsed=796.542μs",
@@ -71,8 +73,24 @@ func (m *MonitorApp) updateExecutionLogs(ctx context.Context) {
 		"2025-06-15T13:51:17.789Z INFO State trie update merkle_root=0x8a4b2c7d9e3f1a6b5c8d2e7f4a9b3c6d8e1f4a7b2c5d8e1f4a7b block=22674578",
 	}
 
+	// Geth logs for when Geth is running instead of Reth
+	gethLogs := []string{
+		"Geth v1.14.8-stable",
+		"INFO [06-15|13:50:49.381] Imported new chain segment               blocks=1 txs=156 mgas=12.345 elapsed=1.234s mgasps=10.001 number=22674573 hash=0x42e0c5..374b706 dirty=45.67MiB",
+		"INFO [06-15|13:51:01.107] State heal in progress                   accounts=1234567@0x89ab..cdef slots=987654@0x1234..5678 codes=45@0xabcd..ef01 nodes=12345@0x5678..9abc pending=67",
+		"INFO [06-15|13:51:01.267] Block synchronisation started",
+		"INFO [06-15|13:51:02.187] Imported new chain segment               blocks=2 txs=289 mgas=15.678 elapsed=1.567s mgasps=10.003 number=22674575 hash=0xca5d0e..bdb6 dirty=52.34MiB",
+		"INFO [06-15|13:51:13.279] Persisted trie from memory database      nodes=45678 size=67.89MiB time=234.567ms gcnodes=12345 gcsize=23.45MiB gctime=45.678ms livenodes=34567 livesize=44.55MiB",
+		"INFO [06-15|13:51:15.123] Fast sync complete, auto disabling",
+		"INFO [06-15|13:51:16.456] Snap sync complete, auto disabling",
+		"INFO [06-15|13:51:17.789] Chain head was updated                   number=22674578 hash=0x8a4b2c..7b2c5d root=0x9e3f1a..1f4a7b elapsed=567.234ms",
+		"INFO [06-15|13:51:18.123] Committed new head block                 number=22674579 hash=0x1a6b5c..8e1f4a txs=234 gas=18234567 elapsed=345.678ms",
+	}
+
 	logIndex := 0
 	var logBuffer []string
+	var currentClientName string
+	var currentLogs []string
 
 	for {
 		select {
@@ -85,58 +103,124 @@ func (m *MonitorApp) updateExecutionLogs(ctx context.Context) {
 				continue
 			}
 
-			// Get current log entry
-			currentEntry := rethLogs[logIndex%len(rethLogs)]
+			// Detect which execution client is running
+			runningClients := utils.GetRunningClients()
+			var executionClient *types.ClientStatus
 
-			// Update timestamps and block numbers for realism
-			if !strings.Contains(currentEntry, "Reth v") {
-				// Update timestamp
-				timestamp := time.Now().Format("2006-01-02T15:04:05.000000Z")
-				if strings.Contains(currentEntry, "2025-06-15T") {
-					// Replace the timestamp part
-					parts := strings.Fields(currentEntry)
-					if len(parts) > 0 {
-						parts[0] = timestamp
-						currentEntry = strings.Join(parts, " ")
-					}
+			for _, client := range runningClients {
+				if client.Name == "Geth" || client.Name == "Reth" {
+					executionClient = &client
+					break
+				}
+			}
+
+			// Update panel title and logs based on detected client
+			if executionClient != nil {
+				if currentClientName != executionClient.Name {
+					// Client changed, reset everything
+					currentClientName = executionClient.Name
+					logIndex = 0
+					logBuffer = []string{}
+
+					// Update panel title
+					m.App.QueueUpdateDraw(func() {
+						if executionClient.Name == "Geth" {
+							m.ExecutionLogBox.SetTitle(" Geth ⚙️ ")
+							currentLogs = gethLogs
+						} else {
+							m.ExecutionLogBox.SetTitle(" Reth ⚡ ")
+							currentLogs = rethLogs
+						}
+					})
 				}
 
-				// Update block numbers progressively
-				currentBlock := 22674573 + int(time.Now().Unix()%1000)
-				currentEntry = strings.ReplaceAll(currentEntry, "22674573", fmt.Sprintf("%d", currentBlock))
-				currentEntry = strings.ReplaceAll(currentEntry, "22674574", fmt.Sprintf("%d", currentBlock+1))
-				currentEntry = strings.ReplaceAll(currentEntry, "22674575", fmt.Sprintf("%d", currentBlock+2))
-				currentEntry = strings.ReplaceAll(currentEntry, "22674576", fmt.Sprintf("%d", currentBlock+3))
-				currentEntry = strings.ReplaceAll(currentEntry, "22674577", fmt.Sprintf("%d", currentBlock+4))
-				currentEntry = strings.ReplaceAll(currentEntry, "22674578", fmt.Sprintf("%d", currentBlock+5))
+				// Try to get real logs first
+				realLogs := GetLatestLogs(strings.ToLower(executionClient.Name), 10)
+				if len(realLogs) > 0 && realLogs[0] != fmt.Sprintf("No log files found for %s", strings.ToLower(executionClient.Name)) {
+					// Use real logs
+					content := strings.Join(realLogs, "\n")
+					select {
+					case m.ExecutionLogChan <- content:
+					default:
+						// Channel full, skip update
+					}
+				} else {
+					// Fall back to simulated logs
+					if len(currentLogs) > 0 {
+						currentEntry := currentLogs[logIndex%len(currentLogs)]
+
+						// Update timestamps and block numbers for realism
+						if !strings.Contains(currentEntry, "v1.") {
+							// Update timestamp for Geth format
+							if executionClient.Name == "Geth" {
+								timestamp := time.Now().Format("01-02|15:04:05.000")
+								if strings.Contains(currentEntry, "06-15|") {
+									currentEntry = strings.Replace(currentEntry, "06-15|13:5", timestamp[:len(timestamp)-4]+":5", 1)
+								}
+							} else {
+								// Update timestamp for Reth format
+								timestamp := time.Now().Format("2006-01-02T15:04:05.000000Z")
+								if strings.Contains(currentEntry, "2025-06-15T") {
+									parts := strings.Fields(currentEntry)
+									if len(parts) > 0 {
+										parts[0] = timestamp
+										currentEntry = strings.Join(parts, " ")
+									}
+								}
+							}
+
+							// Update block numbers progressively
+							currentBlock := 22674573 + int(time.Now().Unix()%1000)
+							currentEntry = strings.ReplaceAll(currentEntry, "22674573", fmt.Sprintf("%d", currentBlock))
+							currentEntry = strings.ReplaceAll(currentEntry, "22674574", fmt.Sprintf("%d", currentBlock+1))
+							currentEntry = strings.ReplaceAll(currentEntry, "22674575", fmt.Sprintf("%d", currentBlock+2))
+							currentEntry = strings.ReplaceAll(currentEntry, "22674576", fmt.Sprintf("%d", currentBlock+3))
+							currentEntry = strings.ReplaceAll(currentEntry, "22674577", fmt.Sprintf("%d", currentBlock+4))
+							currentEntry = strings.ReplaceAll(currentEntry, "22674578", fmt.Sprintf("%d", currentBlock+5))
+							currentEntry = strings.ReplaceAll(currentEntry, "22674579", fmt.Sprintf("%d", currentBlock+6))
+						}
+
+						// Format the log line
+						formattedLine := formatLogLines(currentEntry)
+
+						// Add to buffer (matching JavaScript ensureBufferFillsWidget logic)
+						logBuffer = append(logBuffer, formattedLine)
+
+						// Keep buffer size manageable (matching JavaScript visibleHeight logic)
+						if len(logBuffer) > 50 {
+							logBuffer = logBuffer[len(logBuffer)-45:] // Keep last 45 lines
+						}
+
+						// Update the display
+						content := strings.Join(logBuffer, "\n")
+						select {
+						case m.ExecutionLogChan <- content:
+						default:
+							// Channel full, skip update
+						}
+
+						logIndex++
+					}
+				}
+			} else {
+				// No execution client running
+				if currentClientName != "None" {
+					currentClientName = "None"
+					m.App.QueueUpdateDraw(func() {
+						m.ExecutionLogBox.SetTitle(" Execution Client (Not Running) ❌ ")
+					})
+
+					select {
+					case m.ExecutionLogChan <- "[red]No execution client detected.[white]\n[yellow]Start Geth or Reth to see live logs.[white]":
+					default:
+					}
+				}
 			}
-
-			// Format the log line
-			formattedLine := formatLogLines(currentEntry)
-
-			// Add to buffer (matching JavaScript ensureBufferFillsWidget logic)
-			logBuffer = append(logBuffer, formattedLine)
-
-			// Keep buffer size manageable (matching JavaScript visibleHeight logic)
-			if len(logBuffer) > 50 {
-				logBuffer = logBuffer[len(logBuffer)-45:] // Keep last 45 lines
-			}
-
-			// Update the display
-			// Send to execution log channel
-			content := strings.Join(logBuffer, "\n")
-			select {
-			case m.ExecutionLogChan <- content:
-			default:
-				// Channel full, skip update
-			}
-
-			logIndex++
 		}
 	}
 }
 
-// Update consensus client logs (matching consensusLog.js)
+// Update consensus client logs dynamically based on running clients
 func (m *MonitorApp) updateConsensusLogs(ctx context.Context) {
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
@@ -154,8 +238,22 @@ func (m *MonitorApp) updateConsensusLogs(ctx context.Context) {
 		"Jun 10 13:51:50.456 INFO Attestation published slot=11894955 committee_index=5 validator_index=12345",
 	}
 
+	// Prysm logs for when Prysm is running instead of Lighthouse
+	prysmLogs := []string{
+		"Prysm Beacon Chain v4.2.1",
+		"time=\"2024-06-10T13:50:36Z\" level=info msg=\"Successfully processed block\" block=0xbd82ff3359a52ebc815f8b171ee6465d53e5598ae141612c68aef3793b940f7ff slot=11894951",
+		"time=\"2024-06-10T13:50:41Z\" level=info msg=\"Synced up to slot\" slot=11894952 finalized_epoch=372184 finalized_root=0xd482ff3359e52ebc815f8b171ee6465d5ae3e5598ae141612c68aef3793b940f7ff",
+		"time=\"2024-06-10T13:50:45Z\" level=info msg=\"Successfully verified incoming block\" slot=11894953 proposer=12345 parentRoot=0x9d1329711ce559e1f47bd499d0ae2be3f3ae4560e0bb0aded6b10dd312df78",
+		"time=\"2024-06-10T13:51:05Z\" level=info msg=\"Processed attestations\" count=128 slot=11894954 epoch=372185",
+		"time=\"2024-06-10T13:51:32Z\" level=info msg=\"New payload received\" slot=11894955 block_hash=0xef7fd29c91e856c43dee9573f392f96ae540d7ffce032408ba9a1a053db gas_used=15234567",
+		"time=\"2024-06-10T13:51:45Z\" level=info msg=\"Finalized checkpoint\" epoch=372185 root=0x6660c6f5c489bbdc35507dfb74b016139c885f3b52",
+		"time=\"2024-06-10T13:51:50Z\" level=info msg=\"Submitted attestation\" slot=11894956 committee_index=7 validator_index=23456 source_epoch=372184 target_epoch=372185",
+	}
+
 	logIndex := 0
 	var logBuffer []string
+	var currentClientName string
+	var currentLogs []string
 
 	for {
 		select {
@@ -168,52 +266,121 @@ func (m *MonitorApp) updateConsensusLogs(ctx context.Context) {
 				continue
 			}
 
-			// Get current log entry
-			currentEntry := lighthouseLogs[logIndex%len(lighthouseLogs)]
+			// Detect which consensus client is running
+			runningClients := utils.GetRunningClients()
+			var consensusClient *types.ClientStatus
 
-			// Update timestamps and slot numbers for realism
-			if !strings.Contains(currentEntry, "Lighthouse v") {
-				// Update timestamp to current time (maintaining Jun 10 format)
-				currentTime := time.Now().Format("Jan 02 15:04:05.000")
-				if strings.Contains(currentEntry, "Jun 10 ") {
-					// Replace the timestamp part
-					parts := strings.Fields(currentEntry)
-					if len(parts) >= 3 {
-						parts[0] = currentTime[:6] // "Jun 10" part
-						parts[1] = currentTime[7:] // Time part
-						currentEntry = strings.Join(parts, " ")
-					}
+			for _, client := range runningClients {
+				if client.Name == "Lighthouse" || client.Name == "Prysm" {
+					consensusClient = &client
+					break
+				}
+			}
+
+			// Update panel title and logs based on detected client
+			if consensusClient != nil {
+				if currentClientName != consensusClient.Name {
+					// Client changed, reset everything
+					currentClientName = consensusClient.Name
+					logIndex = 0
+					logBuffer = []string{}
+
+					// Update panel title
+					m.App.QueueUpdateDraw(func() {
+						if consensusClient.Name == "Prysm" {
+							m.ConsensusLogBox.SetTitle(" Prysm 🏛️ ")
+							currentLogs = prysmLogs
+						} else {
+							m.ConsensusLogBox.SetTitle(" Lighthouse 🏛️ ")
+							currentLogs = lighthouseLogs
+						}
+					})
 				}
 
-				// Update slot numbers progressively
-				currentSlot := 11894951 + int(time.Now().Unix()%100)
-				currentEntry = strings.ReplaceAll(currentEntry, "11894951", fmt.Sprintf("%d", currentSlot))
-				currentEntry = strings.ReplaceAll(currentEntry, "11894952", fmt.Sprintf("%d", currentSlot+1))
-				currentEntry = strings.ReplaceAll(currentEntry, "11894953", fmt.Sprintf("%d", currentSlot+2))
-				currentEntry = strings.ReplaceAll(currentEntry, "11894954", fmt.Sprintf("%d", currentSlot+3))
-				currentEntry = strings.ReplaceAll(currentEntry, "11894955", fmt.Sprintf("%d", currentSlot+4))
+				// Try to get real logs first
+				realLogs := GetLatestLogs(strings.ToLower(consensusClient.Name), 10)
+				if len(realLogs) > 0 && realLogs[0] != fmt.Sprintf("No log files found for %s", strings.ToLower(consensusClient.Name)) {
+					// Use real logs
+					content := strings.Join(realLogs, "\n")
+					select {
+					case m.ConsensusLogChan <- content:
+					default:
+						// Channel full, skip update
+					}
+				} else {
+					// Fall back to simulated logs
+					if len(currentLogs) > 0 {
+						currentEntry := currentLogs[logIndex%len(currentLogs)]
+
+						// Update timestamps and slot numbers for realism
+						if !strings.Contains(currentEntry, "v7.") && !strings.Contains(currentEntry, "v4.") {
+							if consensusClient.Name == "Prysm" {
+								// Update timestamp for Prysm format
+								timestamp := time.Now().Format("2006-01-02T15:04:05Z")
+								if strings.Contains(currentEntry, "2024-06-10T") {
+									currentEntry = strings.Replace(currentEntry, "2024-06-10T13:5", timestamp[:len(timestamp)-9]+":5", 1)
+								}
+							} else {
+								// Update timestamp for Lighthouse format (maintaining Jun 10 format)
+								currentTime := time.Now().Format("Jan 02 15:04:05.000")
+								if strings.Contains(currentEntry, "Jun 10 ") {
+									// Replace the timestamp part
+									parts := strings.Fields(currentEntry)
+									if len(parts) >= 3 {
+										parts[0] = currentTime[:6] // "Jun 10" part
+										parts[1] = currentTime[7:] // Time part
+										currentEntry = strings.Join(parts, " ")
+									}
+								}
+							}
+
+							// Update slot numbers progressively
+							baseSlot := 11894951
+							currentSlot := baseSlot + int(time.Now().Unix()%100)
+							currentEntry = strings.ReplaceAll(currentEntry, "11894951", fmt.Sprintf("%d", currentSlot))
+							currentEntry = strings.ReplaceAll(currentEntry, "11894952", fmt.Sprintf("%d", currentSlot+1))
+							currentEntry = strings.ReplaceAll(currentEntry, "11894953", fmt.Sprintf("%d", currentSlot+2))
+							currentEntry = strings.ReplaceAll(currentEntry, "11894954", fmt.Sprintf("%d", currentSlot+3))
+							currentEntry = strings.ReplaceAll(currentEntry, "11894955", fmt.Sprintf("%d", currentSlot+4))
+							currentEntry = strings.ReplaceAll(currentEntry, "11894956", fmt.Sprintf("%d", currentSlot+5))
+						}
+
+						// Format the log line
+						formattedLine := formatLogLines(currentEntry)
+
+						// Add to buffer
+						logBuffer = append(logBuffer, formattedLine)
+
+						// Keep buffer size manageable
+						if len(logBuffer) > 50 {
+							logBuffer = logBuffer[len(logBuffer)-45:]
+						}
+
+						// Send to consensus log channel
+						content := strings.Join(logBuffer, "\n")
+						select {
+						case m.ConsensusLogChan <- content:
+						default:
+							// Channel full, skip update
+						}
+
+						logIndex++
+					}
+				}
+			} else {
+				// No consensus client running
+				if currentClientName != "None" {
+					currentClientName = "None"
+					m.App.QueueUpdateDraw(func() {
+						m.ConsensusLogBox.SetTitle(" Consensus Client (Not Running) ❌ ")
+					})
+
+					select {
+					case m.ConsensusLogChan <- "[red]No consensus client detected.[white]\n[yellow]Start Lighthouse or Prysm to see live logs.[white]":
+					default:
+					}
+				}
 			}
-
-			// Format the log line
-			formattedLine := formatLogLines(currentEntry)
-
-			// Add to buffer
-			logBuffer = append(logBuffer, formattedLine)
-
-			// Keep buffer size manageable
-			if len(logBuffer) > 50 {
-				logBuffer = logBuffer[len(logBuffer)-45:]
-			}
-
-			// Send to consensus log channel
-			content := strings.Join(logBuffer, "\n")
-			select {
-			case m.ConsensusLogChan <- content:
-			default:
-				// Channel full, skip update
-			}
-
-			logIndex++
 		}
 	}
 }
@@ -428,12 +595,12 @@ func (m *MonitorApp) updateRPCInfo(ctx context.Context) {
 	}
 }
 
-// Update Juno client logs (matching Starknet node logs)
+// Update Juno client logs dynamically based on running client and real logs
 func (m *MonitorApp) updateJunoLogs(ctx context.Context) {
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
 
-	// Realistic Juno logs matching typical Starknet node output
+	// Realistic Juno logs matching typical Starknet node output (fallback)
 	junoLogs := []string{
 		"Juno v0.12.1 - Starknet Full Node",
 		"INFO [12-07|15:32:37.437] Starting Juno node syncing with Starknet Mainnet",
@@ -454,6 +621,7 @@ func (m *MonitorApp) updateJunoLogs(ctx context.Context) {
 
 	var logBuffer []string
 	logIndex := 0
+	var currentClientName string
 
 	for {
 		select {
@@ -466,56 +634,116 @@ func (m *MonitorApp) updateJunoLogs(ctx context.Context) {
 				continue
 			}
 
-			if logIndex < len(junoLogs) {
-				currentEntry := junoLogs[logIndex]
+			// Detect if Juno client is running
+			runningClients := utils.GetRunningClients()
+			var junoClient *types.ClientStatus
 
-				// Dynamic updates for realistic logs
-				if strings.Contains(currentEntry, "block_number=") {
-					// Update block numbers progressively
-					baseBlock := 650328
-					currentBlock := baseBlock + int(time.Now().Unix()%100)
-					currentEntry = strings.ReplaceAll(currentEntry, "650328", fmt.Sprintf("%d", currentBlock))
-					currentEntry = strings.ReplaceAll(currentEntry, "650329", fmt.Sprintf("%d", currentBlock+1))
-					currentEntry = strings.ReplaceAll(currentEntry, "650330", fmt.Sprintf("%d", currentBlock+2))
-					currentEntry = strings.ReplaceAll(currentEntry, "650331", fmt.Sprintf("%d", currentBlock+3))
-					currentEntry = strings.ReplaceAll(currentEntry, "650335", fmt.Sprintf("%d", currentBlock+7))
+			for _, client := range runningClients {
+				if client.Name == "Juno" {
+					junoClient = &client
+					break
+				}
+			}
+
+			// Update panel title and logs based on detected client
+			if junoClient != nil {
+				if currentClientName != junoClient.Name {
+					// Client changed, reset everything
+					currentClientName = junoClient.Name
+					logIndex = 0
+					logBuffer = []string{}
+
+					// Update panel title to show it's running
+					m.App.QueueUpdateDraw(func() {
+						m.JunoLogBox.SetTitle(" Juno 🌟 (Running) ")
+					})
 				}
 
-				// Update timestamps to current time
-				if strings.Contains(currentEntry, "15:32:") {
-					now := time.Now()
-					timeStr := now.Format("15:04:05")
-					// Replace the timestamp part
-					parts := strings.Split(currentEntry, "] ")
-					if len(parts) >= 2 {
-						parts[0] = fmt.Sprintf("INFO [12-07|%s.%03d", timeStr, now.Nanosecond()/1000000)
-						currentEntry = strings.Join(parts, "] ")
+				// Try to get real logs first from Juno log directory
+				realLogs := GetLatestLogs("juno", 10)
+				if len(realLogs) > 0 && realLogs[0] != "No log files found for juno" {
+					// Use real logs from Juno client
+					var formattedRealLogs []string
+					for _, logLine := range realLogs {
+						if strings.TrimSpace(logLine) != "" {
+							formattedLine := formatLogLines(logLine)
+							formattedRealLogs = append(formattedRealLogs, formattedLine)
+						}
+					}
+
+					content := strings.Join(formattedRealLogs, "\n")
+					select {
+					case m.JunoLogChan <- content:
+					default:
+						// Channel full, skip update
+					}
+				} else {
+					// Fall back to simulated logs if real logs aren't available
+					if logIndex < len(junoLogs) {
+						currentEntry := junoLogs[logIndex]
+
+						// Dynamic updates for realistic logs
+						if strings.Contains(currentEntry, "block_number=") {
+							// Update block numbers progressively
+							baseBlock := 650328
+							currentBlock := baseBlock + int(time.Now().Unix()%100)
+							currentEntry = strings.ReplaceAll(currentEntry, "650328", fmt.Sprintf("%d", currentBlock))
+							currentEntry = strings.ReplaceAll(currentEntry, "650329", fmt.Sprintf("%d", currentBlock+1))
+							currentEntry = strings.ReplaceAll(currentEntry, "650330", fmt.Sprintf("%d", currentBlock+2))
+							currentEntry = strings.ReplaceAll(currentEntry, "650331", fmt.Sprintf("%d", currentBlock+3))
+							currentEntry = strings.ReplaceAll(currentEntry, "650335", fmt.Sprintf("%d", currentBlock+7))
+						}
+
+						// Update timestamps to current time
+						if strings.Contains(currentEntry, "15:32:") {
+							now := time.Now()
+							timeStr := now.Format("15:04:05")
+							// Replace the timestamp part
+							parts := strings.Split(currentEntry, "] ")
+							if len(parts) >= 2 {
+								parts[0] = fmt.Sprintf("INFO [12-07|%s.%03d", timeStr, now.Nanosecond()/1000000)
+								currentEntry = strings.Join(parts, "] ")
+							}
+						}
+
+						// Format the log line
+						formattedLine := formatLogLines(currentEntry)
+
+						// Add to buffer
+						logBuffer = append(logBuffer, formattedLine)
+
+						// Keep buffer size manageable
+						if len(logBuffer) > 50 {
+							logBuffer = logBuffer[len(logBuffer)-45:]
+						}
+
+						// Send to Juno log channel
+						content := strings.Join(logBuffer, "\n")
+						select {
+						case m.JunoLogChan <- content:
+						default:
+							// Channel full, skip update
+						}
+
+						logIndex++
+					} else {
+						// Reset to beginning for continuous simulation
+						logIndex = 0
 					}
 				}
-
-				// Format the log line
-				formattedLine := formatLogLines(currentEntry)
-
-				// Add to buffer
-				logBuffer = append(logBuffer, formattedLine)
-
-				// Keep buffer size manageable
-				if len(logBuffer) > 50 {
-					logBuffer = logBuffer[len(logBuffer)-45:]
-				}
-
-				// Send to Juno log channel
-				content := strings.Join(logBuffer, "\n")
-				select {
-				case m.JunoLogChan <- content:
-				default:
-					// Channel full, skip update
-				}
-
-				logIndex++
 			} else {
-				// Reset to beginning for continuous simulation
-				logIndex = 0
+				// No Juno client running
+				if currentClientName != "None" {
+					currentClientName = "None"
+					m.App.QueueUpdateDraw(func() {
+						m.JunoLogBox.SetTitle(" Juno (Not Running) ❌ ")
+					})
+
+					select {
+					case m.JunoLogChan <- "[red]No Juno client detected.[white]\n[yellow]Start Juno to see live logs.[white]":
+					default:
+					}
+				}
 			}
 		}
 	}

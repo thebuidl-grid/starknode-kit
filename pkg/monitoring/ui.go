@@ -23,21 +23,21 @@ func (m *MonitorApp) setupUI() {
 	m.ExecutionLogBox = m.createVibrantPanel("Reth", tcell.ColorTeal)
 	m.ExecutionLogBox.SetBorder(true).
 		SetBorderColor(tcell.ColorTeal).
-		SetTitle(" Reth ").
+		SetTitle(" Execution Client ⚡ ").
 		SetTitleAlign(tview.AlignLeft)
 
 	// Create consensus client log panel (matching consensusLog.js)
 	m.ConsensusLogBox = m.createVibrantPanel("Lighthouse", tcell.ColorTeal)
 	m.ConsensusLogBox.SetBorder(true).
 		SetBorderColor(tcell.ColorTeal).
-		SetTitle(" Lighthouse ").
+		SetTitle(" Consensus Client 🏛️ ").
 		SetTitleAlign(tview.AlignLeft)
 
 	// Create Juno Starknet client log panel
 	m.JunoLogBox = m.createVibrantPanel("Juno", tcell.ColorPurple)
 	m.JunoLogBox.SetBorder(true).
 		SetBorderColor(tcell.ColorPurple).
-		SetTitle(" Juno ").
+		SetTitle(" Juno 🌟 ").
 		SetTitleAlign(tview.AlignLeft)
 
 	// Create status box (matching statusBox.js)
