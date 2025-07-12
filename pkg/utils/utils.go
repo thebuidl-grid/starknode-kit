@@ -181,6 +181,19 @@ func GetRunningClients() []types.ClientStatus {
 		clients = append(clients, status)
 	}
 
+	// Check for Juno (Starknet client)
+	if junoInfo := process.GetProcessInfo("juno"); junoInfo != nil {
+		status := types.ClientStatus{
+			Name:       "Juno",
+			Status:     junoInfo.Status,
+			PID:        junoInfo.PID,
+			Uptime:     junoInfo.Uptime,
+			Version:    GetClientVersion("juno"),
+			SyncStatus: GetJunoSyncStatus(),
+		}
+		clients = append(clients, status)
+	}
+
 	return clients
 }
 
