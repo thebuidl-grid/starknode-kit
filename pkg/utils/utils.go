@@ -60,10 +60,14 @@ func LoadConfig() (t.StarkNodeKitConfig, error) {
 		return t.StarkNodeKitConfig{}, err
 	}
 	err = godotenv.Load(pkg.EnvFIlePath)
-	if err != nil {
-		return t.StarkNodeKitConfig{}, err
+	if err == nil {
+		err = envsubt.Unmarshal(cfgByt, &cfg)
+		if err != nil {
+			return t.StarkNodeKitConfig{}, err
+		}
+		return cfg, nil
 	}
-	err = envsubt.Unmarshal(cfgByt, &cfg)
+	err = yaml.Unmarshal(cfgByt, &cfg)
 	if err != nil {
 		return t.StarkNodeKitConfig{}, err
 	}

@@ -8,11 +8,18 @@
 
 | Command      | Description                                                |
 | ------------ | ---------------------------------------------------------- |
-| `add`        | Add an Ethereum client to the configuration                |
-| `remove`     | Removes a specified resource (client, config, etc.)        |
+| `add`        | Add an Ethereum or Starknet client to the config           |
 | `completion` | Generate the autocompletion script for the specified shell |
-| `set`        | Set config values for execution or consensus clients       |
+| `config`     | Show the configured Ethereum clients                       |
 | `help`       | Display help about any command                             |
+| `init`       | Create a default configuration file                        |
+| `monitor`    | Launch real-time monitoring dashboard                      |
+| `remove`     | Remove a specified resource                                |
+| `run`        | Run local Starknet infrastructure services                 |
+| `set`        | Set config values for execution or consensus clients       |
+| `start`      | Run the configured Ethereum clients                        |
+| `stop`       | Stop the configured Ethereum clients                       |
+| `update`     | Check for and install client updates                       |
 
 ---
 
