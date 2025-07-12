@@ -638,8 +638,7 @@ func GetVersionNumber(client string) string {
 	return ""
 }
 
-func CompareClientVersions(client, installedVersion string) (bool, string) {
-	var latestVersion string
+func CompareClientVersions(client, installedVersion string) (isUpToDate bool, latestVersion string) {
 	switch client {
 	case "reth":
 		latestVersion = versions.LatestRethVersion
@@ -656,10 +655,8 @@ func CompareClientVersions(client, installedVersion string) (bool, string) {
 		return false, ""
 	}
 
-	if compareVersions(installedVersion, latestVersion) < 0 {
-		return false, latestVersion
-	}
-	return true, latestVersion
+	isUpToDate = compareVersions(installedVersion, latestVersion) >= 0
+	return // Implicit return of named values
 }
 
 func compareVersions(v1, v2 string) int {
