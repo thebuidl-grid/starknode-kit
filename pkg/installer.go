@@ -648,8 +648,7 @@ func CompareClientVersions(client, installedVersion string) (bool, string) {
 	case "lighthouse":
 		latestVersion = versions.LatestLighthouseVersion
 	case "prysm":
-		// Just use a hard-coded latest version for Prysm
-		latestVersion = "4.0.5" // Replace with an appropriate version
+		latestVersion = versions.LatestPrysmVersion
 	case "juno":
 		latestVersion = versions.LatestJunoVersion
 	default:
