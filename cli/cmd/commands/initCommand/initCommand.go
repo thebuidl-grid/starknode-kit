@@ -75,7 +75,7 @@ func (m InitFlowModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.fullNodeSetupScreen = model
 			if model.done {
 				m.currentStep = stepClientInstallation // TODO we need to use a slise to store screens
-				return m, tea.Quit
+				return m, m.clientInstallationScreen.Init()
 			}
 		}
 		return m, cmd
