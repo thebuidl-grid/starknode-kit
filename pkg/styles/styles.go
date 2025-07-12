@@ -12,17 +12,17 @@ var (
 
 	// Secondary style – used for secondary buttons or muted text
 	Secondary = lipgloss.NewStyle().
-			Background(lipgloss.Color("#6c757d")). // gray
+			Foreground(lipgloss.Color("#6c757d")). // gray
 			Padding(0, 1)
 
 	// Danger style – for errors
 	Danger = lipgloss.NewStyle().
-		Background(lipgloss.Color("#dc3545")). // red
+		Foreground(lipgloss.Color("#dc3545")). // red
 		Padding(0, 0)
 
 	// Warning style – for caution/warnings
 	Warning = lipgloss.NewStyle().
-		Background(lipgloss.Color("#ffc107")). // yellow
+		Foreground(lipgloss.Color("#ffc107")). // yellow
 		Padding(0, 1)
 
 	// Info style – for informational banners

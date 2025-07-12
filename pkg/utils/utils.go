@@ -6,6 +6,7 @@ import (
 	"path"
 	"starknode-kit/pkg"
 	"starknode-kit/pkg/process"
+	"starknode-kit/pkg/styles"
 	"starknode-kit/pkg/types"
 	t "starknode-kit/pkg/types"
 	"starknode-kit/pkg/versions"
@@ -61,11 +62,11 @@ func LoadConfig() (t.StarkNodeKitConfig, error) {
 	}
 	err = godotenv.Load(pkg.EnvFIlePath)
 	if err != nil {
-		return t.StarkNodeKitConfig{}, err
+		fmt.Println(styles.Warning.Render(err.Error()))
 	}
 	err = envsubt.Unmarshal(cfgByt, &cfg)
 	if err != nil {
-		return t.StarkNodeKitConfig{}, err
+		fmt.Println(styles.Warning.Render(err.Error()))
 	}
 	return cfg, nil
 }
