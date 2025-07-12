@@ -2,4 +2,4 @@ package commands
 
 import "starknode-kit/pkg"
 
-var installer = pkg.NewInstaller(pkg.InstallClientsDir)
+var Installer = pkg.NewInstaller(pkg.InstallClientsDir)
