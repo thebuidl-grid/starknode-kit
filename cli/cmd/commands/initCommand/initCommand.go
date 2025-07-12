@@ -48,11 +48,6 @@ func (m InitFlowModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.isQuitting = true
 			return m, tea.Quit
 
-		case "-":
-			if m.currentStep > 0 {
-				m.currentStep--
-			}
-			return m, nil
 		}
 	}
 	// Screen-specific update
@@ -60,7 +55,7 @@ func (m InitFlowModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case stepSelectNodeType:
 		updated, cmd := m.selectNodeScreen.Update(msg)
-		if model, ok := updated.(*screen); ok {
+		if model, ok := updated.(*Screen); ok {
 			m.selectNodeScreen = model
 			if model.done {
 				m.currentStep = stepFullNodeSetup
@@ -72,7 +67,7 @@ func (m InitFlowModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case stepFullNodeSetup:
 		updated, cmd := m.fullNodeSetupScreen.Update(msg)
-		if model, ok := updated.(*screen); ok {
+		if model, ok := updated.(*Screen); ok {
 			m.fullNodeSetupScreen = model
 			if model.done {
 				return m, tea.Quit
@@ -94,10 +89,10 @@ func runInitFlow(cmd *cobra.Command, args []string) {
 	utils.ClearScreen()
 
 	// Init full node screen
-	fullNodeSetupModel := NewFullNodeScreen()
+	fullNodeSetupModel := NewFullNodeConfigScreen()
 
 	// Init select screen
-	selectNodeModel := NewSelectScreen()
+	selectNodeModel := NewNodeSelectionScreen()
 
 	// Create root program model
 	programModel := InitFlowModel{

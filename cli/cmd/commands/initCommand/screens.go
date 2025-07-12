@@ -2,54 +2,56 @@ package initcommand
 
 import (
 	"fmt"
+
 	"starknode-kit/pkg"
 	"starknode-kit/pkg/styles"
 	"starknode-kit/pkg/types"
+	"starknode-kit/pkg/utils"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"gopkg.in/yaml.v3"
 )
 
-// Step represents the flow step
+// Constants and Types
 type Step int
 
 const (
-	stepSelectElClient Step = iota
+	stepSelectNetwork Step = iota
+	stepSelectElClient
 	stepSelectClClient
+	stepInstall
 )
 
-// Scene interface to allow sub-screens to define their logic
+const (
+	numMainChoices = 3
+)
+
+// Scene interface defines common behavior for all screens
 type Scene interface {
 	View() string
 	Enter()
 }
 
-// screen is the base type that delegates to an active Scene
-type screen struct {
+// Base screen type that delegates to active Scene
+type Screen struct {
 	choice    int
 	done      bool
 	numChoice int
 	step      Step
-
-	current Scene
+	current   Scene
 }
 
-func (m *screen) Init() tea.Cmd { return nil }
+// Base screen methods
+func (m *Screen) Init() tea.Cmd { return nil }
 
-func (m *screen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Screen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if key, ok := msg.(tea.KeyMsg); ok {
+
 		switch key.String() {
 		case "j", "down":
-			if m.choice < m.numChoice {
-				m.choice++
-			} else {
-				m.choice = 0
-			}
+			m.choice = (m.choice + 1) % (m.numChoice + 1)
 		case "k", "up":
-			if m.choice > 0 {
-				m.choice--
-			} else {
-				m.choice = m.numChoice
-			}
+			m.choice = (m.choice - 1 + m.numChoice + 1) % (m.numChoice + 1)
 		case "-":
 			if m.step > 0 {
 				m.step--
@@ -58,116 +60,146 @@ func (m *screen) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.current != nil {
 				m.current.Enter()
 			}
-			return m, nil
 		}
+		return m, nil
 	}
 	return m, nil
 }
 
-func (m *screen) View() string {
+func (m *Screen) View() string {
 	if m.current != nil {
 		return m.current.View()
 	}
 	return ""
 }
 
-func (m *screen) SetScene(scene Scene) {
+func (m *Screen) SetScene(scene Scene) {
 	m.current = scene
 }
 
-func (m *screen) Done() bool {
+func (m *Screen) Done() bool {
 	return m.done
 }
 
-type selectModel struct {
-	*screen
+// Node Selection Screen
+type NodeSelectionScreen struct {
+	*Screen
 }
 
-func (m *selectModel) View() string {
-	c := m.screen.choice
-	header := pkg.Banner.String()
-	header += "\nWhat type of node do you want to run?\n\n"
-	header += "%s\n\n"
-	header += "Press %s to select, %s to confirm\n"
-
-	choices := fmt.Sprintf(
-		"%s\n%s\n%s",
-		styles.Checkbox("Full node", c == 0),
-		styles.Checkbox("Full Starknet node", c == 1),
-		styles.Checkbox("Validator node", c == 2),
-	)
-
-	return fmt.Sprintf(
-		header,
-		choices,
-		styles.Primary.Render("↑/↓ or j/k"),
-		styles.Primary.Render("Enter"),
-	)
-}
-
-func (m *selectModel) Enter() {
-	// handle selection logic here
-	m.screen.done = true
-}
-
-type fullNodeModel struct {
-	elClient types.ClientType
-	clClient types.ClientType
-	*screen
-}
-
-func (m *fullNodeModel) View() string {
-	var prompt string
-	var options string
-	choice := m.choice
-
-	switch m.step {
-	case stepSelectElClient:
-		prompt = "Which execution client do you want to use?"
-		for i, c := range elClientOptions {
-			options += fmt.Sprintf("%s\n", styles.Checkbox(c.String(), i == choice))
-		}
-	case stepSelectClClient:
-		prompt = "Which consensus client do you want to use?"
-		for i, c := range clClientOptions {
-			options += fmt.Sprintf("%s\n", styles.Checkbox(c.String(), i == choice))
-		}
-	default:
-		return "Configuration complete."
-	}
-
-	return fmt.Sprintf("%s\n\n%s", prompt, options)
-}
-
-func (m *fullNodeModel) Enter() {
-	switch m.step {
-	case stepSelectElClient:
-		index := m.choice
-		m.elClient = elClientOptions[index]
-		m.step = stepSelectClClient
-		m.choice = 0
-		m.done = false
-
-	case stepSelectClClient:
-		index := m.choice
-		m.clClient = clClientOptions[index]
-		m.choice = 0
-		m.done = true
-	}
-}
-
-func NewSelectScreen() *screen {
-	s := &screen{numChoice: 3, choice: 0}
-	sel := &selectModel{screen: s}
+func NewNodeSelectionScreen() *Screen {
+	s := &Screen{numChoice: numMainChoices - 1, choice: 0}
+	sel := &NodeSelectionScreen{Screen: s}
 	s.SetScene(sel)
 	return s
 }
 
-func NewFullNodeScreen() *screen {
-	s := &screen{numChoice: len(elClientOptions), step: stepSelectElClient, choice: 0}
-	full := &fullNodeModel{screen: s}
+func (m *NodeSelectionScreen) View() string {
+	header := pkg.Banner.String() + "\nWhat type of node do you want to run?\n\n%s\n\n"
+	instructions := fmt.Sprintf(
+		"Press %s to select, %s to confirm",
+		styles.Primary.Render("↑/↓ or j/k"),
+		styles.Primary.Render("Enter"),
+	)
+
+	choices := fmt.Sprintf(
+		"%s\n%s\n%s",
+		styles.Checkbox("Full node", m.choice == 0),
+		styles.Checkbox("Full Starknet node", m.choice == 1),
+		styles.Checkbox("Validator node", m.choice == 2),
+	)
+
+	return fmt.Sprintf(header, choices) + instructions
+}
+
+func (m *NodeSelectionScreen) Enter() {
+	m.done = true
+}
+
+// Full Node Configuration Screen
+type FullNodeConfigScreen struct {
+	network  string
+	elClient types.ClientType
+	clClient types.ClientType
+	*Screen
+}
+
+func NewFullNodeConfigScreen() *Screen {
+	s := &Screen{
+		numChoice: len(supportedNetorks) - 1,
+		step:      stepSelectNetwork,
+		choice:    0,
+	}
+	full := &FullNodeConfigScreen{Screen: s}
 	s.SetScene(full)
 	return s
 }
 
-// NOTE going back does not work 
+func (m *FullNodeConfigScreen) View() string {
+	switch m.step {
+	case stepSelectNetwork:
+		return m.renderSelectionScreen("Which network do you want to use?", supportedNetorks)
+	case stepSelectElClient:
+		return m.renderSelectionScreen("Which execution client do you want to use?", clientTypesToStrings(elClientOptions))
+	case stepSelectClClient:
+		return m.renderSelectionScreen("Which consensus client do you want to use?", clientTypesToStrings(clClientOptions))
+	case stepInstall:
+		return m.renderConfigurationScreen()
+	default:
+		return ""
+	}
+}
+
+func (m *FullNodeConfigScreen) renderSelectionScreen(prompt string, options []string) string {
+	var choices string
+	for i, option := range options {
+		choices += fmt.Sprintf("%s\n", styles.Checkbox(option, i == m.choice))
+	}
+	return fmt.Sprintf("%s\n\n%s", prompt, choices)
+}
+
+func (m *FullNodeConfigScreen) renderConfigurationScreen() string {
+	config := types.StarkNodeKitConfig{
+		Network: m.network,
+		ExecutionCientSettings: types.ClientConfig{
+			Name:          m.elClient,
+			Port:          elClientPort,
+			ExecutionType: "full",
+		},
+		ConsensusCientSettings: types.ClientConfig{
+			Name:                m.clClient,
+			Port:                clClientPort,
+			ConsensusCheckpoint: fmt.Sprintf("https://%s-checkpoint-sync.stakely.io/", m.network),
+		},
+	}
+
+	if err := utils.UpdateStarkNodeConfig(config); err != nil {
+		return fmt.Sprintf("Error saving configuration: %v", err)
+	}
+
+	configBytes, _ := yaml.Marshal(config)
+	return fmt.Sprintf("Configuration generated:\n\n%s\n\nPress Enter to confirm and continue...", string(configBytes))
+}
+
+func (m *FullNodeConfigScreen) Enter() {
+	switch m.step {
+	case stepSelectNetwork:
+		m.network = supportedNetorks[m.choice]
+		m.step = stepSelectElClient
+		m.choice = 0
+		m.numChoice = len(elClientOptions) - 1
+
+	case stepSelectElClient:
+		m.elClient = elClientOptions[m.choice]
+		m.step = stepSelectClClient
+		m.choice = 0
+		m.numChoice = len(clClientOptions) - 1
+
+	case stepSelectClClient:
+		m.clClient = clClientOptions[m.choice]
+		m.step = stepInstall
+		m.numChoice = 0
+
+	case stepInstall:
+		m.done = true
+	}
+}
