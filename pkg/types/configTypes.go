@@ -32,8 +32,6 @@ type ClientConfig struct {
 
 type JunoConfig struct {
 	Port        string   `yaml:"port"`
-	UseSnapshot bool     `yaml:"use_snapshot"`
-	DataDir     string   `yaml:"data_dir"`
 	EthNode     string   `yaml:"eth_node"`
 	Environment []string `yaml:"environment"`
 }
