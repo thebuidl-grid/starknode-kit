@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,6 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"starknode-kit/pkg"
 	"starknode-kit/pkg/types"
 	"starknode-kit/pkg/versions"
 	"strings"
@@ -26,10 +29,24 @@ var (
 		"1.14.12": "293a300d",
 		"1.15.10": "2bf8a789",
 	}
-
-	// Add a new variable for Starknet clients dir
-	StarknetClientsDir = filepath.Join(InstallDir, "starknet_clients")
 )
+
+func getDistro() (string, error) {
+	f, err := os.Open("/etc/os-release")
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "ID=") {
+			return strings.Trim(strings.SplitN(line, "=", 2)[1], "\""), nil
+		}
+	}
+	return "", fmt.Errorf("could not determine Linux distro")
+}
 
 // installer manages Ethereum client installation
 type installer struct {
@@ -92,7 +109,7 @@ func (i *installer) getClientFileName(client types.ClientType) (string, error) {
 		fileName = "prysm.sh"
 	case types.ClientJuno:
 		// Juno is a Go binary, we'll build it from source
-		fileName = fmt.Sprintf("juno-%s", versions.LatestJunoVersion)
+		fileName = fmt.Sprintf("juno-v%s", versions.LatestJunoVersion)
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -114,7 +131,7 @@ func (i *installer) getDownloadURL(client types.ClientType, fileName string) (st
 	case types.ClientPrysm:
 		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
 	case types.ClientJuno:
-		return fmt.Sprintf("https://github.com/NethermindEth/juno/archive/refs/tags/%s.tar.gz", versions.LatestJunoVersion), nil
+		return fmt.Sprintf("https://github.com/NethermindEth/juno/archive/refs/tags/v%s.tar.gz", versions.LatestJunoVersion), nil
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -122,43 +139,22 @@ func (i *installer) getDownloadURL(client types.ClientType, fileName string) (st
 
 // InstallClient installs the specified Ethereum client
 func (i *installer) InstallClient(client types.ClientType) error {
-	// Handle Juno installation separately (npm-based)
-	if client == types.ClientJuno {
-		return i.installJuno()
-	}
-
 	// Get client file name
 	fileName, err := i.getClientFileName(client)
 	if err != nil {
 		return err
 	}
 
-	// Create client directory paths
-	clientDir := filepath.Join(i.InstallDir, string(client))
-	databaseDir := filepath.Join(clientDir, "database")
-	logsDir := filepath.Join(clientDir, "logs")
-
-	// Determine the path to the client binary/script
-	var clientPath string
-	if client == types.ClientPrysm {
-		clientPath = filepath.Join(clientDir, "prysm.sh")
-	} else {
-		clientPath = filepath.Join(clientDir, string(client))
+	// Setup client directories
+	clientDir := i.getClientDirectory(client)
+	if err := i.setupClientDirectories(clientDir); err != nil {
+		return err
 	}
 
-	// Check if client is already installed
-	if _, err := os.Stat(clientPath); err == nil {
-		fmt.Printf("%s is already installed.\n", client)
+	// Determine client path and check if already installed
+	clientPath := i.getClientPath(client, clientDir)
+	if i.isClientInstalled(clientPath, client) {
 		return nil
-	}
-
-	// Create directories
-	fmt.Printf("Creating '%s'\n", clientDir)
-	if err := os.MkdirAll(databaseDir, 0755); err != nil {
-		return fmt.Errorf("failed to create database directory: %w", err)
-	}
-	if err := os.MkdirAll(logsDir, 0755); err != nil {
-		return fmt.Errorf("failed to create logs directory: %w", err)
 	}
 
 	// Get download URL
@@ -167,224 +163,259 @@ func (i *installer) InstallClient(client types.ClientType) error {
 		return err
 	}
 
-	// Handle installation differently based on client
-	if client == types.ClientPrysm {
-		fmt.Println("Downloading Prysm.")
-		if err := downloadFile(downloadURL, clientPath); err != nil {
-			return err
-		}
-
-		// Make executable
-		if err := os.Chmod(clientPath, 0755); err != nil {
-			return fmt.Errorf("error making prysm.sh executable: %w", err)
-		}
-	} else {
-		// Standard client installation (geth, reth, lighthouse)
-		archivePath := filepath.Join(clientDir, fmt.Sprintf("%s.tar.gz", fileName))
-
-		// Download file
-		fmt.Printf("Downloading %s.\n", client)
-		if err := downloadFile(downloadURL, archivePath); err != nil {
-			return err
-		}
-
-		// Extract archive
-		fmt.Printf("Uncompressing %s.\n", client)
-		cmd := exec.Command("tar", "-xzvf", archivePath, "-C", clientDir)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("error extracting archive: %w", err)
-		}
-
-		// For Geth, we need to move the binary from the extracted folder
-		if client == types.ClientGeth {
-			extractedDir := filepath.Join(clientDir, fileName)
-			mvCmd := exec.Command("mv", filepath.Join(extractedDir, "geth"), clientDir)
-			if err := mvCmd.Run(); err != nil {
-				return fmt.Errorf("error moving geth binary: %w", err)
-			}
-
-			// Remove extracted directory
-			if err := os.RemoveAll(extractedDir); err != nil {
-				return fmt.Errorf("error removing extracted directory: %w", err)
-			}
-		}
-
-		// Clean up archive
-		fmt.Printf("Cleaning up %s directory.\n", client)
-		if err := os.Remove(archivePath); err != nil {
-			return fmt.Errorf("error removing archive: %w", err)
-		}
+	// Install the client
+	if err := i.installClientBinary(client, clientDir, clientPath, downloadURL, fileName); err != nil {
+		return err
 	}
 
 	fmt.Printf("%s installed successfully.\n", client)
 	return nil
 }
 
-// installJuno installs Juno by building from Go source code
-func (i *installer) installJuno() error {
-	//  Create Juno directory
-	junoBaseDir := filepath.Join(StarknetClientsDir, string(types.ClientJuno))
-	junoRepoDir := filepath.Join(junoBaseDir, "juno")
-	databaseDir := filepath.Join(junoBaseDir, "database")
-	logsDir := filepath.Join(junoBaseDir, "logs")
-
-	// Check if Juno is already installed
-	junoPath := filepath.Join(junoRepoDir, "juno")
-	if _, err := os.Stat(junoPath); err == nil {
-		fmt.Printf("%s is already installed.\n", types.ClientJuno)
-		return nil
+// getClientDirectory returns the appropriate directory for the client
+func (i *installer) getClientDirectory(client types.ClientType) string {
+	if client == types.ClientJuno {
+		return filepath.Join(pkg.InstallStarknetDir, string(client))
 	}
+	return filepath.Join(i.InstallDir, string(client))
+}
 
-	// Create directories
-	fmt.Printf("Creating '%s'\n", junoBaseDir)
+// setupClientDirectories creates the necessary directories for a client
+func (i *installer) setupClientDirectories(clientDir string) error {
+	databaseDir := filepath.Join(clientDir, "database")
+	logsDir := filepath.Join(clientDir, "logs")
+
+	fmt.Printf("Creating '%s'\n", clientDir)
 	if err := os.MkdirAll(databaseDir, 0755); err != nil {
 		return fmt.Errorf("failed to create database directory: %w", err)
 	}
 	if err := os.MkdirAll(logsDir, 0755); err != nil {
 		return fmt.Errorf("failed to create logs directory: %w", err)
 	}
+	return nil
+}
 
-	// Check if make is available
-	if _, err := exec.LookPath("make"); err != nil {
-		return fmt.Errorf("make is not installed. Please install make first: %w", err)
+// getClientPath returns the path to the client binary/script
+func (i *installer) getClientPath(client types.ClientType, clientDir string) string {
+	switch client {
+	case types.ClientPrysm:
+		return filepath.Join(clientDir, "prysm.sh")
+	case types.ClientJuno:
+		return filepath.Join(clientDir, "juno")
+	default:
+		return filepath.Join(clientDir, string(client))
+	}
+}
+
+// isClientInstalled checks if the client is already installed
+func (i *installer) isClientInstalled(clientPath string, client types.ClientType) bool {
+	if _, err := os.Stat(clientPath); err == nil {
+		fmt.Printf("%s is already installed.\n", client)
+		return true
+	}
+	return false
+}
+
+// installClientBinary handles the actual installation of the client binary
+func (i *installer) installClientBinary(client types.ClientType, clientDir, clientPath, downloadURL, fileName string) error {
+	switch client {
+	case types.ClientPrysm:
+		return i.installPrysmClient(downloadURL, clientPath, client)
+	case types.ClientJuno:
+		return i.installJunoClient(client, clientDir, downloadURL, fileName)
+	default:
+		return i.installStandardClient(client, clientDir, downloadURL, fileName)
+	}
+}
+
+// installPrysmClient handles Prysm-specific installation (script download)
+func (i *installer) installPrysmClient(downloadURL, clientPath string, client types.ClientType) error {
+	fmt.Printf("Downloading %s.\n", client)
+	if err := downloadFile(downloadURL, clientPath); err != nil {
+		return err
 	}
 
-	// Clone or pull Juno repository
-	if _, err := os.Stat(junoRepoDir); os.IsNotExist(err) {
-		fmt.Printf("Cloning Juno repository...\n")
-		cloneCmd := exec.Command("git", "clone", "https://github.com/NethermindEth/juno.git", "juno")
-		cloneCmd.Dir = junoBaseDir
-		cloneCmd.Stdout = os.Stdout
-		cloneCmd.Stderr = os.Stderr
-		if err := cloneCmd.Run(); err != nil {
-			return fmt.Errorf("failed to clone Juno repository: %w", err)
+	// Make executable
+	if err := os.Chmod(clientPath, 0755); err != nil {
+		return fmt.Errorf("error making prysm.sh executable: %w", err)
+	}
+	return nil
+}
+
+// installJunoClient handles Juno installation (tar.gz download and extraction)
+func (i *installer) installJunoClient(client types.ClientType, clientDir, downloadURL, fileName string) error {
+	// Install platform-specific dependencies first
+	if err := i.installJunoDependencies(); err != nil {
+		return fmt.Errorf("failed to install Juno dependencies: %w", err)
+	}
+
+	// Download and extract like other standard clients
+	archivePath := filepath.Join(clientDir, fmt.Sprintf("%s.tar.gz", fileName))
+
+	// Download file
+	fmt.Printf("Downloading %s.\n", client)
+	if err := downloadFile(downloadURL, archivePath); err != nil {
+		return err
+	}
+
+	// Extract archive
+	fmt.Printf("Uncompressing %s.\n", client)
+	if err := i.extractArchive(archivePath, clientDir); err != nil {
+		return err
+	}
+
+	// Handle Juno-specific post-extraction (move binary to correct location)
+	if err := i.handleJunoPostExtraction(clientDir, fileName); err != nil {
+		return err
+	}
+
+	// Clean up archive
+	fmt.Printf("Cleaning up %s directory.\n", client)
+	if err := os.Remove(archivePath); err != nil {
+		return fmt.Errorf("error removing archive: %w", err)
+	}
+
+	return nil
+}
+
+// installStandardClient handles standard client installation (geth, reth, lighthouse)
+func (i *installer) installStandardClient(client types.ClientType, clientDir, downloadURL, fileName string) error {
+	archivePath := filepath.Join(clientDir, fmt.Sprintf("%s.tar.gz", fileName))
+
+	// Download file
+	fmt.Printf("Downloading %s.\n", client)
+	if err := downloadFile(downloadURL, archivePath); err != nil {
+		return err
+	}
+
+	// Extract archive
+	fmt.Printf("Uncompressing %s.\n", client)
+	if err := i.extractArchive(archivePath, clientDir); err != nil {
+		return err
+	}
+
+	// Handle Geth-specific post-extraction
+	if client == types.ClientGeth {
+		if err := i.handleGethPostExtraction(clientDir, fileName); err != nil {
+			return err
 		}
-	} else {
-		fmt.Printf("Juno repository already exists, pulling latest...\n")
-		pullCmd := exec.Command("git", "pull")
-		pullCmd.Dir = junoRepoDir
-		pullCmd.Stdout = os.Stdout
-		pullCmd.Stderr = os.Stderr
-		if err := pullCmd.Run(); err != nil {
-			// Always try to recover by checking out main or master
-			fmt.Printf("git pull failed, attempting to recover by checking out main or master...\n")
-			fetchCmd := exec.Command("git", "fetch")
-			fetchCmd.Dir = junoRepoDir
-			fetchCmd.Stdout = os.Stdout
-			fetchCmd.Stderr = os.Stderr
-			if err := fetchCmd.Run(); err != nil {
-				return fmt.Errorf("failed to fetch in Juno repo: %w", err)
-			}
-			checkoutMainCmd := exec.Command("git", "checkout", "main")
-			checkoutMainCmd.Dir = junoRepoDir
-			checkoutMainCmd.Stdout = os.Stdout
-			checkoutMainCmd.Stderr = os.Stderr
-			if err := checkoutMainCmd.Run(); err == nil {
-				pullMainCmd := exec.Command("git", "pull", "origin", "main")
-				pullMainCmd.Dir = junoRepoDir
-				pullMainCmd.Stdout = os.Stdout
-				pullMainCmd.Stderr = os.Stderr
-				if err := pullMainCmd.Run(); err != nil {
-					return fmt.Errorf("failed to pull origin main in Juno repo: %w", err)
-				}
-			} else {
-				// Try master as fallback
-				checkoutMasterCmd := exec.Command("git", "checkout", "master")
-				checkoutMasterCmd.Dir = junoRepoDir
-				checkoutMasterCmd.Stdout = os.Stdout
-				checkoutMasterCmd.Stderr = os.Stderr
-				if err := checkoutMasterCmd.Run(); err == nil {
-					pullMasterCmd := exec.Command("git", "pull", "origin", "master")
-					pullMasterCmd.Dir = junoRepoDir
-					pullMasterCmd.Stdout = os.Stdout
-					pullMasterCmd.Stderr = os.Stderr
-					if err := pullMasterCmd.Run(); err != nil {
-						return fmt.Errorf("failed to pull origin master in Juno repo: %w", err)
-					}
-				} else {
-					return fmt.Errorf("failed to pull Juno repository and could not recover by checking out main or master: %w", err)
-				}
-			}
-		}
 	}
 
-	// Checkout specific version
-	fmt.Printf("Checking out version %s...\n", versions.LatestJunoVersion)
-	checkoutCmd := exec.Command("git", "checkout", versions.LatestJunoVersion)
-	checkoutCmd.Dir = junoRepoDir
-	checkoutCmd.Stdout = os.Stdout
-	checkoutCmd.Stderr = os.Stderr
-	if err := checkoutCmd.Run(); err != nil {
-		return fmt.Errorf("failed to checkout version %s: %w", versions.LatestJunoVersion, err)
+	// Clean up archive
+	fmt.Printf("Cleaning up %s directory.\n", client)
+	if err := os.Remove(archivePath); err != nil {
+		return fmt.Errorf("error removing archive: %w", err)
+	}
+	return nil
+}
+
+// extractArchive extracts a tar.gz archive
+func (i *installer) extractArchive(archivePath, clientDir string) error {
+	cmd := exec.Command("tar", "-xzvf", archivePath, "-C", clientDir)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("error extracting archive: %w", err)
+	}
+	return nil
+}
+
+// handleGethPostExtraction handles Geth-specific post-extraction steps
+func (i *installer) handleGethPostExtraction(clientDir, fileName string) error {
+	extractedDir := filepath.Join(clientDir, fileName)
+	mvCmd := exec.Command("mv", filepath.Join(extractedDir, "geth"), clientDir)
+	if err := mvCmd.Run(); err != nil {
+		return fmt.Errorf("error moving geth binary: %w", err)
 	}
 
-	// Install dependencies based on platform
-	fmt.Printf("Installing dependencies...\n")
-	if runtime.GOOS == "darwin" {
-		// macOS dependencies
-		brewCmd := exec.Command("brew", "install", "jemalloc", "pkg-config")
-		brewCmd.Stdout = os.Stdout
-		brewCmd.Stderr = os.Stderr
-		if err := brewCmd.Run(); err != nil {
-			// If brew install fails, try with arch -arm64 for Apple Silicon
-			fmt.Printf("brew install failed, trying with arch -arm64...\n")
-			brewCmdARM := exec.Command("arch", "-arm64", "brew", "install", "jemalloc", "pkg-config")
-			brewCmdARM.Stdout = os.Stdout
-			brewCmdARM.Stderr = os.Stderr
-			if err := brewCmdARM.Run(); err != nil {
-				return fmt.Errorf("failed to install macOS dependencies: %w", err)
-			}
-		}
-	} else if runtime.GOOS == "linux" {
-		// Linux dependencies
-		aptCmd := exec.Command("sudo", "apt-get", "install", "-y", "libjemalloc-dev", "libjemalloc2", "pkg-config", "libbz2-dev")
-		aptCmd.Stdout = os.Stdout
-		aptCmd.Stderr = os.Stderr
-		if err := aptCmd.Run(); err != nil {
-			return fmt.Errorf("failed to install Linux dependencies: %w", err)
-		}
+	// Remove extracted directory
+	if err := os.RemoveAll(extractedDir); err != nil {
+		return fmt.Errorf("error removing extracted directory: %w", err)
+	}
+	return nil
+}
+
+// handleJunoPostExtraction handles Juno-specific post-extraction steps
+func (i *installer) handleJunoPostExtraction(clientDir, fileName string) error {
+	fileName = strings.Replace(fileName, "v", "", 1)
+	extractedDir := filepath.Join(clientDir, fileName)
+	junoPath := filepath.Join(clientDir, "juno")
+
+	// Move the juno binary from extracted directory to client directory
+	mvCmd := exec.Command("mv", extractedDir, junoPath)
+	if err := mvCmd.Run(); err != nil {
+		return fmt.Errorf("error moving juno binary: %w", err)
 	}
 
-	// Install Go dependencies
-	fmt.Printf("Installing Go dependencies...\n")
-	installDepsCmd := exec.Command("make", "install-deps")
-	installDepsCmd.Dir = junoRepoDir
-	installDepsCmd.Stdout = os.Stdout
-	installDepsCmd.Stderr = os.Stderr
-	if err := installDepsCmd.Run(); err != nil {
-		return fmt.Errorf("failed to install Go dependencies: %w", err)
-	}
-
-	// Build Juno
-	fmt.Printf("Building Juno...\n")
 	buildCmd := exec.Command("make", "juno")
-	buildCmd.Dir = junoRepoDir
+	buildCmd.Dir = junoPath
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
+
 	if err := buildCmd.Run(); err != nil {
-		return fmt.Errorf("failed to build Juno: %w", err)
+		return fmt.Errorf("make failed: %v", err)
 	}
 
-	// Move the built binary to the correct location
-	buildPath := filepath.Join(junoRepoDir, "build", "juno")
-	if err := os.Rename(buildPath, junoPath); err != nil {
-		return fmt.Errorf("failed to move Juno binary: %w", err)
+	return nil
+}
+
+// installJunoDependencies installs platform-specific dependencies for Juno
+func (i *installer) installJunoDependencies() error {
+	fmt.Printf("Installing Juno dependencies...\n")
+
+	if runtime.GOOS == "darwin" {
+		return i.installMacOSDependencies()
+	} else if runtime.GOOS == "linux" {
+		return i.installLinuxDependencies()
+	}
+	return nil
+}
+
+// installMacOSDependencies installs macOS-specific dependencies
+func (i *installer) installMacOSDependencies() error {
+	brewCmd := exec.Command("brew", "install", "jemalloc", "pkg-config")
+	brewCmd.Stdout = os.Stdout
+	brewCmd.Stderr = os.Stderr
+	if err := brewCmd.Run(); err != nil {
+		// If brew install fails, try with arch -arm64 for Apple Silicon
+		fmt.Printf("brew install failed, trying with arch -arm64...\n")
+		brewCmdARM := exec.Command("arch", "-arm64", "brew", "install", "jemalloc", "pkg-config")
+		brewCmdARM.Stdout = os.Stdout
+		brewCmdARM.Stderr = os.Stderr
+		if err := brewCmdARM.Run(); err != nil {
+			return fmt.Errorf("failed to install macOS dependencies: %w", err)
+		}
+	}
+	return nil
+}
+
+// installLinuxDependencies installs Linux-specific dependencies
+func (i *installer) installLinuxDependencies() error {
+	distro, err := getDistro()
+	if err != nil {
+		return err
 	}
 
-	// Make the binary executable
-	if err := os.Chmod(junoPath, 0755); err != nil {
-		return fmt.Errorf("failed to make Juno binary executable: %w", err)
+	var cmd *exec.Cmd
+	switch distro {
+	case "ubuntu", "debian":
+		cmd = exec.Command("sudo", "apt-get", "install", "-y", "libjemalloc-dev", "libjemalloc2", "pkg-config", "libbz2-dev")
+	case "fedora":
+		cmd = exec.Command("sudo", "dnf", "install", "-y", "jemalloc-devel", "pkgconf-pkg-config", "bzip2-devel")
+	case "arch":
+		cmd = exec.Command("sudo", "pacman", "-S", "--noconfirm", "jemalloc", "pkgconf", "bzip2")
+	default:
+		return fmt.Errorf("unsupported distro: %s", distro)
 	}
 
-	// Clean up build artifacts
-	fmt.Printf("Cleaning up build artifacts...\n")
-	if err := os.RemoveAll(filepath.Join(junoRepoDir, "build")); err != nil {
-		return fmt.Errorf("failed to clean up build directory: %w", err)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	cmd.Stdout = os.Stdout
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to install packages: %v\n%s", err, stderr.String())
 	}
 
-	fmt.Printf("%s installed successfully.\n", types.ClientJuno)
 	return nil
 }
 
@@ -420,7 +451,7 @@ func setupJWTSecret() error {
 func (i *installer) RemoveClient(client types.ClientType) error {
 	var clientDir string
 	if client == types.ClientJuno {
-		clientDir = filepath.Join(StarknetClientsDir, string(types.ClientJuno))
+		clientDir = filepath.Join(pkg.InstallStarknetDir, string(types.ClientJuno))
 	} else {
 		clientDir = filepath.Join(i.InstallDir, string(client))
 	}
@@ -458,7 +489,7 @@ func (i *installer) RemoveClient(client types.ClientType) error {
 func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	var clientDir string
 	if client == types.ClientJuno {
-		clientDir = filepath.Join(StarknetClientsDir, string(types.ClientJuno))
+		clientDir = filepath.Join(pkg.InstallStarknetDir, string(types.ClientJuno))
 	} else {
 		clientDir = filepath.Join(i.InstallDir, string(client))
 	}
