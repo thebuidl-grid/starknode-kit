@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"starknode-kit/pkg"
 	"starknode-kit/pkg/types"
 	"starknode-kit/pkg/versions"
 	"strings"
@@ -175,7 +174,7 @@ func (i *installer) InstallClient(client types.ClientType) error {
 // getClientDirectory returns the appropriate directory for the client
 func (i *installer) getClientDirectory(client types.ClientType) string {
 	if client == types.ClientJuno {
-		return filepath.Join(pkg.InstallStarknetDir, string(client))
+		return filepath.Join(InstallStarknetDir, string(client))
 	}
 	return filepath.Join(i.InstallDir, string(client))
 }
@@ -451,7 +450,7 @@ func setupJWTSecret() error {
 func (i *installer) RemoveClient(client types.ClientType) error {
 	var clientDir string
 	if client == types.ClientJuno {
-		clientDir = filepath.Join(pkg.InstallStarknetDir, string(types.ClientJuno))
+		clientDir = filepath.Join(InstallStarknetDir, string(types.ClientJuno))
 	} else {
 		clientDir = filepath.Join(i.InstallDir, string(client))
 	}
@@ -489,7 +488,7 @@ func (i *installer) RemoveClient(client types.ClientType) error {
 func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	var clientDir string
 	if client == types.ClientJuno {
-		clientDir = filepath.Join(pkg.InstallStarknetDir, string(types.ClientJuno))
+		clientDir = filepath.Join(InstallStarknetDir, string(types.ClientJuno))
 	} else {
 		clientDir = filepath.Join(i.InstallDir, string(client))
 	}
