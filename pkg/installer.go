@@ -246,19 +246,9 @@ func (i *installer) installJuno() error {
 		return fmt.Errorf("failed to create logs directory: %w", err)
 	}
 
-	// Check if Go is available
-	if _, err := exec.LookPath("go"); err != nil {
-		return fmt.Errorf("Go is not installed. Please install Go 1.24 or higher first: %w", err)
-	}
-
 	// Check if make is available
 	if _, err := exec.LookPath("make"); err != nil {
 		return fmt.Errorf("make is not installed. Please install make first: %w", err)
-	}
-
-	// Check if git is available
-	if _, err := exec.LookPath("git"); err != nil {
-		return fmt.Errorf("git is not installed. Please install git first: %w", err)
 	}
 
 	// Clone or pull Juno repository
