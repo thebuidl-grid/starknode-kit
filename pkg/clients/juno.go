@@ -65,11 +65,6 @@ func (c *JunoClient) buildJunoArgs() []string {
 		args = append(args, "--network=sepolia-integration")
 	}
 
-	// Add snapshot flag if enabled
-	if c.config.UseSnapshot {
-		args = append(args, "--snapshot")
-	}
-
 	// Add metrics endpoint
 	args = append(args, "--metrics", "--metrics-port=6060")
 
