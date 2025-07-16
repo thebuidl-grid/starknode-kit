@@ -5,6 +5,9 @@ import (
 	"strings"
 	"time"
 
+	"starknode-kit/pkg/types"
+	"starknode-kit/pkg/utils"
+
 	"github.com/rivo/tview"
 )
 
@@ -18,6 +21,7 @@ func NewMonitorApp() *MonitorApp {
 		// New channels matching JavaScript components
 		ExecutionLogChan: make(chan string, 100),
 		ConsensusLogChan: make(chan string, 100),
+		JunoLogChan:      make(chan string, 100),
 		StatusChan:       make(chan string, 10),
 		ChainInfoChan:    make(chan string, 10),
 		SystemStatsChan:  make(chan string, 10),
@@ -44,13 +48,76 @@ func NewMonitorApp() *MonitorApp {
 	}
 
 	app.setupUI()
+
+	// Perform initial client detection to set proper titles immediately
+	app.detectAndUpdateClientTitles()
+
 	return app
+}
+
+// detectAndUpdateClientTitles performs initial client detection and updates titles immediately
+func (m *MonitorApp) detectAndUpdateClientTitles() {
+	runningClients := utils.GetRunningClients()
+
+	// Check for execution clients
+	var executionClient *types.ClientStatus
+	for _, client := range runningClients {
+		if client.Name == "Geth" || client.Name == "Reth" {
+			executionClient = &client
+			break
+		}
+	}
+
+	if executionClient != nil {
+		if executionClient.Name == "Geth" {
+			m.ExecutionLogBox.SetTitle(" Geth ⚙️ ")
+		} else {
+			m.ExecutionLogBox.SetTitle(" Reth ⚡ ")
+		}
+	} else {
+		m.ExecutionLogBox.SetTitle(" Execution Client (Not Running) ❌ ")
+	}
+
+	// Check for consensus clients
+	var consensusClient *types.ClientStatus
+	for _, client := range runningClients {
+		if client.Name == "Lighthouse" || client.Name == "Prysm" {
+			consensusClient = &client
+			break
+		}
+	}
+
+	if consensusClient != nil {
+		if consensusClient.Name == "Prysm" {
+			m.ConsensusLogBox.SetTitle(" Prysm 🏛️ ")
+		} else {
+			m.ConsensusLogBox.SetTitle(" Lighthouse 🏛️ ")
+		}
+	} else {
+		m.ConsensusLogBox.SetTitle(" Consensus Client (Not Running) ❌ ")
+	}
+
+	// Check for Juno
+	var junoClient *types.ClientStatus
+	for _, client := range runningClients {
+		if client.Name == "Juno" {
+			junoClient = &client
+			break
+		}
+	}
+
+	if junoClient != nil {
+		m.JunoLogBox.SetTitle(" Juno 🌟 ")
+	} else {
+		m.JunoLogBox.SetTitle(" Juno (Not Running) ❌ ")
+	}
 }
 
 func (m *MonitorApp) Start(ctx context.Context) error {
 	// Start new update goroutines matching JavaScript components exactly
 	go m.updateExecutionLogs(ctx)    // executionLog.js equivalent
 	go m.updateConsensusLogs(ctx)    // consensusLog.js equivalent
+	go m.updateJunoLogs(ctx)         // junoLog.js equivalent (Starknet client)
 	go m.updateStatusBox(ctx)        // statusBox.js equivalent
 	go m.updateChainInfoBox(ctx)     // chainInfoBox.js equivalent
 	go m.updateSystemStatsGauge(ctx) // systemStatsGauge.js equivalent
@@ -89,6 +156,11 @@ func (m *MonitorApp) handleUpdates(ctx context.Context) {
 			m.App.QueueUpdateDraw(func() {
 				m.ConsensusLogBox.SetText(text)
 				m.ConsensusLogBox.ScrollToEnd()
+			})
+		case text := <-m.JunoLogChan:
+			m.App.QueueUpdateDraw(func() {
+				m.JunoLogBox.SetText(text)
+				m.JunoLogBox.ScrollToEnd()
 			})
 		case text := <-m.StatusChan:
 			m.App.QueueUpdateDraw(func() {
