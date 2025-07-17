@@ -43,7 +43,7 @@ func (c *gethConfig) buildArgs() []string {
 		"--authrpc.vhosts=*",
 		"--metrics",
 		"--metrics.addr=0.0.0.0",
-		"--metrics.port=6060",
+		"--metrics.port=7878",
 	}
 
 	// Add execution type specific arguments

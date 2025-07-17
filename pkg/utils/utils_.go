@@ -218,6 +218,14 @@ func defaultConfig() t.StarkNodeKitConfig {
 			Port:                []int{5052, 9000},
 			ConsensusCheckpoint: "https://mainnet-checkpoint-sync.stakely.io/",
 		},
+		JunoConfig: t.JunoConfig{
+			Port:    6060,
+			EthNode: "ws://localhost:30303",
+			Environment: []string{
+				"JUNO_HTTP_PORT=6060",
+				"JUNO_HTTP_HOST=0.0.0.0",
+			},
+		},
 	}
 }
 

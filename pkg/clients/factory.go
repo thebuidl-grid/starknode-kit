@@ -31,6 +31,20 @@ func NewExecutionClient(cfg types.ClientConfig, network string) (types.IClient, 
 	}
 }
 
+func NewJunoClient(config types.JunoConfig, network string) (types.IClient, error) {
+
+	// Get Juno binary path
+	junoPath := getJunoPath()
+	if junoPath == "" {
+		return nil, fmt.Errorf("Juno is not installed. Please install it first using 'starknode add -s juno'")
+	}
+
+	return &JunoClient{
+		config:  config,
+		network: network,
+	}, nil
+}
+
 func RestartClient(pid int) error {
 	// First stop the client
 	if err := process.StopClient(pid); err != nil {
@@ -56,6 +70,12 @@ func RestartClient(pid int) error {
 	}
 	c, _ := NewConsensusClient(config.ConsensusCientSettings, config.Network)
 	err = c.Start()
+	if err != nil {
+		return err
+	}
+
+	j, _ := NewJunoClient(config.JunoConfig, config.Network)
+	err = j.Start()
 	if err != nil {
 		return err
 	}

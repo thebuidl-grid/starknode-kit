@@ -20,12 +20,18 @@ type StarkNodeKitConfig struct {
 	Network                string       `yaml:"network"`
 	ExecutionCientSettings ClientConfig `yaml:"execution_client"`
 	ConsensusCientSettings ClientConfig `yaml:"consensus_client"`
+	JunoConfig             JunoConfig   `yaml:"juno_client"`
 }
 
 type ClientConfig struct {
 	Name                ClientType `yaml:"name"`
-	Network             string     `yaml:"network,omitempty"`
 	ExecutionType       string     `yaml:"execution_type,omitempty"`
 	Port                []int      `yaml:"ports"`
 	ConsensusCheckpoint string     `yaml:"consensus_checkpoint,omitempty"`
+}
+
+type JunoConfig struct {
+	Port        int      `yaml:"port"`
+	EthNode     string   `yaml:"eth_node"`
+	Environment []string `yaml:"environment"`
 }
