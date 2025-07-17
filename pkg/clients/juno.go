@@ -50,7 +50,7 @@ func (c *JunoClient) Start() error {
 func (c *JunoClient) buildJunoArgs() []string {
 	args := []string{
 		"--http",
-		fmt.Sprintf("--http-port=%s", c.config.Port),
+		fmt.Sprintf("--http-port=%d", c.config.Port),
 		"--http-host=0.0.0.0",
 		fmt.Sprintf("--db-path=%s", filepath.Join(pkg.InstallStarknetDir, "juno", "database")),
 		fmt.Sprintf("--eth-node=%s", c.config.EthNode),
