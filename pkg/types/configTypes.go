@@ -31,7 +31,7 @@ type ClientConfig struct {
 }
 
 type JunoConfig struct {
-	Port        string   `yaml:"port"`
+	Port        int      `yaml:"port"`
 	EthNode     string   `yaml:"eth_node"`
 	Environment []string `yaml:"environment"`
 }

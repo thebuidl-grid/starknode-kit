@@ -41,7 +41,7 @@ func (config *rethConfig) buildArgs() []string {
 		"--authrpc.port", "8551",
 		"--authrpc.jwtsecret", pkg.JWTPath,
 		"--port", fmt.Sprintf("%d", config.port),
-		"--metrics", "0.0.0.0:6060",
+		"--metrics", "0.0.0.0:7878",
 	}
 
 	// Add execution type specific arguments

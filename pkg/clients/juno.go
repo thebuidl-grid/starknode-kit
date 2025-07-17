@@ -65,8 +65,5 @@ func (c *JunoClient) buildJunoArgs() []string {
 		args = append(args, "--network=sepolia-integration")
 	}
 
-	// Add metrics endpoint
-	args = append(args, "--metrics", "--metrics-port=6060")
-
 	return args
 }
