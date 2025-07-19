@@ -220,7 +220,7 @@ func defaultConfig() t.StarkNodeKitConfig {
 		},
 		JunoConfig: t.JunoConfig{
 			Port:    6060,
-			EthNode: "ws://localhost:30303",
+			EthNode: "wss://eth.drpc.org",
 			Environment: []string{
 				"JUNO_HTTP_PORT=6060",
 				"JUNO_HTTP_HOST=0.0.0.0",
