@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"starknode-kit/pkg"
-	"starknode-kit/pkg/process"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 )
 
 // Configuration options for Reth

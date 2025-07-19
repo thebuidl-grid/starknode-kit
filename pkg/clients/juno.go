@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"starknode-kit/pkg"
-	"starknode-kit/pkg/process"
-	"starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/process"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 )
 
 // JunoClient represents a client for interacting with a local Juno node
@@ -19,7 +19,7 @@ type JunoClient struct {
 
 // getJunoPath returns the path to the Juno binary
 func getJunoPath() string {
-	// Check if Juno is installed in the starknode-kit directory
+	// Check if Juno is installed in the github.com/thebuidl-grid/starknode-kit directory
 	junoDir := filepath.Join(pkg.InstallStarknetDir, "juno")
 	junoPath := filepath.Join(junoDir, "juno", "build", "juno")
 

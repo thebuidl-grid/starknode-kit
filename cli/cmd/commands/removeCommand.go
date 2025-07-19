@@ -2,8 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"starknode-kit/cli/cmd/options"
-	"starknode-kit/pkg/utils"
+
+	"github.com/thebuidl-grid/starknode-kit/cli/cmd/options"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -66,6 +67,6 @@ func removeCommand(cmd *cobra.Command, args []string) {
 	return
 }
 
-func init(){
-  options.InitGlobalOptions(RemoveCommand)
+func init() {
+	options.InitGlobalOptions(RemoveCommand)
 }

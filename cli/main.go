@@ -1,6 +1,6 @@
 package main
 
-import "starknode-kit/cli/cmd"
+import "github.com/thebuidl-grid/starknode-kit/cli/cmd"
 
 func main() {
 	cmd.Execute()

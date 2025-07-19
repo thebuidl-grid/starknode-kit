@@ -3,8 +3,9 @@ package process
 import (
 	"io"
 	"os/exec"
-	t "starknode-kit/pkg/types"
 	"syscall"
+
+	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 )
 
 func IsProcessRunning(pid int) bool {

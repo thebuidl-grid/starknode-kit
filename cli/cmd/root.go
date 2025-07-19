@@ -3,7 +3,8 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"starknode-kit/cli/cmd/commands"
+
+	"github.com/thebuidl-grid/starknode-kit/cli/cmd/commands"
 
 	"github.com/spf13/cobra"
 )

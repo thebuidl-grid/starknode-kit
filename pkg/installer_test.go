@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"starknode-kit/pkg/types"
-	"starknode-kit/pkg/versions"
 	"strings"
 	"testing"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
 
 func TestCompareClientVersions(t *testing.T) {

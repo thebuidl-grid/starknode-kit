@@ -11,9 +11,10 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"starknode-kit/pkg/types"
-	"starknode-kit/pkg/versions"
 	"strings"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
 
 var (

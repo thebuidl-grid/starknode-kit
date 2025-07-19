@@ -3,9 +3,10 @@ package monitoring
 import (
 	"fmt"
 	"os"
-	"starknode-kit/pkg/utils"
 	"strings"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"

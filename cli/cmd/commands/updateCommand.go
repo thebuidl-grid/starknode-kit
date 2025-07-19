@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"starknode-kit/pkg"
-	"starknode-kit/pkg/updater"
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/updater"
 
 	"github.com/spf13/cobra"
 )
@@ -29,11 +29,11 @@ Supported clients:
   - Starknet clients: juno
 
 Examples:
-  starknode-kit update                    # Check all clients for updates
-  starknode-kit update geth               # Update specific client
-  starknode-kit update --check-only       # Only check, don't install
-  starknode-kit update --online           # Fetch latest versions online
-  starknode-kit update --auto-confirm     # Auto-confirm all updates`,
+  github.com/thebuidl-grid/starknode-kit update                    # Check all clients for updates
+  github.com/thebuidl-grid/starknode-kit update geth               # Update specific client
+  github.com/thebuidl-grid/starknode-kit update --check-only       # Only check, don't install
+  github.com/thebuidl-grid/starknode-kit update --online           # Fetch latest versions online
+  github.com/thebuidl-grid/starknode-kit update --auto-confirm     # Auto-confirm all updates`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runUpdate,
 }

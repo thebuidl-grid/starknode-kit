@@ -4,10 +4,11 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"starknode-kit/pkg"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg"
 )
 
 func TestDefaultJunoConfig(t *testing.T) {

@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"starknode-kit/pkg"
-	t "starknode-kit/pkg/types"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 
 	"github.com/joho/godotenv"
 )

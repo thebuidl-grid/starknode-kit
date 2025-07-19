@@ -2,8 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"starknode-kit/pkg/clients"
-	"starknode-kit/pkg/utils"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg/clients"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -37,7 +38,7 @@ Juno requires an Ethereum node connection to verify L1 state. You can specify
 an Ethereum node URL using the --eth-node flag.
 
 Example:
-  starknode-kit run-juno --network mainnet --port 6060 --data-dir ./juno-data --eth-node ws://localhost:8546`,
+  github.com/thebuidl-grid/starknode-kit run-juno --network mainnet --port 6060 --data-dir ./juno-data --eth-node ws://localhost:8546`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, err := utils.LoadConfig()
 		if err != nil {
