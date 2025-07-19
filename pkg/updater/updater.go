@@ -67,7 +67,7 @@ func (u *UpdateChecker) CheckAllClientsForUpdates(useOnline bool) ([]UpdateInfo,
 // CheckClientForUpdate checks if a specific client has an update available
 func (u *UpdateChecker) CheckClientForUpdate(client string, useOnline bool) (*UpdateInfo, error) {
 	// Get current installed version (this would need to be implemented to check actual installations)
-	currentVersion := "1.0.0" // Placeholder - you'd implement actual version detection
+	currentVersion := pkg.GetVersionNumber(client)
 
 	// Get latest version
 	var latestVersion string
@@ -104,7 +104,7 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 	}
 
 	// Get current version for backup info (placeholder implementation)
-	currentVersion := "1.0.0" // You'd implement actual version detection
+	currentVersion := pkg.GetVersionNumber(client)
 	result.PreviousVersion = currentVersion
 
 	// Stop client if running

@@ -49,44 +49,26 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	updateChecker := updater.NewUpdateChecker(installDir)
 
 	// Determine which clients to check
-	var clientsToCheck []string
-	if len(args) > 0 {
-		clientName = strings.ToLower(args[0])
-		clientsToCheck = []string{clientName}
-
-		// Validate client name
-		validClients := []string{"geth", "reth", "lighthouse", "prysm", "juno"}
-		isValid := false
-		for _, valid := range validClients {
-			if clientName == valid {
-				isValid = true
-				break
-			}
-		}
-		if !isValid {
-			return fmt.Errorf("unsupported client '%s'. Valid clients: %s", clientName, strings.Join(validClients, ", "))
-		}
-	} else {
-		// Check all clients
-		clientsToCheck = []string{"geth", "reth", "lighthouse", "prysm", "juno"}
+	eth_clients, err := installer.GetInsalledClients(pkg.InstallClientsDir)
+	if err != nil {
+		return err
 	}
-
-	fmt.Printf("🔍 Checking for updates%s...\n", func() string {
-		if useOnline {
-			return " (fetching latest versions online)"
-		}
-		return ""
-	}())
+	stark_clients, err := installer.GetInsalledClients(pkg.InstallStarknetDir)
+	if err != nil {
+		return err
+	}
 
 	if useOnline {
 		fmt.Println("⏳ Fetching latest versions from GitHub...")
 		time.Sleep(1 * time.Second) // Give visual feedback
 	}
 
+	clients := append(eth_clients, stark_clients...)
+
 	// Check for updates
 	var updatesAvailable []updater.UpdateInfo
-	for _, client := range clientsToCheck {
-		updateInfo, err := updateChecker.CheckClientForUpdate(client, useOnline)
+	for _, client := range clients {
+		updateInfo, err := updateChecker.CheckClientForUpdate(string(client), useOnline)
 		if err != nil {
 			fmt.Printf("⚠️  Warning: Could not check %s: %v\n", client, err)
 			continue

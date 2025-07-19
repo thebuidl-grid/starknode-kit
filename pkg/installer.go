@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
@@ -59,6 +60,26 @@ func NewInstaller(Installpath string) *installer {
 		panic(err)
 	}
 	return &installer{InstallDir: Installpath}
+}
+
+func (installer) GetInsalledClients(dir string) ([]types.ClientType, error) {
+	clients := make([]types.ClientType, 0)
+	validClients := []string{string(types.ClientGeth), string(types.ClientReth), string(types.ClientJuno), string(types.ClientPrysm), string(types.ClientLighthouse)}
+	dirclient, err := readFoldersWithReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, i := range dirclient {
+
+		if !slices.Contains(validClients, string(i)) {
+			continue
+		}
+		clients = append(clients, i)
+	}
+
+	return clients, nil
+
 }
 
 // GetClientFileName returns the file name based on platform and architecture
@@ -601,6 +622,9 @@ func downloadFile(url, filepath string) error {
 }
 
 func GetVersionNumber(client string) string {
+	if client == "juno" {
+		return versions.LatestJunoVersion
+	}
 	var argument string
 
 	switch client {
@@ -649,6 +673,8 @@ func GetVersionNumber(client string) string {
 		versionMatch = regexp.MustCompile(`geth version (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
 	case "prysm":
 		versionMatch = regexp.MustCompile(`beacon-chain-v(\d+\.\d+\.\d+)-`).FindStringSubmatch(versionOutput)
+	case "juno":
+		return ""
 	}
 
 	if len(versionMatch) > 1 {
@@ -701,4 +727,18 @@ func compareVersions(v1, v2 string) int {
 		}
 	}
 	return 0
+}
+
+func readFoldersWithReadDir(dirPath string) ([]types.ClientType, error) {
+	clients := make([]types.ClientType, 0)
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			clients = append(clients, types.ClientType(entry.Name()))
+		}
+	}
+	return clients, nil
 }
