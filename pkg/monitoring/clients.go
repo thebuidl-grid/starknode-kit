@@ -88,6 +88,11 @@ func GetEthereumMetrics() t.EthereumMetrics {
 func GetLatestLogs(clientName string, lines int) []string {
 	logDir := filepath.Join(pkg.InstallClientsDir, clientName, "logs")
 
+	// NOTE minor fix
+	if clientName == "juno" {
+		logDir = filepath.Join(pkg.InstallStarknetDir, clientName, "logs")
+	}
+
 	// Find the most recent log file
 	files, err := filepath.Glob(filepath.Join(logDir, "*.log"))
 	if err != nil || len(files) == 0 {
