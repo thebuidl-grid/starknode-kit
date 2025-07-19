@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/thebuidl-grid/starknode-kit/cli/cmd/commands"
+	"github.com/thebuidl-grid/starknode-kit/cli/commands"
 
 	"github.com/spf13/cobra"
 )
