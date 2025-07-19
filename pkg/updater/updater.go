@@ -2,9 +2,10 @@ package updater
 
 import (
 	"fmt"
-	"starknode-kit/pkg"
-	"starknode-kit/pkg/types"
-	"starknode-kit/pkg/versions"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
 
 type UpdateInfo struct {

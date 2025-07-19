@@ -2,10 +2,11 @@ package commands
 
 import (
 	"fmt"
-	t "starknode-kit/pkg/types"
-	"starknode-kit/pkg/utils"
 	"strconv"
 	"strings"
+
+	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"

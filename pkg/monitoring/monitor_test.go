@@ -1,10 +1,11 @@
 package monitoring_test
 
 import (
-	"starknode-kit/pkg/monitoring"
-	"starknode-kit/pkg/utils"
 	"testing"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg/monitoring"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 )
 
 func TestNewMonitorApp(t *testing.T) {

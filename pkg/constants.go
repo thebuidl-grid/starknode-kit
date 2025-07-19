@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	InstallDir = path.Join(getHomeDir(), "starknode-kit")
+	InstallDir = path.Join(getHomeDir(), "github.com/thebuidl-grid/starknode-kit")
 
 	InstallClientsDir  = path.Join(InstallDir, "ethereum_clients")
 	InstallStarknetDir = path.Join(InstallDir, "starknet_clients")

@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"starknode-kit/pkg/monitoring"
+	"github.com/thebuidl-grid/starknode-kit/pkg/monitoring"
 
 	"github.com/spf13/cobra"
 )
@@ -43,4 +43,3 @@ func runMonitor() {
 		os.Exit(1)
 	}
 }
-

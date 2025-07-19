@@ -2,8 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"starknode-kit/cli/cmd/options"
-	"starknode-kit/pkg/utils"
+
+	"github.com/thebuidl-grid/starknode-kit/cli/cmd/options"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )

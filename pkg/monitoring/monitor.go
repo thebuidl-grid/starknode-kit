@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"starknode-kit/pkg/types"
-	"starknode-kit/pkg/utils"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/rivo/tview"
 )

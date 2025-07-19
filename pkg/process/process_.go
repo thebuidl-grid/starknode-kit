@@ -3,11 +3,12 @@ package process
 import (
 	"os"
 	"path/filepath"
-	t "starknode-kit/pkg/types"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
+
+	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 )
 
 func stopProcess(pid int) error {

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"starknode-kit/pkg/stats"
-	"starknode-kit/pkg/types"
-	"starknode-kit/pkg/utils"
+	"github.com/thebuidl-grid/starknode-kit/pkg/stats"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 )
 
 // Format log lines exactly like the JavaScript helperFunctions.js

@@ -1,5 +1,5 @@
 package commands
 
-import "starknode-kit/pkg"
+import "github.com/thebuidl-grid/starknode-kit/pkg"
 
 var installer = pkg.NewInstaller(pkg.InstallClientsDir)

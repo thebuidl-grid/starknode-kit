@@ -2,11 +2,12 @@ package clients
 
 import (
 	"fmt"
-	"starknode-kit/pkg/process"
-	"starknode-kit/pkg/types"
-	"starknode-kit/pkg/utils"
 	"strings"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg/process"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 )
 
 func NewConsensusClient(cfg types.ClientConfig, network string) (types.IClient, error) {
