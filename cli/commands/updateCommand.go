@@ -157,3 +157,5 @@ func getClientTypeEmoji(clientType string) string {
 		return "🔧"
 	}
 }
+
+// TODO should not crash if folder does not exist return a message if staknet folder does not exist
