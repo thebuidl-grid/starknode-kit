@@ -22,7 +22,7 @@
 
 ### Option 2: Install using Go
 
-Make sure you have Go installed (version 1.19 or later), then run:
+Make sure you have Go installed (version 1.24 or later), then run:
 
 ```bash
 go install github.com/thebuidl-grid/starknode-kit@latest
