@@ -35,3 +35,4 @@ func GetClientLatestVersion(client string) string {
 		return "unknown"
 	}
 }
+

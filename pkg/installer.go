@@ -356,8 +356,8 @@ func (i *installer) handleGethPostExtraction(clientDir, fileName string) error {
 	return nil
 }
 
-// handleJunoPostExtraction handles Juno-specific post-extraction steps
 func (i *installer) handleJunoPostExtraction(clientDir, fileName string) error {
+	version := strings.Replace(fileName, "juno-", "", 1)
 	fileName = strings.Replace(fileName, "v", "", 1)
 	extractedDir := filepath.Join(clientDir, fileName)
 	junoPath := filepath.Join(clientDir, "juno")
@@ -368,13 +368,91 @@ func (i *installer) handleJunoPostExtraction(clientDir, fileName string) error {
 		return fmt.Errorf("error moving juno binary: %w", err)
 	}
 
-	buildCmd := exec.Command("make", "juno")
+	// Set environment variables based on OS
+	if runtime.GOOS == "darwin" {
+		os.Setenv("CGO_LDFLAGS", "-framework Foundation -framework SystemConfiguration")
+		// Get macOS version
+		macVersionCmd := exec.Command("sw_vers", "-productVersion")
+		macVersion, err := macVersionCmd.Output()
+		if err != nil {
+			return fmt.Errorf("error getting macOS version: %w", err)
+		}
+		os.Setenv("MACOSX_DEPLOYMENT_TARGET", strings.TrimSpace(string(macVersion)))
+	} else {
+		os.Setenv("CGO_LDFLAGS", "-ldl -lm")
+	}
+
+	// Build Rust dependencies first
+	if err := i.buildRustDependencies(junoPath); err != nil {
+		return fmt.Errorf("error building Rust dependencies: %w", err)
+	}
+
+	// Build Juno
+	if err := i.buildJuno(junoPath, version); err != nil {
+		return fmt.Errorf("error building Juno: %w", err)
+	}
+
+	return nil
+}
+
+func (i *installer) buildRustDependencies(junoPath string) error {
+	// Check Rust version first
+	minRustVersion := "1.85.1"
+	rustcCmd := exec.Command("rustc", "--version")
+	rustcOut, err := rustcCmd.Output()
+	if err != nil {
+		return fmt.Errorf("error checking Rust version: %w", err)
+	}
+
+	currentRustVersion := strings.Split(string(rustcOut), " ")[1]
+	if currentRustVersion < minRustVersion {
+		return fmt.Errorf("Rust version must be >= %s. Found version %s", minRustVersion, currentRustVersion)
+	}
+
+	// Build VM
+	if err := i.runMakeInDir(filepath.Join(junoPath, "vm/rust"), "all"); err != nil {
+		return fmt.Errorf("error building VM: %w", err)
+	}
+
+	// Build Core Rust
+	if err := i.runMakeInDir(filepath.Join(junoPath, "core/rust"), "all"); err != nil {
+		return fmt.Errorf("error building Core Rust: %w", err)
+	}
+
+	// Build Compiler
+	if err := i.runMakeInDir(filepath.Join(junoPath, "starknet/compiler/rust"), "all"); err != nil {
+		return fmt.Errorf("error building Compiler: %w", err)
+	}
+
+	return nil
+}
+
+func (i *installer) runMakeInDir(dir string, target string) error {
+	makeCmd := exec.Command("make", target)
+	makeCmd.Dir = dir
+	makeCmd.Stdout = os.Stdout
+	makeCmd.Stderr = os.Stderr
+	return makeCmd.Run()
+}
+
+func (i *installer) buildJuno(junoPath, version string) error {
+	// Create build directory
+	if err := os.MkdirAll(filepath.Join(junoPath, "build"), 0755); err != nil {
+		return fmt.Errorf("failed to create build directory: %w", err)
+	}
+
+	// Build Juno with all the required flags
+	ldflags := fmt.Sprintf("-X main.Version=%s", version)
+	args := []string{"build", "-tags", "vm_debug", "-a", "-ldflags", ldflags, "-o", "./build/juno", "./cmd/juno"}
+
+	buildCmd := exec.Command("go", args...)
 	buildCmd.Dir = junoPath
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
+	buildCmd.Env = os.Environ() // Include all environment variables
 
 	if err := buildCmd.Run(); err != nil {
-		return fmt.Errorf("make failed: %v", err)
+		return fmt.Errorf("go build failed: %w", err)
 	}
 
 	return nil
@@ -622,13 +700,11 @@ func downloadFile(url, filepath string) error {
 }
 
 func GetVersionNumber(client string) string {
-	if client == "juno" {
-		return versions.LatestJunoVersion
-	}
+
 	var argument string
 
 	switch client {
-	case "reth", "lighthouse", "geth":
+	case "reth", "lighthouse", "geth", "juno":
 		argument = "--version"
 	case "prysm":
 		argument = "beacon-chain --version"
@@ -674,7 +750,8 @@ func GetVersionNumber(client string) string {
 	case "prysm":
 		versionMatch = regexp.MustCompile(`beacon-chain-v(\d+\.\d+\.\d+)-`).FindStringSubmatch(versionOutput)
 	case "juno":
-		return ""
+		versionMatch = regexp.MustCompile(`juno version (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
+
 	}
 
 	if len(versionMatch) > 1 {
