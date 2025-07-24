@@ -129,7 +129,7 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 	fmt.Printf("Removing old %s installation...\n", client)
 
 	// Install new version
-	if err := installer.InstallClient(clientType); err != nil {
+	if err := installer.UpdateClient(clientType); err != nil {
 		result.Error = fmt.Sprintf("Failed to install new %s: %v", client, err)
 		// Try to restore backup
 		u.restoreBackup(client, backupPath)
