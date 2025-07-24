@@ -567,12 +567,6 @@ func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	return version, nil
 }
 
-// IsClientLatestVersion checks if the installed client is the latest version
-func (i *installer) IsClientLatestVersion(client types.ClientType, version string) (bool, string) {
-	isLatest, latestVersion := CompareClientVersions(string(client), version)
-	return isLatest, latestVersion
-}
-
 // downloadFile downloads a file from a URL to a local path
 func downloadFile(url, filepath string) error {
 	// Create the file
