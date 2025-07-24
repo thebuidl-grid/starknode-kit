@@ -368,7 +368,7 @@ func (i *installer) handleJunoPostExtraction(clientDir, fileName string) error {
 	}
 	defer file.Close()
 
-	_, err = file.WriteString(fileName)
+	_, err = file.WriteString(fmt.Sprintf("juno version %s", fileName))
 	if err != nil {
 		return fmt.Errorf("Error writing to file:%s", err)
 	}
