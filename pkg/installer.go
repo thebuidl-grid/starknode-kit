@@ -139,23 +139,8 @@ func (i *installer) getClientFileName(client types.ClientType) (string, error) {
 }
 
 // getDownloadURL returns the appropriate URL for downloading a client
-func (i *installer) getDownloadURL(client types.ClientType, fileName string) (string, error) {
-	switch client {
-	case types.ClientGeth:
-		return fmt.Sprintf("https://gethstore.blob.core.windows.net/builds/%s.tar.gz", fileName), nil
-	case types.ClientReth:
-		return fmt.Sprintf("https://github.com/paradigmxyz/reth/releases/download/v%s/%s.tar.gz",
-			versions.LatestRethVersion, fileName), nil
-	case types.ClientLighthouse:
-		return fmt.Sprintf("https://github.com/sigp/lighthouse/releases/download/v%s/%s.tar.gz",
-			versions.LatestLighthouseVersion, fileName), nil
-	case types.ClientPrysm:
-		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
-	case types.ClientJuno:
-		return fmt.Sprintf("https://github.com/NethermindEth/juno/archive/refs/tags/v%s.tar.gz", versions.LatestJunoVersion), nil
-	default:
-		return "", fmt.Errorf("unknown client: %s", client)
-	}
+func (i *installer) getDownloadURL(client types.ClientType) (string, error) {
+	return versions.FetchOnlineVersion(string(client))
 }
 
 // InstallClient installs the specified Ethereum client
@@ -179,7 +164,7 @@ func (i *installer) InstallClient(client types.ClientType) error {
 	}
 
 	// Get download URL
-	downloadURL, err := i.getDownloadURL(client, fileName)
+	downloadURL, err := i.getDownloadURL(client)
 	if err != nil {
 		return err
 	}
@@ -609,6 +594,7 @@ func GetVersionNumber(client string) string {
 		if len(versionMatch) > 1 {
 			return versionMatch[1]
 		}
+		return ""
 	case "reth", "lighthouse", "geth":
 		argument = "--version"
 	case "prysm":

@@ -73,7 +73,7 @@ func (u *UpdateChecker) CheckClientForUpdate(client string, useOnline bool) (*Up
 	var latestVersion string
 	if useOnline {
 		var err error
-		latestVersion, err = u.fetchOnlineVersion(client)
+		latestVersion, err = versions.FetchOnlineVersion(client)
 		if err != nil {
 			// Fallback to static version
 			latestVersion = u.getStaticVersion(client)
@@ -123,7 +123,7 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 
 	// Create installer instance
 	installer := pkg.NewInstaller(u.installDir)
-	clientType := getClientType(client)
+	clientType := types.GetClientType(client)
 
 	// Remove old version (using RemoveClient function if available)
 	fmt.Printf("Removing old %s installation...\n", client)
@@ -142,24 +142,6 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 	result.Success = true
 
 	return result
-}
-
-// fetchOnlineVersion fetches the latest version online for a client
-func (u *UpdateChecker) fetchOnlineVersion(client string) (string, error) {
-	switch client {
-	case "geth":
-		return versions.FetchLatestGethVersion()
-	case "reth":
-		return versions.FetchLatestRethVersion()
-	case "lighthouse":
-		return versions.FetchLatestLighthouseVersion()
-	case "prysm":
-		return versions.FetchLatestPrysmVersion()
-	case "juno":
-		return versions.FetchLatestJunoVersion()
-	default:
-		return "", fmt.Errorf("unsupported client: %s", client)
-	}
 }
 
 // getStaticVersion returns the hardcoded version for a client
@@ -181,22 +163,6 @@ func (u *UpdateChecker) getStaticVersion(client string) string {
 }
 
 // getClientType converts client name to ClientType
-func getClientType(client string) types.ClientType {
-	switch client {
-	case "geth":
-		return types.ClientGeth
-	case "reth":
-		return types.ClientReth
-	case "lighthouse":
-		return types.ClientLighthouse
-	case "prysm":
-		return types.ClientPrysm
-	case "juno":
-		return types.ClientJuno
-	default:
-		return ""
-	}
-}
 
 // getClientTypeString returns the client type category as string
 func getClientTypeString(client string) string {

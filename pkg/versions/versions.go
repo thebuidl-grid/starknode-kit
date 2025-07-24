@@ -1,5 +1,7 @@
 package versions
 
+import "fmt"
+
 const (
 	StarkNodeVersion        = "0.0.1"
 	LatestGethVersion       = "1.15.10"
@@ -18,21 +20,19 @@ var ClientReleaseUrls = map[string]string{
 	"juno":       "https://github.com/NethermindEth/juno/releases",
 }
 
-// GetClientLatestVersion returns the static latest version for a client
-func GetClientLatestVersion(client string) string {
+func FetchOnlineVersion(client string) (string, error) {
 	switch client {
 	case "geth":
-		return LatestGethVersion
+		return FetchLatestGethVersion()
 	case "reth":
-		return LatestRethVersion
+		return FetchLatestRethVersion()
 	case "lighthouse":
-		return LatestLighthouseVersion
+		return FetchLatestLighthouseVersion()
 	case "prysm":
-		return LatestPrysmVersion
+		return FetchLatestPrysmVersion()
 	case "juno":
-		return LatestJunoVersion
+		return FetchLatestJunoVersion()
 	default:
-		return "unknown"
+		return "", fmt.Errorf("unsupported client: %s", client)
 	}
 }
-
