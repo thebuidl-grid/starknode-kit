@@ -671,25 +671,8 @@ func GetVersionNumber(client string) string {
 	return ""
 }
 
-func CompareClientVersions(client, installedVersion string) (isUpToDate bool, latestVersion string) {
-	switch client {
-	case "reth":
-		latestVersion = versions.LatestRethVersion
-	case "geth":
-		latestVersion = versions.LatestGethVersion
-	case "lighthouse":
-		latestVersion = versions.LatestLighthouseVersion
-	case "prysm":
-		latestVersion = versions.LatestPrysmVersion
-	case "juno":
-		latestVersion = versions.LatestJunoVersion
-	default:
-		fmt.Printf("Unknown client: %s\n", client)
-		return false, ""
-	}
-
-	isUpToDate = compareVersions(installedVersion, latestVersion) >= 0
-	return // Implicit return of named values
+func CompareClientVersions(client, installedVersion, latestVersion string) bool {
+	return compareVersions(installedVersion, latestVersion) >= 0
 }
 
 func compareVersions(v1, v2 string) int {

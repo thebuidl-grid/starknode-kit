@@ -84,7 +84,7 @@ func (u *UpdateChecker) CheckClientForUpdate(client string, useOnline bool) (*Up
 	}
 
 	// Compare versions using the existing function
-	isLatest, _ := pkg.CompareClientVersions(client, currentVersion)
+	isLatest := pkg.CompareClientVersions(client, currentVersion, latestVersion)
 
 	updateInfo := &UpdateInfo{
 		Client:         client,
