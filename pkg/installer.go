@@ -541,7 +541,12 @@ func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 
 	// Handle Juno version checking differently (npm-based)
 	if client == types.ClientJuno {
-		return i.getJunoVersion(clientDir)
+		path := filepath.Join(InstallStarknetDir, "juno", ".version")
+		version, _ := os.ReadFile(path)
+		versionMatch := regexp.MustCompile(`juno version (\d+\.\d+\.\d+)`).FindStringSubmatch(string(version))
+		if len(versionMatch) > 1 {
+			return versionMatch[1], nil
+		}
 	}
 
 	currentDir, err := os.Getwd()
