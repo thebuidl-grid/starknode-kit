@@ -166,29 +166,6 @@ func (i *installer) installClient(client types.ClientType, clientPath, clientDir
 
 }
 
-func (i *installer) installClient(client types.ClientType, clientDir, clientPath string) error {
-	// Get client file name
-	fileName, err := i.getClientFileName(client)
-	if err != nil {
-		return err
-	}
-
-	// Get download URL
-	downloadURL, err := i.getDownloadURL(client)
-	if err != nil {
-		return err
-	}
-
-	// Install the client
-	if err := i.installClientBinary(client, clientDir, clientPath, downloadURL, fileName); err != nil {
-		return err
-	}
-
-	fmt.Printf("%s installed successfully.\n", client)
-	return nil
-
-}
-
 // InstallClient installs the specified Ethereum client
 func (i *installer) InstallClient(client types.ClientType) error {
 
