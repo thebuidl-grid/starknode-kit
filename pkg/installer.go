@@ -29,7 +29,7 @@ var (
 		"1.14.3":  "ab48ba42",
 		"1.14.12": "293a300d",
 		"1.15.10": "2bf8a789",
-		"1.16.1":  "12b4131",
+		"1.16.1":  "12b4131f",
 	}
 )
 
@@ -122,7 +122,7 @@ func (i *installer) getClientFileName(client types.ClientType, version string) (
 			gethArch = "arm64"
 		}
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
-			goos, gethArch, version, GethHash[versions.LatestGethVersion])
+			goos, gethArch, version, GethHash[version])
 	case types.ClientReth:
 		fileName = fmt.Sprintf("reth-%s-%s", version, archName)
 	case types.ClientLighthouse:
@@ -179,7 +179,6 @@ func (i *installer) installClient(client types.ClientType, clientPath, clientDir
 	if err != nil {
 		return err
 	}
-	fmt.Println(downloadURL)
 
 	// Install the client
 	if err := i.installClientBinary(client, clientDir, clientPath, downloadURL, fileName); err != nil {
@@ -217,7 +216,7 @@ func (i *installer) getClientDirectory(client types.ClientType) string {
 	if client == types.ClientJuno {
 		return filepath.Join(InstallStarknetDir, string(client))
 	}
-	return filepath.Join(i.InstallDir, string(client))
+	return filepath.Join(InstallClientsDir)
 }
 
 // setupClientDirectories creates the necessary directories for a client
@@ -380,6 +379,7 @@ func (i *installer) handleJunoPostExtraction(clientDir, fileName string) error {
 	extractedDir := filepath.Join(clientDir, fileName)
 	junoPath := filepath.Join(clientDir, "juno")
 	version_file := filepath.Join(InstallStarknetDir, "juno", ".version")
+	version := strings.Replace(fileName, "juno-", "", 1)
 
 	file, err := os.Create(version_file)
 	if err != nil {
@@ -387,7 +387,7 @@ func (i *installer) handleJunoPostExtraction(clientDir, fileName string) error {
 	}
 	defer file.Close()
 
-	_, err = file.WriteString(fmt.Sprintf("juno version %s", fileName))
+	_, err = file.WriteString(fmt.Sprintf("juno version %s", version))
 	if err != nil {
 		return fmt.Errorf("Error writing to file:%s", err)
 	}
@@ -509,7 +509,6 @@ func (i *installer) RemoveClient(client types.ClientType) error {
 	}
 
 	if _, err := os.Stat(clientDir); err == nil {
-		fmt.Printf("Removing %s installation.\n", client)
 
 		// For Juno, we need to clean up Go build artifacts
 		if client == types.ClientJuno {
@@ -533,7 +532,7 @@ func (i *installer) RemoveClient(client types.ClientType) error {
 
 		return os.RemoveAll(clientDir)
 	}
-
+	fmt.Println("Successfully removed %s", client)
 	return nil
 }
 
