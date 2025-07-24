@@ -10,6 +10,23 @@ const (
 	ClientJuno       ClientType = "juno"
 )
 
+func GetClientType(client string) ClientType {
+	switch client {
+	case "geth":
+		return ClientGeth
+	case "reth":
+		return ClientReth
+	case "lighthouse":
+		return ClientLighthouse
+	case "prysm":
+		return ClientPrysm
+	case "juno":
+		return ClientJuno
+	default:
+		return ""
+	}
+}
+
 type IClient interface {
 	Start() error
 }
