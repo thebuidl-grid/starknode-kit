@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strconv"
+	"strings"
+
 	"github.com/thebuidl-grid/starknode-kit/pkg"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
-	"strconv"
-	"strings"
 
 	"github.com/NethermindEth/juno/core/felt"
 	envsubt "github.com/emperorsixpacks/envsubst"
