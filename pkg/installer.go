@@ -29,6 +29,7 @@ var (
 		"1.14.3":  "ab48ba42",
 		"1.14.12": "293a300d",
 		"1.15.10": "2bf8a789",
+		"1.16.1":  "12b4131",
 	}
 )
 
@@ -83,7 +84,7 @@ func (installer) GetInsalledClients(dir string) ([]types.ClientType, error) {
 }
 
 // GetClientFileName returns the file name based on platform and architecture
-func (i *installer) getClientFileName(client types.ClientType) (string, error) {
+func (i *installer) getClientFileName(client types.ClientType, version string) (string, error) {
 	// Get current OS and architecture
 	goos := runtime.GOOS     // "darwin", "linux", "windows"
 	goarch := runtime.GOARCH // "amd64", "arm64"
@@ -121,16 +122,16 @@ func (i *installer) getClientFileName(client types.ClientType) (string, error) {
 			gethArch = "arm64"
 		}
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
-			goos, gethArch, versions.LatestGethVersion, GethHash[versions.LatestGethVersion])
+			goos, gethArch, version, GethHash[versions.LatestGethVersion])
 	case types.ClientReth:
-		fileName = fmt.Sprintf("reth-v%s-%s", versions.LatestRethVersion, archName)
+		fileName = fmt.Sprintf("reth-%s-%s", version, archName)
 	case types.ClientLighthouse:
-		fileName = fmt.Sprintf("lighthouse-v%s-%s", versions.LatestLighthouseVersion, archName)
+		fileName = fmt.Sprintf("lighthouse-%s-%s", version, archName)
 	case types.ClientPrysm:
 		fileName = "prysm.sh"
 	case types.ClientJuno:
 		// Juno is a Go binary, we'll build it from source
-		fileName = fmt.Sprintf("juno-v%s", versions.LatestJunoVersion)
+		fileName = fmt.Sprintf("juno-%s", version)
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -139,22 +140,46 @@ func (i *installer) getClientFileName(client types.ClientType) (string, error) {
 }
 
 // getDownloadURL returns the appropriate URL for downloading a client
-func (i *installer) getDownloadURL(client types.ClientType) (string, error) {
-	return versions.FetchOnlineVersion(string(client))
+func (i *installer) getDownloadURL(client types.ClientType, fileName, version string) (string, error) {
+
+	switch client {
+	case types.ClientGeth:
+		return fmt.Sprintf("https://gethstore.blob.core.windows.net/builds/%s.tar.gz", fileName), nil
+	case types.ClientReth:
+		return fmt.Sprintf("https://github.com/paradigmxyz/reth/releases/download/%s/%s.tar.gz",
+			version, fileName), nil
+	case types.ClientLighthouse:
+		return fmt.Sprintf("https://github.com/sigp/lighthouse/releases/download/%s/%s.tar.gz",
+			version, fileName), nil
+	case types.ClientPrysm:
+		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
+	case types.ClientJuno:
+		return fmt.Sprintf("https://github.com/NethermindEth/juno/archive/refs/tags/%s.tar.gz", version), nil
+	default:
+		return "", fmt.Errorf("unknown client: %s", client)
+	}
 }
 
 func (i *installer) installClient(client types.ClientType, clientPath, clientDir string) error {
 	// Get client file name
-	fileName, err := i.getClientFileName(client)
+
+	version, err := versions.FetchOnlineVersion(string(client))
+
+	if err != nil {
+		return nil
+	}
+
+	fileName, err := i.getClientFileName(client, version)
 	if err != nil {
 		return err
 	}
 
 	// Get download URL
-	downloadURL, err := i.getDownloadURL(client)
+	downloadURL, err := i.getDownloadURL(client, fileName, version)
 	if err != nil {
 		return err
 	}
+	fmt.Println(downloadURL)
 
 	// Install the client
 	if err := i.installClientBinary(client, clientDir, clientPath, downloadURL, fileName); err != nil {
@@ -178,7 +203,7 @@ func (i *installer) InstallClient(client types.ClientType) error {
 	if i.isClientInstalled(clientPath, client) {
 		return nil
 	}
-	return i.installClient(client, clientDir, clientPath)
+	return i.installClient(client, clientPath, clientDir)
 }
 
 func (i *installer) UpdateClient(client types.ClientType) error {
