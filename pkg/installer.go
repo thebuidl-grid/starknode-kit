@@ -143,24 +143,11 @@ func (i *installer) getDownloadURL(client types.ClientType) (string, error) {
 	return versions.FetchOnlineVersion(string(client))
 }
 
-// InstallClient installs the specified Ethereum client
-func (i *installer) InstallClient(client types.ClientType) error {
+func (i *installer) installClient(client types.ClientType, clientPath, clientDir string) error {
 	// Get client file name
 	fileName, err := i.getClientFileName(client)
 	if err != nil {
 		return err
-	}
-
-	// Setup client directories
-	clientDir := i.getClientDirectory(client)
-	if err := i.setupClientDirectories(clientDir); err != nil {
-		return err
-	}
-
-	// Determine client path and check if already installed
-	clientPath := i.getClientPath(client, clientDir)
-	if i.isClientInstalled(clientPath, client) {
-		return nil
 	}
 
 	// Get download URL
@@ -176,6 +163,51 @@ func (i *installer) InstallClient(client types.ClientType) error {
 
 	fmt.Printf("%s installed successfully.\n", client)
 	return nil
+
+}
+
+func (i *installer) installClient(client types.ClientType, clientDir, clientPath string) error {
+	// Get client file name
+	fileName, err := i.getClientFileName(client)
+	if err != nil {
+		return err
+	}
+
+	// Get download URL
+	downloadURL, err := i.getDownloadURL(client)
+	if err != nil {
+		return err
+	}
+
+	// Install the client
+	if err := i.installClientBinary(client, clientDir, clientPath, downloadURL, fileName); err != nil {
+		return err
+	}
+
+	fmt.Printf("%s installed successfully.\n", client)
+	return nil
+
+}
+
+// InstallClient installs the specified Ethereum client
+func (i *installer) InstallClient(client types.ClientType) error {
+
+	// Setup client directories
+	clientDir := i.getClientDirectory(client)
+	if err := i.setupClientDirectories(clientDir); err != nil {
+		return err
+	}
+	clientPath := i.getClientPath(client, clientDir)
+	if i.isClientInstalled(clientPath, client) {
+		return nil
+	}
+	return i.installClient(client, clientDir, clientPath)
+}
+
+func (i *installer) UpdateClient(client types.ClientType) error {
+	clientDir := i.getClientDirectory(client)
+	clientPath := i.getClientPath(client, clientDir)
+	return i.installClient(client, clientDir, clientPath)
 }
 
 // getClientDirectory returns the appropriate directory for the client
