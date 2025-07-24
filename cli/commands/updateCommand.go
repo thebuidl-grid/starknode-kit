@@ -29,19 +29,17 @@ Supported clients:
   - Starknet clients: juno
 
 Examples:
-  github.com/thebuidl-grid/starknode-kit update                    # Check all clients for updates
-  github.com/thebuidl-grid/starknode-kit update geth               # Update specific client
-  github.com/thebuidl-grid/starknode-kit update --check-only       # Only check, don't install
-  github.com/thebuidl-grid/starknode-kit update --online           # Fetch latest versions online
-  github.com/thebuidl-grid/starknode-kit update --auto-confirm     # Auto-confirm all updates`,
+  starknode-kit update                    # Check all clients for updates
+  starknode-kit update geth               # Update specific client
+  starknode-kit update --check-only       # Only check, don't install
+  starknode-kit update -y                 # Auto-confirm all updates`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runUpdate,
 }
 
 func init() {
 	UpdateCommand.Flags().BoolVar(&checkOnly, "check-only", false, "Only check for updates, don't install")
-	UpdateCommand.Flags().BoolVar(&useOnline, "online", false, "Fetch latest versions online instead of using static versions")
-	UpdateCommand.Flags().BoolVar(&autoConfirm, "auto-confirm", false, "Automatically confirm all updates without prompting")
+	UpdateCommand.Flags().BoolVarP(&autoConfirm, "yes", "y", false, "Automatically confirm all updates without prompting")
 }
 
 func runUpdate(cmd *cobra.Command, args []string) error {
@@ -68,7 +66,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	// Check for updates
 	var updatesAvailable []updater.UpdateInfo
 	for _, client := range clients {
-		updateInfo, err := updateChecker.CheckClientForUpdate(string(client), useOnline)
+		updateInfo, err := updateChecker.CheckClientForUpdate(string(client), true)
 		if err != nil {
 			fmt.Printf("⚠️  Warning: Could not check %s: %v\n", client, err)
 			continue
