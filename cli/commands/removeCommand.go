@@ -63,8 +63,6 @@ func removeCommand(cmd *cobra.Command, args []string) {
 			return
 		}
 	}
-
-	return
 }
 
 func init() {
