@@ -124,9 +124,9 @@ func (i *installer) getClientFileName(client types.ClientType, version string) (
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
 			goos, gethArch, version, GethHash[version])
 	case types.ClientReth:
-		fileName = fmt.Sprintf("reth-%s-%s", version, archName)
+		fileName = fmt.Sprintf("reth-v%s-%s", version, archName)
 	case types.ClientLighthouse:
-		fileName = fmt.Sprintf("lighthouse-%s-%s", version, archName)
+		fileName = fmt.Sprintf("lighthouse-v%s-%s", version, archName)
 	case types.ClientPrysm:
 		fileName = "prysm.sh"
 	case types.ClientJuno:
@@ -146,10 +146,10 @@ func (i *installer) getDownloadURL(client types.ClientType, fileName, version st
 	case types.ClientGeth:
 		return fmt.Sprintf("https://gethstore.blob.core.windows.net/builds/%s.tar.gz", fileName), nil
 	case types.ClientReth:
-		return fmt.Sprintf("https://github.com/paradigmxyz/reth/releases/download/%s/%s.tar.gz",
+		return fmt.Sprintf("https://github.com/paradigmxyz/reth/releases/download/v%s/%s.tar.gz",
 			version, fileName), nil
 	case types.ClientLighthouse:
-		return fmt.Sprintf("https://github.com/sigp/lighthouse/releases/download/%s/%s.tar.gz",
+		return fmt.Sprintf("https://github.com/sigp/lighthouse/releases/download/v%s/%s.tar.gz",
 			version, fileName), nil
 	case types.ClientPrysm:
 		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
