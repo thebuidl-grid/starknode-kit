@@ -60,32 +60,7 @@ func (m *MonitorApp) updateExecutionLogs(ctx context.Context) {
 	defer ticker.Stop()
 
 	// Default to Reth logs if no execution client is detected
-	rethLogs := []string{
-		"Reth v1.3.12",
-		"2025-06-15T13:50:49.381500Z INFO Canonical chain committed number=22674573 hash=0x42e0c59670d0aae3e65fc1109baec597207bb20eacceab850374b706 elapsed=796.542μs",
-		"2025-06-15T13:51:01.107312Z INFO State root task finished state_root=0x37fcdd548d484c536f5816b855e2497e03da5e7503 elapsed=1.07344ms",
-		"2025-06-15T13:51:01.107966Z INFO Block added to canonical chain number=22674574 hash=0xca5d0e5dbdc9f6fab2be1b4f8b9c6cc76fbd09ce3 elapsed=293.77ms",
-		"2025-06-15T13:51:01.267946Z INFO Canonical chain committed number=22674574 hash=0xca5d0e5dbdc9f6fab2be1b4f8b9c6cc76fbd09ce3dbbdb6 elapsed=416.344μs",
-		"2025-06-15T13:51:02.187294Z INFO State root task finished state_root=0x6660c6f5c489bbdc35507dfb74b016139c885f3b52 elapsed=356098ms",
-		"2025-06-15T13:51:13.279558Z INFO Block added to canonical chain number=22674575 hash=0x2a965406cad77de0d2701d3d5a29cdd0197a7d71 elapsed=290.97ms",
-		"2025-06-15T13:51:15.123Z INFO Downloading bodies from_block=22674576 to_block=22674580",
-		"2025-06-15T13:51:16.456Z INFO Processing transactions block=22674577 txs=156 gas_used=15234567",
-		"2025-06-15T13:51:17.789Z INFO State trie update merkle_root=0x8a4b2c7d9e3f1a6b5c8d2e7f4a9b3c6d8e1f4a7b2c5d8e1f4a7b block=22674578",
-	}
-
-	// Geth logs for when Geth is running instead of Reth
-	gethLogs := []string{
-		"Geth v1.14.8-stable",
-		"INFO [06-15|13:50:49.381] Imported new chain segment               blocks=1 txs=156 mgas=12.345 elapsed=1.234s mgasps=10.001 number=22674573 hash=0x42e0c5..374b706 dirty=45.67MiB",
-		"INFO [06-15|13:51:01.107] State heal in progress                   accounts=1234567@0x89ab..cdef slots=987654@0x1234..5678 codes=45@0xabcd..ef01 nodes=12345@0x5678..9abc pending=67",
-		"INFO [06-15|13:51:01.267] Block synchronisation started",
-		"INFO [06-15|13:51:02.187] Imported new chain segment               blocks=2 txs=289 mgas=15.678 elapsed=1.567s mgasps=10.003 number=22674575 hash=0xca5d0e..bdb6 dirty=52.34MiB",
-		"INFO [06-15|13:51:13.279] Persisted trie from memory database      nodes=45678 size=67.89MiB time=234.567ms gcnodes=12345 gcsize=23.45MiB gctime=45.678ms livenodes=34567 livesize=44.55MiB",
-		"INFO [06-15|13:51:15.123] Fast sync complete, auto disabling",
-		"INFO [06-15|13:51:16.456] Snap sync complete, auto disabling",
-		"INFO [06-15|13:51:17.789] Chain head was updated                   number=22674578 hash=0x8a4b2c..7b2c5d root=0x9e3f1a..1f4a7b elapsed=567.234ms",
-		"INFO [06-15|13:51:18.123] Committed new head block                 number=22674579 hash=0x1a6b5c..8e1f4a txs=234 gas=18234567 elapsed=345.678ms",
-	}
+	elLogs := []string{}
 
 	logIndex := 0
 	var logBuffer []string
@@ -126,12 +101,11 @@ func (m *MonitorApp) updateExecutionLogs(ctx context.Context) {
 					m.App.QueueUpdateDraw(func() {
 						if executionClient.Name == "Geth" {
 							m.ExecutionLogBox.SetTitle(" Geth ⚙️ ")
-							currentLogs = gethLogs
 						} else {
 							m.ExecutionLogBox.SetTitle(" Reth ⚡ ")
-							currentLogs = rethLogs
 						}
 					})
+					currentLogs = elLogs
 				}
 
 				// Try to get real logs first
@@ -169,15 +143,6 @@ func (m *MonitorApp) updateExecutionLogs(ctx context.Context) {
 								}
 							}
 
-							// Update block numbers progressively
-							currentBlock := 22674573 + int(time.Now().Unix()%1000)
-							currentEntry = strings.ReplaceAll(currentEntry, "22674573", fmt.Sprintf("%d", currentBlock))
-							currentEntry = strings.ReplaceAll(currentEntry, "22674574", fmt.Sprintf("%d", currentBlock+1))
-							currentEntry = strings.ReplaceAll(currentEntry, "22674575", fmt.Sprintf("%d", currentBlock+2))
-							currentEntry = strings.ReplaceAll(currentEntry, "22674576", fmt.Sprintf("%d", currentBlock+3))
-							currentEntry = strings.ReplaceAll(currentEntry, "22674577", fmt.Sprintf("%d", currentBlock+4))
-							currentEntry = strings.ReplaceAll(currentEntry, "22674578", fmt.Sprintf("%d", currentBlock+5))
-							currentEntry = strings.ReplaceAll(currentEntry, "22674579", fmt.Sprintf("%d", currentBlock+6))
 						}
 
 						// Format the log line
@@ -225,30 +190,7 @@ func (m *MonitorApp) updateConsensusLogs(ctx context.Context) {
 	ticker := time.NewTicker(3 * time.Second)
 	defer ticker.Stop()
 
-	// Realistic Lighthouse logs matching the JavaScript format
-	lighthouseLogs := []string{
-		"Lighthouse v7.0.1",
-		"Jun 10 13:50:36.160 INFO New block received root: 0xbd82ff3359a52ebc815f8b171ee6465d53e5598ae141612c68aef3793b940f7ff, elapsed=37171μs",
-		"Jun 10 13:50:41.004 INFO Synced slot: 11894951, block: 0xd482ff3359e52ebc815f8b171ee6465d5ae3e5598ae141612c68aef3793b940f7ff, elapsed=371717μs",
-		"Jun 10 13:50:45.001 INFO Synced verified attestation slot: 11894952 block: 0x9d1329711ce559e1f47bd499d0ae2be3f3ae4560e0bb0aded6b10dd312df78, elapsed=hash: 0x4a2e0c59a78bda6adf5f",
-		"Jun 10 13:51:05.001 INFO New block received root: 0x9d1329711ce559e1f47bd499d0ae2be3f3ae4560e0bb0aded6b10dd312df78, slot_notifier",
-		"Jun 10 13:51:32.796 INFO New block received slot: 11894953, elapsed=0xef7fd29c91e856c43dee9573f392f96ae540d7ffce032408ba9a1a053db",
-		"Jun 10 13:51:32.797 INFO Synced slot: 11894953, block: 0xef7fd29c91e856c43dee9573f392f96ae540d7ffce032408ba9a1a053db, elapsed=371757μs",
-		"Jun 10 13:51:45.123 INFO Updated latestProcessedSlot slot=11894954 epoch=372185",
-		"Jun 10 13:51:50.456 INFO Attestation published slot=11894955 committee_index=5 validator_index=12345",
-	}
-
-	// Prysm logs for when Prysm is running instead of Lighthouse
-	prysmLogs := []string{
-		"Prysm Beacon Chain v4.2.1",
-		"time=\"2024-06-10T13:50:36Z\" level=info msg=\"Successfully processed block\" block=0xbd82ff3359a52ebc815f8b171ee6465d53e5598ae141612c68aef3793b940f7ff slot=11894951",
-		"time=\"2024-06-10T13:50:41Z\" level=info msg=\"Synced up to slot\" slot=11894952 finalized_epoch=372184 finalized_root=0xd482ff3359e52ebc815f8b171ee6465d5ae3e5598ae141612c68aef3793b940f7ff",
-		"time=\"2024-06-10T13:50:45Z\" level=info msg=\"Successfully verified incoming block\" slot=11894953 proposer=12345 parentRoot=0x9d1329711ce559e1f47bd499d0ae2be3f3ae4560e0bb0aded6b10dd312df78",
-		"time=\"2024-06-10T13:51:05Z\" level=info msg=\"Processed attestations\" count=128 slot=11894954 epoch=372185",
-		"time=\"2024-06-10T13:51:32Z\" level=info msg=\"New payload received\" slot=11894955 block_hash=0xef7fd29c91e856c43dee9573f392f96ae540d7ffce032408ba9a1a053db gas_used=15234567",
-		"time=\"2024-06-10T13:51:45Z\" level=info msg=\"Finalized checkpoint\" epoch=372185 root=0x6660c6f5c489bbdc35507dfb74b016139c885f3b52",
-		"time=\"2024-06-10T13:51:50Z\" level=info msg=\"Submitted attestation\" slot=11894956 committee_index=7 validator_index=23456 source_epoch=372184 target_epoch=372185",
-	}
+	clLogs := []string{}
 
 	logIndex := 0
 	var logBuffer []string
@@ -289,12 +231,11 @@ func (m *MonitorApp) updateConsensusLogs(ctx context.Context) {
 					m.App.QueueUpdateDraw(func() {
 						if consensusClient.Name == "Prysm" {
 							m.ConsensusLogBox.SetTitle(" Prysm 🏛️ ")
-							currentLogs = prysmLogs
 						} else {
 							m.ConsensusLogBox.SetTitle(" Lighthouse 🏛️ ")
-							currentLogs = lighthouseLogs
 						}
 					})
+					currentLogs = clLogs
 				}
 
 				// Try to get real logs first
@@ -333,16 +274,6 @@ func (m *MonitorApp) updateConsensusLogs(ctx context.Context) {
 									}
 								}
 							}
-
-							// Update slot numbers progressively
-							baseSlot := 11894951
-							currentSlot := baseSlot + int(time.Now().Unix()%100)
-							currentEntry = strings.ReplaceAll(currentEntry, "11894951", fmt.Sprintf("%d", currentSlot))
-							currentEntry = strings.ReplaceAll(currentEntry, "11894952", fmt.Sprintf("%d", currentSlot+1))
-							currentEntry = strings.ReplaceAll(currentEntry, "11894953", fmt.Sprintf("%d", currentSlot+2))
-							currentEntry = strings.ReplaceAll(currentEntry, "11894954", fmt.Sprintf("%d", currentSlot+3))
-							currentEntry = strings.ReplaceAll(currentEntry, "11894955", fmt.Sprintf("%d", currentSlot+4))
-							currentEntry = strings.ReplaceAll(currentEntry, "11894956", fmt.Sprintf("%d", currentSlot+5))
 						}
 
 						// Format the log line
@@ -390,15 +321,6 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
-	statusMessages := []string{
-		"FOLLOWING CHAIN HEAD",
-		"SYNCING BLOCKS...",
-		"PROCESSING TRANSACTIONS",
-		"UPDATING STATE ROOT",
-		"VALIDATING CONSENSUS",
-		"FOLLOWING CHAIN HEAD",
-	}
-
 	messageIndex := 0
 
 	for {
@@ -412,9 +334,6 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 				continue
 			}
 
-			// Cycle through status messages
-			status := statusMessages[messageIndex%len(statusMessages)]
-
 			// Add some dynamic information
 			currentTime := time.Now()
 			syncStatus := utils.GetGethSyncStatus() // Works with reth too, same api
@@ -422,8 +341,7 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 			peers := syncStatus.PeersCount
 			syncPercent := syncStatus.SyncPercent
 
-			statusContent := fmt.Sprintf("[green][bold]%s[white]\n", status)
-			statusContent += fmt.Sprintf("Block: [yellow]%d[white]\n", currentBlock)
+			statusContent := fmt.Sprintf("Block: [yellow]%d[white]\n", currentBlock)
 			statusContent += fmt.Sprintf("Time: [cyan]%s[white]\n", currentTime.Format("15:04:05"))
 			statusContent += fmt.Sprintf("Peers: [green]%d[white]\n", peers)
 			statusContent += fmt.Sprintf("SyncPercent: [green]%.0f[white]", syncPercent)
@@ -569,7 +487,6 @@ func (m *MonitorApp) updateRPCInfo(ctx context.Context) {
 				continue
 			}
 
-			// Simulate RPC connection info
 			content := "[yellow][bold]RPC STATUS[white]\n"
 			content += strings.Repeat("-", 15) + "\n"
 
@@ -605,23 +522,7 @@ func (m *MonitorApp) updateJunoLogs(ctx context.Context) {
 	defer ticker.Stop()
 
 	// Realistic Juno logs matching typical Starknet node output (fallback)
-	junoLogs := []string{
-		"Juno v0.12.1 - Starknet Full Node",
-		"INFO [12-07|15:32:37.437] Starting Juno node syncing with Starknet Mainnet",
-		"INFO [12-07|15:32:38.234] Connected to Starknet sequencer endpoint=https://alpha-mainnet.starknet.io",
-		"INFO [12-07|15:32:39.156] Block received block_number=650328 block_hash=0x42e0c59670d0aae3e65fc1109baec597207bb20eacceab850374b706",
-		"INFO [12-07|15:32:40.789] State root updated new_root=0x37fcdd548d484c536158b0855e2497e03da5e7503 elapsed=1.0734ms",
-		"INFO [12-07|15:32:41.234] Processing block transactions count=15 gas_used=847329",
-		"INFO [12-07|15:32:42.567] Block committed to database block_number=650329 elapsed=423.17ms",
-		"INFO [12-07|15:32:43.891] Syncing with network latest_block=650335 local_block=650329 behind=6",
-		"INFO [12-07|15:32:44.456] State verification completed block_number=650330 state_root=0x6660c6f5c489bbdc35507dfb74b016139c883f3b52",
-		"INFO [12-07|15:32:45.123] Transaction pool updated pending=42 queued=18 pool_size=60",
-		"INFO [12-07|15:32:46.789] Block received block_number=650331 block_hash=0xca5d0e5dbdc9f6fab2be1b4f8b9c6cc76fbd09ce3dbbdb6",
-		"INFO [12-07|15:32:47.234] Processing Cairo 1.0 contracts calls=8 execution_time=156ms",
-		"INFO [12-07|15:32:48.567] L1 settlement verified block_range=650320-650330 l1_tx=0x9d1329711ce559e1f47bd499d0ae2be3f3ae4560e0bb0aded6b10dd312df78",
-		"INFO [12-07|15:32:49.891] State diff applied additions=145 modifications=78 deletions=2",
-		"INFO [12-07|15:32:50.345] Mempool synchronization active peers=12 pending_tx=38",
-	}
+	junoLogs := []string{}
 
 	var logBuffer []string
 	logIndex := 0
