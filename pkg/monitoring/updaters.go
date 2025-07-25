@@ -417,12 +417,16 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 
 			// Add some dynamic information
 			currentTime := time.Now()
-			currentBlock := 22674573 + int(currentTime.Unix()%1000)
+			syncStatus := utils.GetGethSyncStatus() // Works with reth too, same api
+			currentBlock := syncStatus.CurrentBlock
+			peers := syncStatus.PeersCount
+			syncPercent := syncStatus.SyncPercent
 
 			statusContent := fmt.Sprintf("[green][bold]%s[white]\n", status)
 			statusContent += fmt.Sprintf("Block: [yellow]%d[white]\n", currentBlock)
 			statusContent += fmt.Sprintf("Time: [cyan]%s[white]\n", currentTime.Format("15:04:05"))
-			statusContent += fmt.Sprintf("Peers: [green]%d[white]", 18+rand.Intn(10))
+			statusContent += fmt.Sprintf("Peers: [green]%d[white]\n", peers)
+			statusContent += fmt.Sprintf("SyncPercent: [green]%.0f[white]", syncPercent)
 
 			// Send to status channel
 			select {
