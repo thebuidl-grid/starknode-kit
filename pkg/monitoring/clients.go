@@ -24,8 +24,9 @@ import (
 
 // GetEthereumMetrics gets blockchain metrics
 func GetEthereumMetrics() t.EthereumMetrics {
+	config, _ := utils.LoadConfig()
 	metrics := t.EthereumMetrics{
-		NetworkName: "Mainnet",
+		NetworkName: config.Network,
 		IsSyncing:   false,
 		SyncPercent: 100.0,
 	}

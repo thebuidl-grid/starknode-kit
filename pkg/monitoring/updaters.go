@@ -335,14 +335,17 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 			}
 
 			// Add some dynamic information
+			config, _ := utils.LoadConfig()
 			currentTime := time.Now()
-			ethStatus := GetEthereumMetrics()
+			ethStatus := utils.GetGethSyncStatus()
 			currentBlock := ethStatus.CurrentBlock
-			peers := ethStatus.PeerCount
+			peers := ethStatus.PeersCount
+			netowrk := config.Network
 			syncPercent := ethStatus.SyncPercent
 			isSyncing := ethStatus.IsSyncing
 
-			statusContent := fmt.Sprintf("Block: [yellow]%d[white]\n", currentBlock)
+			statusContent := fmt.Sprintf("Network: [yellow]%s[white]\n", netowrk)
+			statusContent += fmt.Sprintf("Block: [yellow]%d[white]\n", currentBlock)
 			statusContent += fmt.Sprintf("Time: [cyan]%s[white]\n", currentTime.Format("15:04:05"))
 			statusContent += fmt.Sprintf("Peers: [green]%d[white]\n", peers)
 			statusContent += fmt.Sprintf("Syncing: [green]%t[white]\n", isSyncing)
