@@ -32,8 +32,8 @@ type IClient interface {
 }
 
 type StarkNodeKitConfig struct {
-	WalletAddress          string       `yaml:"wallet_address"`
-	PrivateKey             string       `yaml:"private_key"`
+	// WalletAddress          string       `yaml:"wallet_address"`
+	// PrivateKey             string       `yaml:"private_key"`
 	Network                string       `yaml:"network"`
 	ExecutionCientSettings ClientConfig `yaml:"execution_client"`
 	ConsensusCientSettings ClientConfig `yaml:"consensus_client"`
