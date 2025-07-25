@@ -216,7 +216,7 @@ func (i *installer) getClientDirectory(client types.ClientType) string {
 	if client == types.ClientJuno {
 		return filepath.Join(InstallStarknetDir, string(client))
 	}
-	return filepath.Join(InstallClientsDir)
+	return filepath.Join(InstallClientsDir, string(client))
 }
 
 // setupClientDirectories creates the necessary directories for a client
@@ -532,7 +532,7 @@ func (i *installer) RemoveClient(client types.ClientType) error {
 
 		return os.RemoveAll(clientDir)
 	}
-	fmt.Println("Successfully removed %s", client)
+	fmt.Printf("Successfully removed %s", client)
 	return nil
 }
 
