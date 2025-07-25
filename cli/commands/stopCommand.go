@@ -21,7 +21,7 @@ func stopCommand(cmd *cobra.Command, args []string) {
 	_, err := utils.LoadConfig()
 	if err != nil {
 		fmt.Println("❌ No config found.")
-		fmt.Println("💡 Run `starknode init` to create a config file.")
+		fmt.Println("💡 Run `starknode-kit init` to create a config file.")
 		return
 	}
 

@@ -22,7 +22,7 @@ func startCommand(cmd *cobra.Command, args []string) {
 	config, err := utils.LoadConfig()
 	if err != nil {
 		fmt.Println("No config found")
-		fmt.Println("Run `starknode init` to create config file")
+		fmt.Println("Run `starknode-kit init` to create config file")
 		return
 	}
 	el := config.ExecutionCientSettings
@@ -43,13 +43,13 @@ func startCommand(cmd *cobra.Command, args []string) {
 	}
 	if !utils.IsInstalled(elClient) {
 		fmt.Printf("Client \"%s\" is not installed.\n", elClient)
-		fmt.Printf("Please run: starknode add -e %s\n", elClient)
+		fmt.Printf("Please run: starknode-kit add -e %s\n", elClient)
 		return
 	}
 
 	if !utils.IsInstalled(clClient) {
 		fmt.Printf("Client \"%s\" is not installed.\n", clClient)
-		fmt.Printf("Please run: starknode add -c %s\n", clClient)
+		fmt.Printf("Please run: starknode-kit add -c %s\n", clClient)
 		return
 	}
 	cClient, err := clients.NewConsensusClient(cl, config.Network)
@@ -71,6 +71,6 @@ func startCommand(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Clients started, run: `starknode monitor` to view logs")
+	fmt.Println("Clients started, run: `starknode-kit monitor` to view logs")
 	return
 }

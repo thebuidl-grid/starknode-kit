@@ -13,7 +13,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "starknode",
 		Short: "Tool for setting up and managing Ethereum and  Starknet nodes",
-		Long: `starknode is a CLI tool designed to simplify the setup and management 
+		Long: `starknode-kit is a CLI tool designed to simplify the setup and management 
 of Ethereum and  Starknet nodes. It helps developers quickly configure, 
 launch, monitor, and maintain full nodes or validator setups for both networks.
 

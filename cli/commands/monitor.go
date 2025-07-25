@@ -35,7 +35,7 @@ func runMonitor() {
 
 	monitor := monitoring.NewMonitorApp()
 
-	fmt.Println("Starting StarkNode Monitor Dashboard...")
+	fmt.Println("Starting StarkNode-kit Monitor Dashboard...")
 	fmt.Println("Press 'q' or ESC to quit")
 
 	if err := monitor.Start(ctx); err != nil {
