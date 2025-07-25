@@ -63,7 +63,6 @@ starknode-kit --help
 | `monitor`    | Launch real-time monitoring dashboard                      |
 | `remove`     | Remove a specified resource                                |
 | `run`        | Run local Starknet infrastructure services                 |
-| `set`        | Set config values for execution or consensus clients       |
 | `start`      | Run the configured Ethereum clients                        |
 | `stop`       | Stop the configured Ethereum clients                       |
 | `update`     | Check for and install client updates                       |
@@ -106,7 +105,7 @@ starknode-kit remove --starknet_client juno
 
 #### Set an execution client
 ```bash
-starknode-kit set el client=reth network=mainnet port=9000,9001
+starknode-kit config el client=reth network=mainnet port=9000,9001
 ```
 
 #### Run a Juno Starknet node
