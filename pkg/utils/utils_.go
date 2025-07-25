@@ -37,7 +37,6 @@ func GetGethSyncStatus() t.SyncInfo {
 	if err := json.Unmarshal(body, &result); err != nil {
 		return syncInfo
 	}
-
 	if syncResult, ok := result["result"]; ok {
 		if syncResult == false {
 			// Not syncing = fully synced
