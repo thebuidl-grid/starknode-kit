@@ -336,15 +336,17 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 
 			// Add some dynamic information
 			currentTime := time.Now()
-			syncStatus := utils.GetGethSyncStatus() // Works with reth too, same api
-			currentBlock := syncStatus.CurrentBlock
-			peers := syncStatus.PeersCount
-			syncPercent := syncStatus.SyncPercent
+			ethStatus := GetEthereumMetrics()
+			currentBlock := ethStatus.CurrentBlock
+			peers := ethStatus.PeerCount
+			syncPercent := ethStatus.SyncPercent
+			isSyncing := ethStatus.IsSyncing
 
 			statusContent := fmt.Sprintf("Block: [yellow]%d[white]\n", currentBlock)
 			statusContent += fmt.Sprintf("Time: [cyan]%s[white]\n", currentTime.Format("15:04:05"))
 			statusContent += fmt.Sprintf("Peers: [green]%d[white]\n", peers)
-			statusContent += fmt.Sprintf("SyncPercent: [green]%.0f[white]", syncPercent)
+			statusContent += fmt.Sprintf("Syncing: [green]%t[white]\n", isSyncing)
+			statusContent += fmt.Sprintf("Percent: [green]%.0f[white]\n", syncPercent)
 
 			// Send to status channel
 			select {
@@ -374,32 +376,14 @@ func (m *MonitorApp) updateChainInfoBox(ctx context.Context) {
 				continue
 			}
 
-			// Simulate chain info similar to JavaScript version
-			currentTime := time.Now()
-			currentBlock := 22674573 + int(currentTime.Unix()%1000)
-
-			// Create multiple blocks info like in JavaScript
 			content := ""
 			separator := strings.Repeat("-", 25)
 			content += separator + "\n"
 
-			for i := 0; i < 5; i++ {
-				blockNum := currentBlock - i
-				ethPrice := 3200.00 + float64(rand.Intn(200))  // Random ETH price
-				gasPrice := 15.0 + float64(rand.Intn(50))/10.0 // Random gas price
-				txCount := 150 + rand.Intn(100)                // Random TX count
-
-				content += fmt.Sprintf("[center][green][bold]%s[white][/center]\n",
-					formatNumberWithCommas(uint64(blockNum)))
-				content += fmt.Sprintf("[blue][bold]ETH $:[white] %.2f\n", ethPrice)
-				content += fmt.Sprintf("[blue][bold]GAS:[white]   %.1f\n", gasPrice)
-				content += fmt.Sprintf("[blue][bold]# TX:[white]  %d\n", txCount)
-				content += separator
-
-				if i < 4 {
-					content += "\n"
-				}
-			}
+			metrics := GetEthereumMetrics()
+			gasPrice := metrics.GasPrice
+			content += fmt.Sprintf("[blue][bold]GAS:[white]   %s\n", gasPrice)
+			content += separator
 
 			// Send to chain info channel instead of direct update
 			select {
