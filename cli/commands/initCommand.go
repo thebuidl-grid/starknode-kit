@@ -22,6 +22,4 @@ func initCommand(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		return
 	}
-	return
-
 }

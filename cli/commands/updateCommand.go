@@ -53,7 +53,7 @@ func runUpdate(cmd *cobra.Command, args []string) error {
 	}
 	stark_clients, err := installer.GetInsalledClients(pkg.InstallStarknetDir)
 	if err != nil {
-		return err
+		fmt.Println("No starknet client installed")
 	}
 
 	if useOnline {
