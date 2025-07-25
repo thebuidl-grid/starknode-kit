@@ -1,11 +1,15 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
@@ -271,4 +275,29 @@ func FormatStarknetAddress(addr *felt.Felt) string {
 // FormatTransactionHash formats a transaction hash with proper padding
 func FormatTransactionHash(hash *felt.Felt) string {
 	return PadZerosInFelt(hash)
+}
+
+func CheckRPCStatus(rpcURL, method string) (string, error) {
+	payload := map[string]any{
+		"jsonrpc": "2.0",
+		"method":  method,
+		"params":  []any{},
+		"id":      1,
+	}
+	body, _ := json.Marshal(payload)
+
+	start := time.Now()
+	resp, err := http.Post(rpcURL, "application/json", bytes.NewBuffer(body))
+	latency := time.Since(start)
+
+	if err != nil {
+		return "❌ Disconnected", err
+	}
+	defer resp.Body.Close()
+
+	// Determine status based on latency
+	if latency > 1*time.Second {
+		return "⚠️ Slow", nil
+	}
+	return "✅ Connected", nil
 }

@@ -478,20 +478,14 @@ func (m *MonitorApp) updateRPCInfo(ctx context.Context) {
 			content += strings.Repeat("-", 15) + "\n"
 
 			// Execution RPC
-			execRPCStatus := "✅ Connected"
-			if rand.Intn(10) < 2 { // 20% chance of connection issues
-				execRPCStatus = "⚠️ Slow"
-			}
-			content += fmt.Sprintf("[blue]Execution:[white]\n%s\n", execRPCStatus)
-			content += "[dim]http://localhost:8545[white]\n\n"
+			execRPCURL := "http://localhost:8545"
+			execStatus, _ := utils.CheckRPCStatus(execRPCURL, "web3_clientVersion")
+			content += fmt.Sprintf("[blue]Execution:[white]\n%s\n[dim]%s[white]\n\n", execStatus, execRPCURL)
 
 			// Consensus RPC
-			consRPCStatus := "✅ Connected"
-			if rand.Intn(20) < 1 { // 5% chance of issues
-				consRPCStatus = "❌ Disconnected"
-			}
-			content += fmt.Sprintf("[blue]Consensus:[white]\n%s\n", consRPCStatus)
-			content += "[dim]http://localhost:5052[white]"
+			consRPCURL := "http://localhost:5054"
+			consStatus, _ := utils.CheckRPCStatus(consRPCURL, "eth/v1/node/health") // Use a valid consensus-layer method
+			content += fmt.Sprintf("[blue]Consensus:[white]\n%s\n[dim]%s[white]\n", consStatus, consRPCURL)
 
 			// Send to RPC info channel
 			select {
