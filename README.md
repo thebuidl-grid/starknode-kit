@@ -112,16 +112,22 @@ starknode-kit remove --consensus_client lighthouse
 starknode-kit remove --starknet_client juno
 ```
 
+#### Change netowork
+
+```bash
+starknode-kit config -n sepolia # Default network is mainnet
+```
+
 #### Set an execution client
 
 ```bash
-starknode-kit config el client=reth network=mainnet port=9000,9001
+starknode-kit config el client=reth port=9000,9001
 ```
 
 #### Run a Juno Starknet node
 
 ```bash
-starknode-kit run juno --network mainnet --port 6060 --data-dir ./juno-data
+starknode-kit run juno 
 ```
 
 #### Generate bash completion script
