@@ -42,7 +42,6 @@ type MonitorApp struct {
 	NetworkChan      chan string
 	StatusChan       chan string
 	JunoStatusChan   chan string
-	JunoNetworkChan  chan string
 	ChainInfoChan    chan string
 	SystemStatsChan  chan string
 	RPCInfoChan      chan string
