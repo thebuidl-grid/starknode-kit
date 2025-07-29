@@ -23,6 +23,7 @@ func NewMonitorApp() *MonitorApp {
 		ConsensusLogChan: make(chan string, 100),
 		JunoLogChan:      make(chan string, 100),
 		StatusChan:       make(chan string, 10),
+		JunoStatusChan:   make(chan string, 10),
 		NetworkChan:      make(chan string, 10),
 		ChainInfoChan:    make(chan string, 10),
 		SystemStatsChan:  make(chan string, 10),
