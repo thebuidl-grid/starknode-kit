@@ -118,8 +118,18 @@ func GetJunoMetrics() t.EthereumMetrics {
 		syncBody, _ := io.ReadAll(gasResp.Body)
 		var syncResult map[string]any
 		if json.Unmarshal(syncBody, &syncResult) == nil {
-			if result, ok := syncResult["result"].(bool); ok {
-				metrics.IsSyncing = result
+			if result, ok := syncResult["result"].(map[string]any); ok {
+				currentBlock, ok := result["current_block_num"].(float64)
+				if !ok {
+					return t.EthereumMetrics{}
+				}
+				hightestBlock, ok := result["highest_block_num"].(float64)
+				if !ok {
+					return t.EthereumMetrics{}
+				}
+				metrics.IsSyncing = hightestBlock > currentBlock
+				metrics.CurrentBlock = uint64(currentBlock)
+				metrics.SyncPercent = (currentBlock / hightestBlock) * 100
 			}
 		}
 	}

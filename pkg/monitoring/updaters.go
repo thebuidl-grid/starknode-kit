@@ -341,15 +341,16 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 			netowrk := config.Network
 			isSyncing := ethStatus.IsSyncing
 
-			l1statusContent := fmt.Sprintf("Block: [yellow]%d[white]\n", currentStrkBlock)
+			l1statusContent := fmt.Sprintf("Block: [green]%d[white]\n", currentStrkBlock)
 			l1statusContent += fmt.Sprintf("Peers: [green]%d[white]\n", peers)
 			l1statusContent += fmt.Sprintf("Syncing: [green]%t[white]\n", isSyncing)
 
 			l2Status := GetJunoMetrics()
-			l2statusContent := fmt.Sprintf("Current Block: [yellow]%d[white]\n", l2Status.CurrentBlock)
+			l2statusContent := fmt.Sprintf("Current Block: [green]%d[white]\n", l2Status.CurrentBlock)
 			l2statusContent += fmt.Sprintf("Syncing: [green]%t[white]\n", l2Status.IsSyncing)
+			l2statusContent += fmt.Sprintf("Syncing Percent: [green]%.1f[white]\n", l2Status.SyncPercent)
 
-			networkChanContent := fmt.Sprintf("Network: %s\ntime: %s", netowrk, currentTime.Format("15:04:05"))
+			networkChanContent := fmt.Sprintf("Network: [green]%s\n[white]time: %s", netowrk, currentTime.Format("15:04:05"))
 
 			// Send to status channel
 			select {
