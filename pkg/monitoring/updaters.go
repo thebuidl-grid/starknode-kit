@@ -321,8 +321,6 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
-	messageIndex := 0
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -338,27 +336,35 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 			config, _ := utils.LoadConfig()
 			currentTime := time.Now()
 			ethStatus := utils.GetGethSyncStatus()
-			currentBlock := ethStatus.CurrentBlock
+			currentStrkBlock := ethStatus.CurrentBlock
 			peers := ethStatus.PeersCount
 			netowrk := config.Network
 			syncPercent := ethStatus.SyncPercent
 			isSyncing := ethStatus.IsSyncing
 
-			statusContent := fmt.Sprintf("Network: [yellow]%s[white]\n", netowrk)
-			statusContent += fmt.Sprintf("Block: [yellow]%d[white]\n", currentBlock)
-			statusContent += fmt.Sprintf("Time: [cyan]%s[white]\n", currentTime.Format("15:04:05"))
+			statusContent := fmt.Sprintf("Block: [yellow]%d[white]\n", currentStrkBlock)
 			statusContent += fmt.Sprintf("Peers: [green]%d[white]\n", peers)
 			statusContent += fmt.Sprintf("Syncing: [green]%t[white]\n", isSyncing)
 			statusContent += fmt.Sprintf("Percent: [green]%.0f[white]\n", syncPercent)
 
+			l2Status := GetJunoMetrics()
+			l2statusContent := fmt.Sprintf("Block: [yellow]%d[white]\n", l2Status.CurrentBlock)
+			l2statusContent += fmt.Sprintf("Syncing: [green]%t[white]\n", l2Status.IsSyncing)
+
+			networkChanContent := fmt.Sprintf("Network: %s\ntime: %s", netowrk, currentTime.Format("15:04:05"))
+
 			// Send to status channel
 			select {
 			case m.StatusChan <- statusContent:
+				continue
+			case m.NetworkChan <- networkChanContent:
+				continue
+			case m.JunoStatusChan <- networkChanContent:
+				continue
 			default:
 				// Channel full, skip update
 			}
 
-			messageIndex++
 		}
 	}
 }
