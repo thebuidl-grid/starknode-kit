@@ -41,54 +41,59 @@ func (m *MonitorApp) setupUI() {
 		SetTitle(" Juno (Detecting...) 🌟 ").
 		SetTitleAlign(tview.AlignLeft)
 
-	// Create status box (matching statusBox.js)
-	m.StatusBox = m.createVibrantPanel("Status", tcell.ColorTeal)
+	// Create status boxes
+	m.StatusBox = m.createVibrantPanel("Eth Status", tcell.ColorTeal)
 	m.StatusBox.SetText("INITIALIZING...")
 
-	// Create chain info box (matching chainInfoBox.js)
+	m.NetworkBox = m.createVibrantPanel("Network", tcell.ColorTeal)
+	m.NetworkBox.SetText("INITIALIZING...")
+
+	m.StarknetStatusBox = m.createVibrantPanel("Starknet Status", tcell.ColorPurple)
+	m.StarknetStatusBox.SetText("INITIALIZING...")
+
+	// Create info boxes
 	m.ChainInfoBox = m.createVibrantPanel("Chain Info", tcell.ColorTeal)
-
-	// Create system stats gauge (matching systemStatsGauge.js)
 	m.SystemStatsBox = m.createVibrantPanel("System Stats", tcell.ColorTeal)
-
-	// Create RPC info box
 	m.RPCInfoBox = m.createVibrantPanel("RPC Info", tcell.ColorTeal)
 
-	// Perfect LEFT/RIGHT split layout
-	// LEFT side (60%): Execution logs (top) + Consensus logs (middle) + Juno logs (bottom) - EQUAL SIZES
-	// RIGHT side (40%): Status, Chain Info, RPC Info, System Stats - STACKED VERTICALLY
-
-	m.Grid.SetRows(-1, -1, -1). // 3 rows: execution(1), consensus(1), juno(1) - FULL TERMINAL HEIGHT
-					SetColumns(-3, -2). // 2 columns: LEFT(60%), RIGHT(40%)
+	// Setup main grid: LEFT (60%) for logs, RIGHT (40%) for info panels
+	m.Grid.SetRows(-1, -1, -1). // 3 rows for the 3 log panels
+					SetColumns(-3, -2). // LEFT(60%), RIGHT(40%)
 					SetBorders(false).
-					SetGap(0, 0) // No gaps for maximum space usage
+					SetGap(0, 0)
 
-	// LEFT SIDE - Execution logs (top third of left side)
-	m.Grid.AddItem(m.ExecutionLogBox, 0, 0, 1, 1, 0, 0, false) // Row 0, left col - Execution logs
+	// LEFT SIDE - Add log panels directly to main grid
+	m.Grid.AddItem(m.ExecutionLogBox, 0, 0, 1, 1, 0, 0, false) // Row 0, left col
+	m.Grid.AddItem(m.ConsensusLogBox, 1, 0, 1, 1, 0, 0, false) // Row 1, left col
+	m.Grid.AddItem(m.JunoLogBox, 2, 0, 1, 1, 0, 0, false)      // Row 2, left col
 
-	// LEFT SIDE - Consensus logs (middle third of left side)
-	m.Grid.AddItem(m.ConsensusLogBox, 1, 0, 1, 1, 0, 0, false) // Row 1, left col - Consensus logs
-
-	// LEFT SIDE - Juno logs (bottom third of left side)
-	m.Grid.AddItem(m.JunoLogBox, 2, 0, 1, 1, 0, 0, false) // Row 2, left col - Juno logs
-
-	// RIGHT SIDE - Create a sub-grid for the 4 panels stacked vertically
+	// RIGHT SIDE - Create sub-grid for info panels (5 rows total)
 	rightGrid := tview.NewGrid().
-		SetRows(-1, -1, -1, -1). // 4 equal rows for the 4 panels
-		SetColumns(-1).          // 1 column
+		SetRows(-1, -1, -1, -1, -1). // 5 equal rows
+		SetColumns(-1).              // Single column
 		SetBorders(false).
 		SetGap(0, 0)
 
-	// Add the 4 panels to the right side sub-grid
-	rightGrid.AddItem(m.StatusBox, 0, 0, 1, 1, 0, 0, false)      // Status
-	rightGrid.AddItem(m.ChainInfoBox, 1, 0, 1, 1, 0, 0, false)   // Chain Info
-	rightGrid.AddItem(m.RPCInfoBox, 2, 0, 1, 1, 0, 0, false)     // RPC Info
-	rightGrid.AddItem(m.SystemStatsBox, 3, 0, 1, 1, 0, 0, false) // System Stats
+	// Create status grid for ETH and Starknet status side by side
+	statusGrid := tview.NewGrid().
+		SetRows(-1).        // Single row
+		SetColumns(-1, -1). // 2 equal columns for ETH and Starknet
+		SetBorders(false).
+		SetGap(1, 0) // Small gap between status panels
+
+	// Add ETH and Starknet status to the status grid
+	statusGrid.AddItem(m.StatusBox, 0, 0, 1, 1, 0, 0, false)         // ETH Status (left)
+	statusGrid.AddItem(m.StarknetStatusBox, 0, 1, 1, 1, 0, 0, false) // Starknet Status (right)
+
+	// Add all panels to the right side sub-grid
+	rightGrid.AddItem(m.NetworkBox, 0, 0, 1, 1, 0, 0, false)     // Row 0: Network
+	rightGrid.AddItem(statusGrid, 1, 0, 1, 1, 0, 0, false)       // Row 1: Status grid (ETH + Starknet)
+	rightGrid.AddItem(m.ChainInfoBox, 2, 0, 1, 1, 0, 0, false)   // Row 2: Chain Info
+	rightGrid.AddItem(m.RPCInfoBox, 3, 0, 1, 1, 0, 0, false)     // Row 3: RPC Info
+	rightGrid.AddItem(m.SystemStatsBox, 4, 0, 1, 1, 0, 0, false) // Row 4: System Stats
 
 	// Add the right side sub-grid to main grid (spans all 3 rows on right)
 	m.Grid.AddItem(rightGrid, 0, 1, 3, 1, 0, 0, false) // Spans rows 0-2 on right column
-
-	// NO HELP BAR - MONITOR FILLS 100% OF TERMINAL HEIGHT
 
 	// Enhanced input handling
 	m.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {

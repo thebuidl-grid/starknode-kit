@@ -11,14 +11,16 @@ type MonitorApp struct {
 	Grid *tview.Grid
 
 	// Main dashboard panels matching JavaScript components exactly
-	ExecutionLogBox *tview.TextView // executionLog.js - Reth logs
-	ConsensusLogBox *tview.TextView // consensusLog.js - Lighthouse logs
-	JunoLogBox      *tview.TextView // junoLog.js - Juno Starknet logs
-	StatusBox       *tview.TextView // statusBox.js - Chain status
-	ChainInfoBox    *tview.TextView // chainInfoBox.js - Block info with ETH prices
-	SystemStatsBox  *tview.TextView // systemStatsGauge.js - Memory/Storage/CPU temp gauges
-	RPCInfoBox      *tview.TextView // rpcInfoBox.js - RPC connection info
-	StatusBar       *tview.TextView // Status bar for displaying current status
+	ExecutionLogBox   *tview.TextView
+	ConsensusLogBox   *tview.TextView
+	JunoLogBox        *tview.TextView
+	StatusBox         *tview.TextView
+	NetworkBox        *tview.TextView
+	StarknetStatusBox *tview.TextView
+	ChainInfoBox      *tview.TextView
+	SystemStatsBox    *tview.TextView
+	RPCInfoBox        *tview.TextView
+	StatusBar         *tview.TextView
 
 	// Legacy panels (for backward compatibility during transition)
 	SystemBox       *tview.TextView
