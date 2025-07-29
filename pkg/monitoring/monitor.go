@@ -23,6 +23,7 @@ func NewMonitorApp() *MonitorApp {
 		ConsensusLogChan: make(chan string, 100),
 		JunoLogChan:      make(chan string, 100),
 		StatusChan:       make(chan string, 10),
+		NetworkChan:      make(chan string, 10),
 		ChainInfoChan:    make(chan string, 10),
 		SystemStatsChan:  make(chan string, 10),
 		RPCInfoChan:      make(chan string, 10),
@@ -165,6 +166,14 @@ func (m *MonitorApp) handleUpdates(ctx context.Context) {
 		case text := <-m.StatusChan:
 			m.App.QueueUpdateDraw(func() {
 				m.StatusBox.SetText(text)
+			})
+		case text := <-m.NetworkChan:
+			m.App.QueueUpdateDraw(func() {
+				m.NetworkBox.SetText(text)
+			})
+		case text := <-m.JunoStatusChan:
+			m.App.QueueUpdateDraw(func() {
+				m.StarknetStatusBox.SetText(text)
 			})
 		case text := <-m.ChainInfoChan:
 			m.App.QueueUpdateDraw(func() {
