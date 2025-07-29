@@ -35,20 +35,20 @@ func (m *MonitorApp) setupUI() {
 		SetTitleAlign(tview.AlignLeft)
 
 	// Create Juno Starknet client log panel
-	m.JunoLogBox = m.createVibrantPanel("Juno", tcell.ColorPurple)
+	m.JunoLogBox = m.createVibrantPanel("Juno", tcell.ColorTeal)
 	m.JunoLogBox.SetBorder(true).
-		SetBorderColor(tcell.ColorPurple).
+		SetBorderColor(tcell.ColorTeal).
 		SetTitle(" Juno (Detecting...) 🌟 ").
 		SetTitleAlign(tview.AlignLeft)
 
 	// Create status boxes
-	m.StatusBox = m.createVibrantPanel("Eth Status", tcell.ColorTeal)
+	m.StatusBox = m.createVibrantPanel("L1 Status", tcell.ColorTeal)
 	m.StatusBox.SetText("INITIALIZING...")
 
 	m.NetworkBox = m.createVibrantPanel("Network", tcell.ColorTeal)
 	m.NetworkBox.SetText("INITIALIZING...")
 
-	m.StarknetStatusBox = m.createVibrantPanel("Starknet Status", tcell.ColorPurple)
+	m.StarknetStatusBox = m.createVibrantPanel("L2 Status", tcell.ColorTeal)
 	m.StarknetStatusBox.SetText("INITIALIZING...")
 
 	// Create info boxes
