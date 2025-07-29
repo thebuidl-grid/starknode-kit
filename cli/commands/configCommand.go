@@ -213,7 +213,7 @@ func parsePorts(value string) ([]int, error) {
 }
 
 func init() {
-	ConfigCommand.Flags().StringP("network", "n", "", "Show all client settings")
+	ConfigCommand.Flags().StringP("network", "n", "", "set netowork")
 	ConfigCommand.Flags().Bool("all", false, "Show all client settings")
 	ConfigCommand.Flags().Bool("el", false, "Show execution client settings")
 	ConfigCommand.Flags().Bool("cl", false, "Show consensus client settings")
