@@ -53,7 +53,11 @@ After installation, verify that `starknode-kit` is working:
 ```bash
 starknode-kit --help
 ```
+#### Generate Config file
 
+```bash
+starknode-kit init
+```
 ---
 
 ## 📘 Available Commands
@@ -87,12 +91,6 @@ starknode-kit --help
 
 ## 🧪 Example Usage
 
-#### Generate Config file
-
-```bash
-starknode-kit init
-```
-
 #### Add a client pair (consensus + execution)
 
 ```bash
@@ -112,7 +110,7 @@ starknode-kit remove --consensus_client lighthouse
 starknode-kit remove --starknet_client juno
 ```
 
-#### Change netowork
+#### Change network
 
 ```bash
 starknode-kit config -n sepolia # Default network is mainnet
@@ -124,10 +122,20 @@ starknode-kit config -n sepolia # Default network is mainnet
 starknode-kit config el client=reth port=9000,9001
 ```
 
-#### Run a Juno Starknet node
+#### Start Ethereum clients
 
 ```bash
-starknode-kit run juno 
+starknode-kit start
+```
+
+> ⚠️ **Note**: The `start` command only launches the configured **execution (EL)** and **consensus (CL)** clients. It does **not** start any Starknet clients.
+
+#### Run a Juno Starknet node
+
+To run a Starknet client like Juno, use the `run` command:
+
+```bash
+starknode-kit run juno
 ```
 
 #### Generate bash completion script

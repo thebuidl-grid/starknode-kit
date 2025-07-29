@@ -9,14 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	junoNetwork string
-	junoPort    string
-	junoDataDir string
-	junoEthNode string
-	useSnapshot bool
-)
-
 // RunJunoCmd represents the run juno command
 var RunCmd = &cobra.Command{
 	Use:   "run",
@@ -38,7 +30,7 @@ Juno requires an Ethereum node connection to verify L1 state. You can specify
 an Ethereum node URL using the --eth-node flag.
 
 Example:
-  github.com/thebuidl-grid/starknode-kit run-juno --network mainnet --port 6060 --data-dir ./juno-data --eth-node ws://localhost:8546`,
+  starknode-kit run juno`,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, err := utils.LoadConfig()
 		if err != nil {
