@@ -193,6 +193,14 @@ See this [Rocket Pool Hardware Guide](https://docs.rocketpool.net/guides/node/ha
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## 🌐 Join the Community
+
+Join the community to stay updated, ask questions, or contribute:
+
+- Telegram: [https://t.me/+SCPbza9fk8dkYWI0](https://t.me/+SCPbza9fk8dkYWI0)
+
+Whether you're a seasoned validator, hobbyist, or first-time node runner, you're welcome!
+
 ---
 
 ## 📄 License
