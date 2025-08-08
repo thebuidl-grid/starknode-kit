@@ -12,8 +12,11 @@ import (
 var (
 	InitCommand = &cobra.Command{
 		Use:   "init",
-		Short: "Create a default configuration file",
-		Run:   initCommand,
+		Short: "Initialize a new Starknet node configuration",
+		Long: `Creates a default configuration file for a Starknet node. 
+This command helps you get started with a new setup by generating a 'starknode.yaml' file with sensible defaults. 
+You can customize the configuration by using the available flags.`,
+		Run: initCommand,
 	}
 )
 
@@ -26,8 +29,9 @@ func initCommand(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	options.InitGlobalOptions(ConfigCommand)
-	ConfigCommand.Flags().String("network", "sepolia", "Select network")
-	ConfigCommand.Flags().Bool("validator", false, "Configure validotor node")
-	ConfigCommand.Flags().Bool("install", true, "Install clients after setup")
+	options.InitGlobalOptions(InitCommand)
+	InitCommand.Flags().String("network", "sepolia", "Select the network to connect to (e.g., 'mainnet', 'sepolia')")
+	InitCommand.Flags().Bool("starknet_node", false, "Install a Starknet node")
+	InitCommand.Flags().Bool("validator", false, "Configure a validator node")
+	InitCommand.Flags().Bool("install", true, "Install clients automatically after setup")
 }
