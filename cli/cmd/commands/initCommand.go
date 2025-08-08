@@ -2,7 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"starknode-kit/pkg/utils"
+
+	"github.com/thebuidl-grid/starknode-kit/cli/options"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -23,4 +25,10 @@ func initCommand(cmd *cobra.Command, args []string) {
 	}
 	return
 
+}
+
+func init() {
+	options.InitGlobalOptions(InitCommand)
+	InitCommand.Flags().BoolP("install", "i", false, "Install clients")
+	InitCommand.Flags().BoolP("validator_node", "v", false, "Is validator node")
 }
