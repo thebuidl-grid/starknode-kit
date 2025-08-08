@@ -34,7 +34,6 @@ type IClient interface {
 type (
 	StarkNodeKitConfig struct {
 		Network                string       `yaml:"network"`
-		IsValidatorNode        bool         `yaml:"is_validator_node"`
 		Wallet                 WalletConfig `wallet:"wallet"`
 		ExecutionCientSettings ClientConfig `yaml:"execution_client"`
 		ConsensusCientSettings ClientConfig `yaml:"consensus_client"`
@@ -49,9 +48,10 @@ type (
 	}
 
 	JunoConfig struct {
-		Port        int      `yaml:"port"`
-		EthNode     string   `yaml:"eth_node"`
-		Environment []string `yaml:"environment"`
+		Port            int      `yaml:"port"`
+		EthNode         string   `yaml:"eth_node"`
+		Environment     []string `yaml:"environment"`
+		IsValidatorNode bool     `yaml:"is_validator_node"`
 	}
 
 	WalletConfig struct {
