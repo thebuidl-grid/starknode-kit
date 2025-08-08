@@ -1,1 +1,12 @@
 # cli/cli 
+bin
+logs/
+
+# Binary output
+starknode-kit
+starknode-kit.exe
+
+# Build artifacts
+*.exe
+*.so
+*.dylib

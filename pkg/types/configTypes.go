@@ -7,15 +7,34 @@ const (
 	ClientReth       ClientType = "reth"
 	ClientLighthouse ClientType = "lighthouse"
 	ClientPrysm      ClientType = "prysm"
+	ClientJuno       ClientType = "juno"
 )
 
+func GetClientType(client string) ClientType {
+	switch client {
+	case "geth":
+		return ClientGeth
+	case "reth":
+		return ClientReth
+	case "lighthouse":
+		return ClientLighthouse
+	case "prysm":
+		return ClientPrysm
+	case "juno":
+		return ClientJuno
+	default:
+		return ""
+	}
+}
+
 type IClient interface {
-	 Start() error
+	Start() error
 }
 
 type (
 	StarkNodeKitConfig struct {
 		Network                string       `yaml:"network"`
+		IsValidatorNode        bool         `yaml:"is_validator_node"`
 		Wallet                 WalletConfig `wallet:"wallet"`
 		ExecutionCientSettings ClientConfig `yaml:"execution_client"`
 		ConsensusCientSettings ClientConfig `yaml:"consensus_client"`
@@ -30,10 +49,9 @@ type (
 	}
 
 	JunoConfig struct {
-		Port            int      `yaml:"port"`
-		EthNode         string   `yaml:"eth_node"`
-		Environment     []string `yaml:"environment"`
-		IsValidatorNode bool     `yaml:"is_validator_node"`
+		Port        int      `yaml:"port"`
+		EthNode     string   `yaml:"eth_node"`
+		Environment []string `yaml:"environment"`
 	}
 
 	WalletConfig struct {

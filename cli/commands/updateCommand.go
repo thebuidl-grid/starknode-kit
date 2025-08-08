@@ -37,6 +37,11 @@ Examples:
 	RunE: runUpdate,
 }
 
+func init() {
+	UpdateCommand.Flags().BoolVar(&checkOnly, "check-only", false, "Only check for updates, don't install")
+	UpdateCommand.Flags().BoolVarP(&autoConfirm, "yes", "y", false, "Automatically confirm all updates without prompting")
+}
+
 func runUpdate(cmd *cobra.Command, args []string) error {
 	installDir := pkg.InstallDir
 	updateChecker := updater.NewUpdateChecker(installDir)
@@ -151,7 +156,4 @@ func getClientTypeEmoji(clientType string) string {
 	}
 }
 
-func init() {
-	UpdateCommand.Flags().BoolVar(&checkOnly, "check-only", false, "Only check for updates, don't install")
-	UpdateCommand.Flags().BoolVarP(&autoConfirm, "yes", "y", false, "Automatically confirm all updates without prompting")
-}
+// TODO should not crash if folder does not exist return a message if staknet folder does not exist

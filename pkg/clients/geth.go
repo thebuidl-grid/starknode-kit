@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"starknode-kit/pkg"
-	"starknode-kit/pkg/process"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 )
 
 // Configuration options for Geth
@@ -43,7 +44,7 @@ func (c *gethConfig) buildArgs() []string {
 		"--authrpc.vhosts=*",
 		"--metrics",
 		"--metrics.addr=0.0.0.0",
-		"--metrics.port=6060",
+		"--metrics.port=7878",
 	}
 
 	// Add execution type specific arguments

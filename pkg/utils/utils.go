@@ -1,17 +1,25 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path"
-	"starknode-kit/pkg"
-	"starknode-kit/pkg/process"
-	"starknode-kit/pkg/types"
-	t "starknode-kit/pkg/types"
-	"starknode-kit/pkg/versions"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/process"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
+
+	"github.com/NethermindEth/juno/core/felt"
+	envsubt "github.com/emperorsixpacks/envsubst"
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
 )
 
@@ -42,12 +50,12 @@ func IsInstalled(c t.ClientType) bool {
 	dir := path.Join(pkg.InstallClientsDir, string(c))
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		return false 
+		return false
 	}
 	if !info.IsDir() {
-		return false 
+		return false
 	}
-	return true 
+	return true
 }
 
 func LoadConfig() (t.StarkNodeKitConfig, error) {
@@ -55,6 +63,14 @@ func LoadConfig() (t.StarkNodeKitConfig, error) {
 	cfgByt, err := os.ReadFile(pkg.ConfigPath)
 	if err != nil {
 		return t.StarkNodeKitConfig{}, err
+	}
+	err = godotenv.Load(pkg.EnvFIlePath)
+	if err == nil {
+		err = envsubt.Unmarshal(cfgByt, &cfg)
+		if err != nil {
+			return t.StarkNodeKitConfig{}, err
+		}
+		return cfg, nil
 	}
 	err = yaml.Unmarshal(cfgByt, &cfg)
 	if err != nil {
@@ -79,6 +95,10 @@ func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
 }
 
 func CreateStarkNodeConfig() error {
+	if _, err := os.Stat(pkg.ConfigDir); err == nil {
+		return fmt.Errorf("Starknode-kit already initialized at %s", pkg.ConfigDir)
+	}
+
 	default_config := defaultConfig()
 	if err := os.MkdirAll(pkg.ConfigDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
@@ -166,6 +186,19 @@ func GetRunningClients() []types.ClientStatus {
 		clients = append(clients, status)
 	}
 
+	// Check for Juno (Starknet client)
+	if junoInfo := process.GetProcessInfo("juno"); junoInfo != nil {
+		status := types.ClientStatus{
+			Name:       "Juno",
+			Status:     junoInfo.Status,
+			PID:        junoInfo.PID,
+			Uptime:     junoInfo.Uptime,
+			Version:    GetClientVersion("juno"),
+			SyncStatus: GetJunoSyncStatus(),
+		}
+		clients = append(clients, status)
+	}
+
 	return clients
 }
 
@@ -175,4 +208,96 @@ func ParseHexInt(hexStr string) (uint64, error) {
 		hexStr = hexStr[2:]
 	}
 	return strconv.ParseUint(hexStr, 16, 64)
+}
+
+func SetNetwork(cfg *t.StarkNodeKitConfig, network string) error {
+	switch network {
+	case "mainnet":
+		cfg.Network = "mainnet"
+		cfg.ConsensusCientSettings.ConsensusCheckpoint = "https://mainnet-checkpoint-sync.stakely.io/"
+		return nil
+	case "sepolia":
+		cfg.Network = "sepolia"
+		cfg.ConsensusCientSettings.ConsensusCheckpoint = "https://sepolia-checkpoint-sync.stakely.io/"
+		return nil
+	default:
+		return fmt.Errorf("Network %v not supported", network)
+	}
+}
+
+func GetStarknetClient(c string) (t.ClientType, error) {
+	sprtClients := map[string]t.ClientType{
+		"juno": t.ClientJuno,
+	}
+	client, ok := sprtClients[c]
+	if !ok {
+		return "", fmt.Errorf("starknet client %s not supported", c)
+	}
+	return client, nil
+}
+
+func ViewConfig() error {
+	cfg, err := LoadConfig()
+	if err != nil {
+		return err
+	}
+	fmt.Println(cfg)
+	return nil
+
+}
+
+// PadZerosInFelt pads a felt value to 66 characters with leading zeros
+// This ensures consistent formatting for Starknet addresses and hashes
+func PadZerosInFelt(hexFelt *felt.Felt) string {
+	const targetLength = 66
+	hexStr := hexFelt.String()
+
+	// Check if the hex value is already of the desired length
+	if len(hexStr) >= targetLength {
+		return hexStr
+	}
+
+	// Extract the hex value without the "0x" prefix
+	hexValue := hexStr[2:]
+
+	// Pad zeros after the "0x" prefix
+	paddedHexValue := fmt.Sprintf("%0*s", targetLength-2, hexValue)
+
+	// Add back the "0x" prefix to the padded hex value
+	return "0x" + paddedHexValue
+}
+
+// FormatStarknetAddress formats a felt address with proper padding
+func FormatStarknetAddress(addr *felt.Felt) string {
+	return PadZerosInFelt(addr)
+}
+
+// FormatTransactionHash formats a transaction hash with proper padding
+func FormatTransactionHash(hash *felt.Felt) string {
+	return PadZerosInFelt(hash)
+}
+
+func CheckRPCStatus(rpcURL, method string) (string, error) {
+	payload := map[string]any{
+		"jsonrpc": "2.0",
+		"method":  method,
+		"params":  []any{},
+		"id":      1,
+	}
+	body, _ := json.Marshal(payload)
+
+	start := time.Now()
+	resp, err := http.Post(rpcURL, "application/json", bytes.NewBuffer(body))
+	latency := time.Since(start)
+
+	if err != nil {
+		return "❌ Disconnected", err
+	}
+	defer resp.Body.Close()
+
+	// Determine status based on latency
+	if latency > 1*time.Second {
+		return "⚠️ Slow", nil
+	}
+	return "✅ Connected", nil
 }

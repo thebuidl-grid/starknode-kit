@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"starknode-kit/pkg"
-	"starknode-kit/pkg/process"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 )
 
 // Configuration options for Reth
@@ -31,17 +32,17 @@ func (config *rethConfig) buildArgs() []string {
 	// Build common arguments
 	args := []string{
 		"node",
-		"--network", config.network,
+		"--chain", config.network,
 		"--http",
 		"--http.addr", "0.0.0.0",
 		"--http.port", "8545",
-		"--http.api", "eth,net,engine,admin",
+		"--http.api", "eth,net,admin",
 		"--http.corsdomain", "*",
 		"--authrpc.addr", "0.0.0.0",
 		"--authrpc.port", "8551",
 		"--authrpc.jwtsecret", pkg.JWTPath,
 		"--port", fmt.Sprintf("%d", config.port),
-		"--metrics", "0.0.0.0:6060",
+		"--metrics", "0.0.0.0:7878",
 	}
 
 	// Add execution type specific arguments
@@ -50,7 +51,7 @@ func (config *rethConfig) buildArgs() []string {
 	}
 
 	// Add data directory
-	dataDir := filepath.Join(pkg.InstallClientsDir, "ethereum_clients", "reth", "database")
+	dataDir := filepath.Join(pkg.InstallClientsDir, "reth", "database")
 	args = append(args, "--datadir", dataDir)
 
 	return args
@@ -62,9 +63,9 @@ func (c *rethConfig) Start() error {
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
 		pkg.InstallClientsDir,
-		"geth",
+		"reth",
 		"logs",
-		fmt.Sprintf("geth_%s.log", timestamp))
+		fmt.Sprintf("reth_%s.log", timestamp))
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err

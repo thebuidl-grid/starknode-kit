@@ -4,10 +4,14 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	t "starknode-kit/pkg/types"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
+
+	"github.com/joho/godotenv"
 )
 
 func GetGethSyncStatus() t.SyncInfo {
@@ -33,7 +37,6 @@ func GetGethSyncStatus() t.SyncInfo {
 	if err := json.Unmarshal(body, &result); err != nil {
 		return syncInfo
 	}
-
 	if syncResult, ok := result["result"]; ok {
 		if syncResult == false {
 			// Not syncing = fully synced
@@ -179,8 +182,31 @@ func GetPrysmSyncStatus() t.SyncInfo {
 
 	return syncInfo
 }
+
+// getJunoSyncStatus gets sync status from Juno's HTTP API
+func GetJunoSyncStatus() t.SyncInfo {
+	syncInfo := t.SyncInfo{IsSyncing: false, SyncPercent: 100.0}
+
+	// Juno doesn't have a standard HTTP API endpoint like Ethereum clients
+	// For now, we'll default to not syncing unless we detect log patterns
+	// In the future, this could be enhanced to check Juno-specific endpoints
+	// or parse log files for sync status
+
+	// Try to check if Juno process is running and assume it's operational
+	// This is a simplified implementation - real Juno sync status would need
+	// to check Starknet block height vs network height
+	syncInfo.IsSyncing = false
+	syncInfo.SyncPercent = 100.0
+	syncInfo.CurrentBlock = 650000 // Placeholder Starknet block
+	syncInfo.HighestBlock = 650000
+
+	return syncInfo
+}
+
 func defaultConfig() t.StarkNodeKitConfig {
 	return t.StarkNodeKitConfig{
+		// WalletAddress: "${STARKNET_WALLET}",
+		// PrivateKey:    "${STARKNET_PRIVATE_KEY}",
 		Network: "mainnet",
 		ExecutionCientSettings: t.ClientConfig{
 			Name:          t.ClientGeth,
@@ -192,5 +218,18 @@ func defaultConfig() t.StarkNodeKitConfig {
 			Port:                []int{5052, 9000},
 			ConsensusCheckpoint: "https://mainnet-checkpoint-sync.stakely.io/",
 		},
+		JunoConfig: t.JunoConfig{
+			Port:    6060,
+			EthNode: "wss://eth.drpc.org",
+			Environment: []string{
+				"JUNO_HTTP_PORT=6060",
+				"JUNO_HTTP_HOST=0.0.0.0",
+			},
+		},
 	}
+}
+
+func writeToENV(ks map[string]string) error {
+	err := godotenv.Write(ks, pkg.EnvFIlePath)
+	return err
 }

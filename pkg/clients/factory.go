@@ -2,11 +2,12 @@ package clients
 
 import (
 	"fmt"
-	"starknode-kit/pkg/process"
-	"starknode-kit/pkg/types"
-	"starknode-kit/pkg/utils"
 	"strings"
 	"time"
+
+	"github.com/thebuidl-grid/starknode-kit/pkg/process"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 )
 
 func NewConsensusClient(cfg types.ClientConfig, network string) (types.IClient, error) {
@@ -29,6 +30,20 @@ func NewExecutionClient(cfg types.ClientConfig, network string) (types.IClient, 
 	default:
 		return nil, fmt.Errorf("unsupported execution client: %s", cfg.Name)
 	}
+}
+
+func NewJunoClient(config types.JunoConfig, network string) (types.IClient, error) {
+
+	// Get Juno binary path
+	junoPath := getJunoPath()
+	if junoPath == "" {
+		return nil, fmt.Errorf("Juno is not installed. Please install it first using 'starknode-kit add -s juno'")
+	}
+
+	return &JunoClient{
+		config:  config,
+		network: network,
+	}, nil
 }
 
 func RestartClient(pid int) error {
@@ -56,6 +71,12 @@ func RestartClient(pid int) error {
 	}
 	c, _ := NewConsensusClient(config.ConsensusCientSettings, config.Network)
 	err = c.Start()
+	if err != nil {
+		return err
+	}
+
+	j, _ := NewJunoClient(config.JunoConfig, config.Network)
+	err = j.Start()
 	if err != nil {
 		return err
 	}
