@@ -16,6 +16,12 @@ NC='\033[0m' # No Color
 
 # Node type selection variable
 SELECTED_NODE_TYPE=""
+SELECTED_NETWORK=""
+SELECTED_EL_CLIENT=""
+SELECTED_CL_CLIENT=""
+
+IS_STARKNET_NODE=1
+IS_VALIDATOR_NODE=1
 
 handle_keyboard_interrupt(){
   clear
@@ -105,6 +111,155 @@ show_node_selection() {
     sleep 1
 }
 
+# Function to select Ethereum network
+select_ethereum_network() {
+    while true; do
+        clear
+        show_banner
+        
+        echo -e "${BLUE}Select Ethereum Network:${NC}"
+        echo
+        echo -e "${YELLOW}1)${NC} Mainnet"
+        echo -e "   ${CYAN}└── Ethereum main network (production)${NC}"
+        echo
+        echo -e "${YELLOW}2)${NC} Sepolia"
+        echo -e "   ${CYAN}└── Ethereum test network${NC}"
+        echo
+        echo -n -e "${GREEN}Enter your choice [1-2]: ${NC}"
+        
+        read -r choice
+        
+        case $choice in
+            1)
+                SELECTED_NETWORK="mainnet"
+                print_status "Selected: Ethereum Mainnet"
+                break
+                ;;
+            2)
+                SELECTED_NETWORK="sepolia"
+                print_status "Selected: Sepolia Testnet"
+                break
+                ;;
+            *)
+                print_error "Invalid choice. Please select 1-2."
+                sleep 2
+                ;;
+        esac
+    done
+    echo
+    sleep 1
+}
+
+# Function to select Execution Layer client
+select_el_client() {
+    while true; do
+        clear
+        show_banner
+        
+        echo -e "${BLUE}Select Execution Layer (EL) Client:${NC}"
+        echo
+        echo -e "${YELLOW}1)${NC} Geth"
+        echo -e "   ${CYAN}└── Go Ethereum (Most popular, stable)${NC}"
+        echo
+        echo -e "${YELLOW}2)${NC} Reth"
+        echo -e "   ${CYAN}└── Rust Ethereum (High performance, modern)${NC}"
+        echo
+        echo -n -e "${GREEN}Enter your choice [1-2]: ${NC}"
+        
+        read -r choice
+        
+        case $choice in
+            1)
+                SELECTED_EL_CLIENT="geth"
+                print_status "Selected: Geth (Go Ethereum)"
+                break
+                ;;
+            2)
+                SELECTED_EL_CLIENT="reth"
+                print_status "Selected: Reth (Rust Ethereum)"
+                break
+                ;;
+            *)
+                print_error "Invalid choice. Please select 1-2."
+                sleep 2
+                ;;
+        esac
+    done
+    echo
+    sleep 1
+}
+
+# Function to select Consensus Layer client
+select_cl_client() {
+    while true; do
+        clear
+        show_banner
+        
+        echo -e "${BLUE}Select Consensus Layer (CL) Client:${NC}"
+        echo
+        echo -e "${YELLOW}1)${NC} Lighthouse"
+        echo -e "   ${CYAN}└── Rust implementation (Efficient, reliable)${NC}"
+        echo
+        echo -e "${YELLOW}2)${NC} Prysm"
+        echo -e "   ${CYAN}└── Go implementation (Feature-rich, popular)${NC}"
+        echo
+        echo -n -e "${GREEN}Enter your choice [1-2]: ${NC}"
+        
+        read -r choice
+        
+        case $choice in
+            1)
+                SELECTED_CL_CLIENT="lighthouse"
+                print_status "Selected: Lighthouse"
+                break
+                ;;
+            2)
+                SELECTED_CL_CLIENT="prysm"
+                print_status "Selected: Prysm"
+                break
+                ;;
+            *)
+                print_error "Invalid choice. Please select 1-2."
+                sleep 2
+                ;;
+        esac
+    done
+    echo
+    sleep 1
+}
+
+
+# Function to handle complete Ethereum selection flow
+handle_ethereum_selection() {
+    select_ethereum_network
+    select_el_client
+    select_cl_client
+    show_node_config 
+}
+
+show_node_config() {
+    echo -e "${BLUE}Ethereum Node Configuration Summary:${NC}"
+    echo -e "${CYAN}Network:${NC} $SELECTED_NETWORK"
+    echo -e "${CYAN}Execution Client:${NC} $SELECTED_EL_CLIENT"
+    echo -e "${CYAN}Consensus Client:${NC} $SELECTED_CL_CLIENT"
+    if [ "$IS_STARKNET_NODE" != 1 ]; then
+      echo -e "${CYAN}Starknet Client:${NC} Juno"
+    fi
+    echo
+    echo -e "${YELLOW}Requirements:${NC}"
+    if [ "$SELECTED_NETWORK" == "mainnet" ]; then
+        echo "• Disk Space: 1TB+ (mainnet)"
+        echo "• RAM: 16GB+ recommended"
+        echo "• Sync Time: 1-3 days"
+    else
+        echo "• Disk Space: 100GB+ (sepolia)"
+        echo "• RAM: 8GB+ recommended"
+        echo "• Sync Time: 2-6 hours"
+    fi
+    echo
+}
+
+
 # Function to display node type specific information
 show_node_info() {
     case $SELECTED_NODE_TYPE in
@@ -121,6 +276,7 @@ show_node_info() {
             echo "• Requires moderate disk space (100GB+ recommended)"
             echo "• Provides fast transaction processing"
             echo "• Estimated sync time: 2-6 hours"
+            IS_STARKNET_NODE=0
             ;;
         "validator")
             echo -e "${BLUE}Starknet Validator Node Setup:${NC}"
@@ -128,13 +284,8 @@ show_node_info() {
             echo "• Requires staking STRK tokens"
             echo "• Earns validation rewards"
             echo "• Requires high uptime and reliable connection"
-            ;;
-        "custom")
-            echo -e "${BLUE}Custom Setup:${NC}"
-            echo "• Configure advanced node parameters"
-            echo "• Multiple node types on same machine"
-            echo "• Custom RPC endpoints and ports"
-            echo "• Expert configuration options"
+            IS_STARKNET_NODE=0
+            IS_VALIDATOR_NODE=0
             ;;
     esac
     echo
@@ -331,6 +482,17 @@ main() {
     show_node_info
     
     # Ask for confirmation
+    echo -n -e "${GREEN}Proceed with installation? [y/N]: ${NC}"
+    read -r confirm
+    
+    if [[ $confirm =~ ^[Yy]$ ]]; then
+        echo
+        handle_ethereum_selection
+    else
+        print_status "Installation cancelled by user"
+        exit 0
+    fi
+
     echo -n -e "${GREEN}Proceed with installation? [y/N]: ${NC}"
     read -r confirm
     
