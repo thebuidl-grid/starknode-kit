@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/thebuidl-grid/starknode-kit/cli/options"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
@@ -22,4 +23,11 @@ func initCommand(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		return
 	}
+}
+
+func init() {
+	options.InitGlobalOptions(ConfigCommand)
+	ConfigCommand.Flags().String("network", "sepolia", "Select network")
+	ConfigCommand.Flags().Bool("validator", false, "Configure validotor node")
+	ConfigCommand.Flags().Bool("install", true, "Install clients after setup")
 }
