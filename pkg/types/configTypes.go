@@ -48,7 +48,8 @@ type ClientConfig struct {
 }
 
 type JunoConfig struct {
-	Port        int      `yaml:"port"`
-	EthNode     string   `yaml:"eth_node"`
-	Environment []string `yaml:"environment"`
+	Port            int      `yaml:"port"`
+	EthNode         string   `yaml:"eth_node"`
+	IsValidatorNode bool     `yaml:"is_validator_node"`
+	Environment     []string `yaml:"environment"`
 }
