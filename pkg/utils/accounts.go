@@ -59,7 +59,7 @@ func monitorFunding(client *rpc.Provider, address *felt.Felt, requiredAmount *fe
 			balance, err := checkBalance(client, address)
 			if err != nil {
 				fmt.Printf("❌ Error checking balance: %v\n", err)
-				continue
+				return
 			}
 
 			if balance.Cmp(requiredAmount) >= 0 {
@@ -69,58 +69,6 @@ func monitorFunding(client *rpc.Provider, address *felt.Felt, requiredAmount *fe
 			}
 		}
 	}
-}
-
-func DeployAccount() error {
-	client, err := createRPCProvider()
-	if err != nil {
-		return fmt.Errorf("failed to create RPC provider: %w", err)
-	}
-
-	ks, pub, priv := generateKeys()
-
-	accnt, err := createAccount(client, pub, ks)
-	if err != nil {
-		return fmt.Errorf("failed to create account: %w", err)
-	}
-
-	classHash, err := getClassHash()
-	if err != nil {
-		return fmt.Errorf("failed to get class hash: %w", err)
-	}
-
-	deployTxn, precomputedAddr, err := buildDeployTransaction(accnt, pub, classHash)
-	if err != nil {
-		return fmt.Errorf("failed to build deploy transaction: %w", err)
-	}
-
-	requiredAmount, err := displayFundingInfoAndStartMonitoring(deployTxn, precomputedAddr)
-	if err != nil {
-		return fmt.Errorf("failed to start funding monitoring: %w", err)
-	}
-
-	waitForFundingWithMonitoring(client, precomputedAddr, requiredAmount)
-
-	resp, err := executeDeployment(accnt, deployTxn)
-	if err != nil {
-		return fmt.Errorf("failed to execute deployment: %w", err)
-	}
-
-	fmt.Println("✅ Account deployment transaction successfully submitted!")
-	fmt.Printf("🔗 Transaction hash: %v\n", FormatTransactionHash(resp.Hash))
-	fmt.Printf("📍 Contract address: %v\n", FormatStarknetAddress(resp.ContractAddress))
-	walletKS := map[string]string{
-		"STARKNET_WALLET":      FormatStarknetAddress(resp.ContractAddress),
-		"STARKNET_PRIVATE_KEY": FormatStarknetAddress(priv),
-	}
-	err = writeToENV(walletKS)
-	if err != nil {
-		fmt.Println("Error writing to env file")
-		return err
-	}
-	fmt.Println("⏰ Wait a few minutes to see it in Voyager.")
-
-	return err
 }
 
 // createRPCProvider initializes and returns an RPC provider
@@ -208,49 +156,54 @@ func executeDeployment(accnt *account.Account, deployTxn *rpc.BroadcastDeployAcc
 	return resp, nil
 }
 
-// NOTE utility func not using
-// CheckAccountBalance is a utility function to check STRK balance of any address
-func CheckAccountBalance(address string) (float64, error) {
-	client, err := createRPCProvider()
-	if err != nil {
-		return 0, fmt.Errorf("failed to create RPC provider: %w", err)
-	}
-
-	addr, err := utils.HexToFelt(address)
-	if err != nil {
-		return 0, fmt.Errorf("invalid address format: %w", err)
-	}
-
-	balance, err := checkBalance(client, addr)
-	if err != nil {
-		return 0, fmt.Errorf("failed to check balance: %w", err)
-	}
-
-	return utils.FRIToSTRK(balance), nil
-}
-
-// NOTE currently not using
-// MonitorAddressFunding is a utility function to monitor any address for funding
-func MonitorAddressFunding(address string, requiredAmount float64, callback func()) error {
+func DeployAccount() error {
 	client, err := createRPCProvider()
 	if err != nil {
 		return fmt.Errorf("failed to create RPC provider: %w", err)
 	}
 
-	addr, err := utils.HexToFelt(address)
+	ks, pub, priv := generateKeys()
+
+	accnt, err := createAccount(client, pub, ks)
 	if err != nil {
-		return fmt.Errorf("invalid address format: %w", err)
+		return fmt.Errorf("failed to create account: %w", err)
 	}
 
-	requiredFRI := utils.STRKToFRI(requiredAmount)
-
-	funded := make(chan bool)
-	go monitorFunding(client, addr, requiredFRI, funded)
-
-	<-funded
-	if callback != nil {
-		callback()
+	classHash, err := getClassHash()
+	if err != nil {
+		return fmt.Errorf("failed to get class hash: %w", err)
 	}
 
-	return nil
+	deployTxn, precomputedAddr, err := buildDeployTransaction(accnt, pub, classHash)
+	if err != nil {
+		return fmt.Errorf("failed to build deploy transaction: %w", err)
+	}
+
+	requiredAmount, err := displayFundingInfoAndStartMonitoring(deployTxn, precomputedAddr)
+	if err != nil {
+		return fmt.Errorf("failed to start funding monitoring: %w", err)
+	}
+
+	waitForFundingWithMonitoring(client, precomputedAddr, requiredAmount)
+
+	resp, err := executeDeployment(accnt, deployTxn)
+	if err != nil {
+		return fmt.Errorf("failed to execute deployment: %w", err)
+	}
+
+	fmt.Println("✅ Account deployment transaction successfully submitted!")
+	fmt.Printf("🔗 Transaction hash: %v\n", FormatTransactionHash(resp.Hash))
+	fmt.Printf("📍 Contract address: %v\n", FormatStarknetAddress(resp.ContractAddress))
+	walletKS := map[string]string{
+		"STARKNET_WALLET":      FormatStarknetAddress(resp.ContractAddress),
+		"STARKNET_PRIVATE_KEY": FormatStarknetAddress(priv),
+	}
+	err = writeToENV(walletKS)
+	if err != nil {
+		fmt.Println("Error writing to env file")
+		return err
+	}
+	fmt.Println("⏰ Wait a few minutes to see it in Voyager.")
+
+	return err
 }
