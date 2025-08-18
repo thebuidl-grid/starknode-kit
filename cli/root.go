@@ -29,7 +29,6 @@ func init() {
 	rootCmd.AddCommand(commands.StopCommand)
 	rootCmd.AddCommand(commands.InstallCommand)
 	rootCmd.AddCommand(commands.StartCommand)
-	rootCmd.AddCommand(commands.InitCommand)
 	rootCmd.AddCommand(commands.RemoveCommand)
 	rootCmd.AddCommand(commands.RunCmd)
 	rootCmd.AddCommand(commands.UpdateCommand)
