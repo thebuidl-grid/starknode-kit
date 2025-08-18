@@ -47,7 +47,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	network, _ := cmd.Flags().GetString("network")
 	starknet_node, _ := cmd.Flags().GetBool("starknet-node")
 	validator, _ := cmd.Flags().GetBool("validator")
-	//	install, _ := cmd.Flags().GetBool("install")
+	install, _ := cmd.Flags().GetBool("install")
 
 	if network != "mainnet" && network != "sepolia" {
 		errMessage := fmt.Sprintf("Invalid Network: %s", network)
@@ -84,6 +84,26 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+
+	if install {
+		clients := []types.ClientType{defaultConsensusClientSettings.Name, defaultExecutionCientSettings.Name}
+		for _, i := range clients {
+			err := options.Installer.InstallClient(i)
+			if err != nil {
+				errMessage := fmt.Sprintf("Could not install client %s\nError: %v", i, err.Error())
+				fmt.Println(errMessage)
+				return
+			}
+		}
+		if starknet_node {
+			err := options.Installer.InstallClient(types.ClientJuno)
+			if err != nil {
+				errMessage := fmt.Sprintf("Could not install client Juno\nError: %v", err.Error())
+				fmt.Println(errMessage)
+				return
+			}
+		}
 	}
 }
 
