@@ -1,3 +1,9 @@
+package cli
+
+import (
+	"fmt"
+	"os"
+
 	"github.com/thebuidl-grid/starknode-kit/cli/commands"
 	configcommand "github.com/thebuidl-grid/starknode-kit/cli/commands/configCommand"
 
