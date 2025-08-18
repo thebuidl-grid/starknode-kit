@@ -203,8 +203,8 @@ func GetJunoSyncStatus() t.SyncInfo {
 	return syncInfo
 }
 
-func defaultConfig() t.StarkNodeKitConfig {
-	return t.StarkNodeKitConfig{
+func defaultConfig() *t.StarkNodeKitConfig {
+	return &t.StarkNodeKitConfig{
 		// WalletAddress: "${STARKNET_WALLET}",
 		// PrivateKey:    "${STARKNET_PRIVATE_KEY}",
 		Network: "mainnet",
