@@ -49,7 +49,7 @@ func initCommand(cmd *cobra.Command, args []string) {
 	validator, _ := cmd.Flags().GetBool("validator")
 	//	install, _ := cmd.Flags().GetBool("install")
 
-	if network != "mainnet" || network != "sepolia" {
+	if network != "mainnet" && network != "sepolia" {
 		errMessage := fmt.Sprintf("Invalid Network: %s", network)
 		fmt.Println(errMessage)
 		return
