@@ -1,10 +1,5 @@
-package cli
-
-import (
-	"fmt"
-	"os"
-
 	"github.com/thebuidl-grid/starknode-kit/cli/commands"
+	configcommand "github.com/thebuidl-grid/starknode-kit/cli/commands/configCommand"
 
 	"github.com/spf13/cobra"
 )
@@ -31,7 +26,6 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(commands.MonitorCmd)
-	rootCmd.AddCommand(commands.ConfigCommand)
 	rootCmd.AddCommand(commands.StopCommand)
 	rootCmd.AddCommand(commands.InstallCommand)
 	rootCmd.AddCommand(commands.StartCommand)
@@ -39,4 +33,5 @@ func init() {
 	rootCmd.AddCommand(commands.RemoveCommand)
 	rootCmd.AddCommand(commands.RunCmd)
 	rootCmd.AddCommand(commands.UpdateCommand)
+	rootCmd.AddCommand(configcommand.ConfigCommand)
 }
