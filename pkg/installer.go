@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/thebuidl-grid/starknode-kit/pkg"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
@@ -56,11 +57,11 @@ type installer struct {
 }
 
 // Newinstaller creates a new installer instance
-func NewInstaller(Installpath string) *installer {
+func NewInstaller() installer {
 	if err := setupJWTSecret(); err != nil {
 		panic(err)
 	}
-	return &installer{InstallDir: Installpath}
+	return installer{InstallDir: pkg.InstallClientsDir}
 }
 
 func (installer) GetInsalledClients(dir string) ([]types.ClientType, error) {

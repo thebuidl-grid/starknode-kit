@@ -26,7 +26,7 @@ func installCommand(cmd *cobra.Command, args []string) {
 			fmt.Println(err)
 			return
 		}
-		err = installer.InstallClient(client)
+		err = options.Installer.InstallClient(client)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -38,7 +38,7 @@ func installCommand(cmd *cobra.Command, args []string) {
 			fmt.Println(err)
 			return
 		}
-		err = installer.InstallClient(client)
+		err = options.Installer.InstallClient(client)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -50,7 +50,7 @@ func installCommand(cmd *cobra.Command, args []string) {
 			fmt.Println(err)
 			return
 		}
-		err = installer.InstallClient(client)
+		err = options.Installer.InstallClient(client)
 		if err != nil {
 			fmt.Println(err)
 			return

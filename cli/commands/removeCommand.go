@@ -28,7 +28,7 @@ func removeCommand(cmd *cobra.Command, args []string) {
 			fmt.Println("  - lighthouse")
 			return
 		}
-		err = installer.RemoveClient(client)
+		err = options.Installer.RemoveClient(client)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -43,7 +43,7 @@ func removeCommand(cmd *cobra.Command, args []string) {
 			fmt.Println("  - reth")
 			return
 		}
-		err = installer.RemoveClient(client)
+		err = options.Installer.RemoveClient(client)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -57,7 +57,7 @@ func removeCommand(cmd *cobra.Command, args []string) {
 			fmt.Println("  - juno")
 			return
 		}
-		err = installer.RemoveClient(client)
+		err = options.Installer.RemoveClient(client)
 		if err != nil {
 			fmt.Println(err)
 			return

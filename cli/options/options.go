@@ -1,11 +1,15 @@
 package options
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"github.com/thebuidl-grid/starknode-kit/pkg"
+)
 
 var (
 	ConsensusClient string
 	ExecutionClient string
 	StarknetClient  string
+	Installer       = pkg.NewInstaller()
 )
 
 func InitGlobalOptions(cmd *cobra.Command) {
