@@ -94,20 +94,25 @@ func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
 	return nil
 }
 
-func CreateStarkNodeConfig() error {
+func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
+	var setupConfig *types.StarkNodeKitConfig
 	if _, err := os.Stat(pkg.ConfigDir); err == nil {
 		return fmt.Errorf("Starknode-kit already initialized at %s", pkg.ConfigDir)
 	}
 
-	default_config := defaultConfig()
+	if cfg == nil {
+		setupConfig = defaultConfig()
+	} else {
+		setupConfig = cfg
+	}
 	if err := os.MkdirAll(pkg.ConfigDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
 	}
-	cfg, err := yaml.Marshal(default_config)
+	conigBytes, err := yaml.Marshal(*setupConfig)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(pkg.ConfigPath, cfg, 0600)
+	err = os.WriteFile(pkg.ConfigPath, conigBytes, 0600)
 	if err != nil {
 		return err
 	}
@@ -204,9 +209,7 @@ func GetRunningClients() []types.ClientStatus {
 
 func ParseHexInt(hexStr string) (uint64, error) {
 	// Remove 0x prefix if present
-	if strings.HasPrefix(hexStr, "0x") {
-		hexStr = hexStr[2:]
-	}
+	hexStr = strings.TrimPrefix(hexStr, "0x")
 	return strconv.ParseUint(hexStr, 16, 64)
 }
 
