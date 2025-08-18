@@ -103,6 +103,9 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 				fmt.Println(errMessage)
 				return
 			}
+      if validator{
+        utils.DeployAccount()
+      }
 		}
 	}
 }
