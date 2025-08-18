@@ -37,7 +37,7 @@ type (
 		Wallet                 WalletConfig `wallet:"wallet"`
 		ExecutionCientSettings ClientConfig `yaml:"execution_client"`
 		ConsensusCientSettings ClientConfig `yaml:"consensus_client"`
-		JunoConfig             JunoConfig   `yaml:"juno_client"`
+		JunoConfig             JunoConfig   `yaml:"juno_client,omitempty"`
 	}
 
 	ClientConfig struct {
