@@ -28,6 +28,11 @@ handle_keyboard_interrupt(){
   exit 1
 }
 
+handle_keyboard_interrupt() {
+    clear
+    print_status "Keyboard Interrupt"
+    exit 1
+}
 # Function to display figlet banner
 show_banner() {
     clear
@@ -96,8 +101,20 @@ show_node_selection() {
                 break
                 ;;
             4)
+<<<<<<< Updated upstream
                 clear
                 print_error "Installation cancelled by user"
+||||||| Stash base
+                SELECTED_NODE_TYPE="custom"
+                print_status "Selected: Custom Setup"
+                break
+                ;;
+            5)
+                print_status "Installation cancelled by user"
+=======
+                clear
+                print_status "Installation cancelled by user"
+>>>>>>> Stashed changes
                 exit 0
                 ;;
             *)
@@ -468,7 +485,13 @@ show_completion() {
 
 # Main execution
 main() {
+<<<<<<< Updated upstream
     trap handle_keyboard_interrupt SIGINT 
+||||||| Stash base
+=======
+    trap handle_keyboard_interrupt SIGINT
+
+>>>>>>> Stashed changes
     # Show banner
     show_banner
     
@@ -480,6 +503,7 @@ main() {
     
     # Display selected node information
     show_node_info
+
     
     # Ask for confirmation
     echo -n -e "${GREEN}Proceed with installation? [y/N]: ${NC}"
