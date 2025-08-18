@@ -164,6 +164,8 @@ func DeployAccount() error {
 
 	ks, pub, priv := generateKeys()
 
+  fmt.Println(ks)
+
 	accnt, err := createAccount(client, pub, ks)
 	if err != nil {
 		return fmt.Errorf("failed to create account: %w", err)
