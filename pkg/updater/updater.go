@@ -122,7 +122,7 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 	result.BackupPath = backupPath
 
 	// Create installer instance
-	installer := pkg.NewInstaller(u.installDir)
+	installer := pkg.NewInstaller()
 	clientType := types.GetClientType(client)
 
 	// Remove old version (using RemoveClient function if available)

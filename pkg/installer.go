@@ -14,7 +14,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
@@ -61,7 +60,7 @@ func NewInstaller() installer {
 	if err := setupJWTSecret(); err != nil {
 		panic(err)
 	}
-	return installer{InstallDir: pkg.InstallClientsDir}
+	return installer{InstallDir: InstallClientsDir}
 }
 
 func (installer) GetInsalledClients(dir string) ([]types.ClientType, error) {
