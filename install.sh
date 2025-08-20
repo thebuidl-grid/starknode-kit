@@ -102,7 +102,7 @@ show_node_selection() {
                 exit 0
                 ;;
             *)
-                print_error "Invalid choice. Please select 1-4."
+                                print_error "Invalid choice. Please select 1-4."
                 sleep 2
                 ;;
         esac
@@ -469,45 +469,7 @@ show_completion() {
 
 # Main execution
 main() {
-    trap handle_keyboard_interrupt SIGINT 
-
-    # Show banner
-    show_banner
-    
-    # Check prerequisites first
-    check_prerequisites
-    
-    # Show node selection menu
-    show_node_selection
-    
-    # Display selected node information
-    show_node_info
-
-    
-    # Ask for confirmation
-    echo -n -e "${GREEN}Proceed with installation? [y/N]: ${NC}"
-    read -r confirm
-    
-    if [[ $confirm =~ ^[Yy]$ ]]; then
-        echo
-        handle_ethereum_selection
-    else
-        print_status "Installation cancelled by user"
-        exit 0
-    fi
-
-    echo -n -e "${GREEN}Proceed with installation? [y/N]: ${NC}"
-    read -r confirm
-    
-    if [[ $confirm =~ ^[Yy]$ ]]; then
-        echo
-        perform_installation
-        show_completion
-    else
-        print_status "Installation cancelled by user"
-        exit 0
-    fi
-}
+    trap handle_keyboard_interrupt SIGINT
 
 # Run main function
 main
