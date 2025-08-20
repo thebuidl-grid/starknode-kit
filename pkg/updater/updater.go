@@ -3,7 +3,7 @@ package updater
 import (
 	"fmt"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg/installer"
+	"github.com/thebuidl-grid/starknode-kit/pkg"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
@@ -67,7 +67,7 @@ func (u *UpdateChecker) CheckAllClientsForUpdates(useOnline bool) ([]UpdateInfo,
 // CheckClientForUpdate checks if a specific client has an update available
 func (u *UpdateChecker) CheckClientForUpdate(client string, useOnline bool) (*UpdateInfo, error) {
 	// Get current installed version (this would need to be implemented to check actual installations)
-	currentVersion := installer.GetVersionNumber(client)
+	currentVersion := pkg.GetVersionNumber(client)
 
 	// Get latest version
 	var latestVersion string
@@ -122,7 +122,7 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 	result.BackupPath = backupPath
 
 	// Create installer instance
-	installer := installer.NewInstaller()
+	installer := pkg.NewInstaller()
 	clientType := types.GetClientType(client)
 
 	// Remove old version (using RemoveClient function if available)

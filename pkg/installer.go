@@ -1,9 +1,8 @@
 package pkg
 
 import (
-	"archive/tar"
-	"archive/zip"
-	"compress/gzip"
+	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
