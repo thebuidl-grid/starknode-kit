@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 )
@@ -20,7 +20,7 @@ type JunoClient struct {
 // getJunoPath returns the path to the Juno binary
 func getJunoPath() string {
 	// Check if Juno is installed in the github.com/thebuidl-grid/starknode-kit directory
-	junoDir := filepath.Join(pkg.InstallStarknetDir, "juno")
+	junoDir := filepath.Join(constants.InstallStarknetDir, "juno")
 	junoPath := filepath.Join(junoDir, "juno", "build", "juno")
 
 	if _, err := os.Stat(junoPath); err == nil {
@@ -34,7 +34,7 @@ func getJunoPath() string {
 func (c *JunoClient) Start() error {
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
-		pkg.InstallStarknetDir,
+		constants.InstallStarknetDir,
 		"juno",
 		"logs",
 		fmt.Sprintf("juno_%s.log", timestamp))
@@ -52,7 +52,7 @@ func (c *JunoClient) buildJunoArgs() []string {
 		"--http",
 		fmt.Sprintf("--http-port=%d", c.config.Port),
 		"--http-host=0.0.0.0",
-		fmt.Sprintf("--db-path=%s", filepath.Join(pkg.InstallStarknetDir, "juno", "database")),
+		fmt.Sprintf("--db-path=%s", filepath.Join(constants.InstallStarknetDir, "juno", "database")),
 		fmt.Sprintf("--eth-node=%s", c.config.EthNode),
 		fmt.Sprintf("--ws=%s", c.config.IsValidatorNode),
 		"--ws-port=6061",

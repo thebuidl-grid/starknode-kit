@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/thebuidl-grid/starknode-kit/cli/options"
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/updater"
 
 	"github.com/spf13/cobra"
@@ -44,15 +44,15 @@ func init() {
 }
 
 func runUpdate(cmd *cobra.Command, args []string) error {
-	installDir := pkg.InstallDir
+	installDir := constants.InstallDir
 	updateChecker := updater.NewUpdateChecker(installDir)
 
 	// Determine which clients to check
-	eth_clients, err := options.Installer.GetInsalledClients(pkg.InstallClientsDir)
+	eth_clients, err := options.Installer.GetInsalledClients(constants.InstallClientsDir)
 	if err != nil {
 		return err
 	}
-	stark_clients, err := options.Installer.GetInsalledClients(pkg.InstallStarknetDir)
+	stark_clients, err := options.Installer.GetInsalledClients(constants.InstallStarknetDir)
 	if err != nil {
 		fmt.Println("No starknet client installed")
 	}

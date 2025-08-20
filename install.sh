@@ -23,16 +23,12 @@ SELECTED_CL_CLIENT=""
 IS_STARKNET_NODE=1
 IS_VALIDATOR_NODE=1
 
-handle_keyboard_interrupt(){
-  clear
-  exit 1
-}
-
 handle_keyboard_interrupt() {
     clear
     print_status "Keyboard Interrupt"
     exit 1
 }
+
 # Function to display figlet banner
 show_banner() {
     clear
@@ -80,7 +76,7 @@ show_node_selection() {
         echo
         echo -e "${RED}4)${NC} Exit"
         echo
-        echo -n -e "${GREEN}Enter your choice [1-5]: ${NC}"
+        echo -n -e "${GREEN}Enter your choice [1-4]: ${NC}"
         
         read -r choice
         
@@ -101,24 +97,12 @@ show_node_selection() {
                 break
                 ;;
             4)
-<<<<<<< Updated upstream
-                clear
-                print_error "Installation cancelled by user"
-||||||| Stash base
-                SELECTED_NODE_TYPE="custom"
-                print_status "Selected: Custom Setup"
-                break
-                ;;
-            5)
-                print_status "Installation cancelled by user"
-=======
                 clear
                 print_status "Installation cancelled by user"
->>>>>>> Stashed changes
                 exit 0
                 ;;
             *)
-                print_error "Invalid choice. Please select 1-5."
+                print_error "Invalid choice. Please select 1-4."
                 sleep 2
                 ;;
         esac
@@ -485,13 +469,8 @@ show_completion() {
 
 # Main execution
 main() {
-<<<<<<< Updated upstream
     trap handle_keyboard_interrupt SIGINT 
-||||||| Stash base
-=======
-    trap handle_keyboard_interrupt SIGINT
 
->>>>>>> Stashed changes
     # Show banner
     show_banner
     

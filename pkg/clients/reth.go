@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 )
 
@@ -22,9 +22,9 @@ type rethConfig struct {
 func (_ rethConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
-		return filepath.Join(pkg.InstallClientsDir, "reth", "reth.exe")
+		return filepath.Join(constants.InstallClientsDir, "reth", "reth.exe")
 	}
-	return filepath.Join(pkg.InstallClientsDir, "reth", "reth")
+	return filepath.Join(constants.InstallClientsDir, "reth", "reth")
 }
 
 // BuildRethArgs builds the arguments for the reth command
@@ -40,7 +40,7 @@ func (config *rethConfig) buildArgs() []string {
 		"--http.corsdomain", "*",
 		"--authrpc.addr", "0.0.0.0",
 		"--authrpc.port", "8551",
-		"--authrpc.jwtsecret", pkg.JWTPath,
+		"--authrpc.jwtsecret", constants.JWTPath,
 		"--port", fmt.Sprintf("%d", config.port),
 		"--metrics", "0.0.0.0:7878",
 	}
@@ -51,7 +51,7 @@ func (config *rethConfig) buildArgs() []string {
 	}
 
 	// Add data directory
-	dataDir := filepath.Join(pkg.InstallClientsDir, "reth", "database")
+	dataDir := filepath.Join(constants.InstallClientsDir, "reth", "database")
 	args = append(args, "--datadir", dataDir)
 
 	return args
@@ -62,7 +62,7 @@ func (c *rethConfig) Start() error {
 	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
-		pkg.InstallClientsDir,
+		constants.InstallClientsDir,
 		"reth",
 		"logs",
 		fmt.Sprintf("reth_%s.log", timestamp))

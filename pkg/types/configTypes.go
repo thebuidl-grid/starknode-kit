@@ -3,11 +3,12 @@ package types
 type ClientType string
 
 const (
-	ClientGeth       ClientType = "geth"
-	ClientReth       ClientType = "reth"
-	ClientLighthouse ClientType = "lighthouse"
-	ClientPrysm      ClientType = "prysm"
-	ClientJuno       ClientType = "juno"
+	ClientGeth           ClientType = "geth"
+	ClientReth           ClientType = "reth"
+	ClientLighthouse     ClientType = "lighthouse"
+	ClientPrysm          ClientType = "prysm"
+	ClientJuno           ClientType = "juno"
+	ClientStarkValidator ClientType = "starknet-staking-v2"
 )
 
 func GetClientType(client string) ClientType {
@@ -22,6 +23,8 @@ func GetClientType(client string) ClientType {
 		return ClientPrysm
 	case "juno":
 		return ClientJuno
+	case "starknet-staking-v2":
+		return ClientJuno
 	default:
 		return ""
 	}
@@ -33,11 +36,13 @@ type IClient interface {
 
 type (
 	StarkNodeKitConfig struct {
-		Network                string       `yaml:"network"`
-		Wallet                 WalletConfig `wallet:"wallet"`
-		ExecutionCientSettings ClientConfig `yaml:"execution_client"`
-		ConsensusCientSettings ClientConfig `yaml:"consensus_client"`
-		JunoConfig             JunoConfig   `yaml:"juno_client,omitempty"`
+		Network                string          `yaml:"network"`
+		Wallet                 WalletConfig    `wallet:"wallet"`
+		ExecutionCientSettings ClientConfig    `yaml:"execution_client"`
+		ConsensusCientSettings ClientConfig    `yaml:"consensus_client"`
+		JunoConfig             JunoConfig      `yaml:"juno_client,omitempty"`
+		ValidatorConfig        ValidatorConfig `yaml:"validator_config"`
+		Wallets                []WalletConfig  `yaml:"wallet"`
 	}
 
 	ClientConfig struct {
@@ -55,8 +60,8 @@ type (
 	}
 
 	WalletConfig struct {
-		WalletAddress string `yaml:"wallet_address"`
-		PrivateKey    string `yaml:"private_key"`
+		Name   string `yaml:"name"`
+		Wallet Wallet
 	}
 
 	ValidatorConfig struct {
@@ -68,5 +73,15 @@ type (
 			OperationalAddress string `json:"operational_address"`
 			WalletPrivateKey   string `json:"privateKey"`
 		} `json:"signer" yaml:"signer"`
+	}
+
+	Wallet struct {
+		Address    string `json:"address"`
+		ClassHash  string `json:"class_hash"`
+		Deployed   bool   `json:"deployed"`
+		Legacy     bool   `json:"legacy"`
+		PrivateKey string `json:"private_key"`
+		PublicKey  string `json:"public_key"`
+		Salt       string `json:"salt"`
 	}
 )

@@ -13,11 +13,12 @@ const (
 
 // ClientReleaseUrls maps client names to their GitHub release URLs
 var ClientReleaseUrls = map[string]string{
-	"geth":       "https://github.com/ethereum/go-ethereum/releases",
-	"reth":       "https://github.com/paradigmxyz/reth/releases",
-	"lighthouse": "https://github.com/sigp/lighthouse/releases",
-	"prysm":      "https://github.com/prysmaticlabs/prysm/releases",
-	"juno":       "https://github.com/NethermindEth/juno/releases",
+	"geth":                "https://github.com/ethereum/go-ethereum/releases",
+	"reth":                "https://github.com/paradigmxyz/reth/releases",
+	"lighthouse":          "https://github.com/sigp/lighthouse/releases",
+	"prysm":               "https://github.com/prysmaticlabs/prysm/releases",
+	"juno":                "https://github.com/NethermindEth/juno/releases",
+	"starknet-staking-v2": "https://github.com/NethermindEth/starknet-staking-v2/releases",
 }
 
 func FetchOnlineVersion(client string) (string, error) {
@@ -32,6 +33,8 @@ func FetchOnlineVersion(client string) (string, error) {
 		return FetchLatestPrysmVersion()
 	case "juno":
 		return FetchLatestJunoVersion()
+	case "starknet-staking-v2":
+		return FetchLatestStarknetValidatorVersion()
 	default:
 		return "", fmt.Errorf("unsupported client: %s", client)
 	}

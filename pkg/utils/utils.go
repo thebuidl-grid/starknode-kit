@@ -10,8 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
@@ -47,7 +48,7 @@ func GetConsensusClient(c string) (t.ClientType, error) {
 }
 
 func IsInstalled(c t.ClientType) bool {
-	dir := path.Join(pkg.InstallClientsDir, string(c))
+	dir := path.Join(constants.InstallClientsDir, string(c))
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		return false
@@ -60,11 +61,11 @@ func IsInstalled(c t.ClientType) bool {
 
 func LoadConfig() (t.StarkNodeKitConfig, error) {
 	var cfg t.StarkNodeKitConfig
-	cfgByt, err := os.ReadFile(pkg.ConfigPath)
+	cfgByt, err := os.ReadFile(constants.ConfigPath)
 	if err != nil {
 		return t.StarkNodeKitConfig{}, err
 	}
-	err = godotenv.Load(pkg.EnvFIlePath)
+	err = godotenv.Load(constants.EnvFIlePath)
 	if err == nil {
 		err = envsubt.Unmarshal(cfgByt, &cfg)
 		if err != nil {
@@ -80,14 +81,14 @@ func LoadConfig() (t.StarkNodeKitConfig, error) {
 }
 
 func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
-	if err := os.MkdirAll(pkg.ConfigDir, 0755); err != nil {
+	if err := os.MkdirAll(constants.ConfigDir, 0755); err != nil {
 		return fmt.Errorf("failed to update config file: %w", err)
 	}
 	cfg, err := yaml.Marshal(config)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(pkg.ConfigPath, cfg, 0600)
+	err = os.WriteFile(constants.ConfigPath, cfg, 0600)
 	if err != nil {
 		return err
 	}
@@ -96,8 +97,8 @@ func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
 
 func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
 	var setupConfig *types.StarkNodeKitConfig
-	if _, err := os.Stat(pkg.ConfigDir); err == nil {
-		return fmt.Errorf("Starknode-kit already initialized at %s", pkg.ConfigDir)
+	if _, err := os.Stat(constants.ConfigDir); err == nil {
+		return fmt.Errorf("Starknode-kit already initialized at %s", constants.ConfigDir)
 	}
 
 	if cfg == nil {
@@ -105,14 +106,14 @@ func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
 	} else {
 		setupConfig = cfg
 	}
-	if err := os.MkdirAll(pkg.ConfigDir, 0755); err != nil {
+	if err := os.MkdirAll(constants.ConfigDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
 	}
 	conigBytes, err := yaml.Marshal(*setupConfig)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(pkg.ConfigPath, conigBytes, 0600)
+	err = os.WriteFile(constants.ConfigPath, conigBytes, 0600)
 	if err != nil {
 		return err
 	}
@@ -303,4 +304,9 @@ func CheckRPCStatus(rpcURL, method string) (string, error) {
 		return "⚠️ Slow", nil
 	}
 	return "✅ Connected", nil
+}
+
+func StringTile(s string) string {
+	r, size := utf8.DecodeRuneInString(s)
+	return strings.ToUpper(string(r)) + s[size:]
 }

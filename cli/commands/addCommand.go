@@ -1,10 +1,8 @@
 package commands
 
 import (
-	"fmt"
-
 	"github.com/thebuidl-grid/starknode-kit/cli/options"
-	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 
 	"github.com/spf13/cobra"
 )
@@ -20,44 +18,7 @@ the client as part of your node setup.`,
 }
 
 func installCommand(cmd *cobra.Command, args []string) {
-	if options.ConsensusClient != "" {
-		client, err := utils.GetConsensusClient(options.ConsensusClient)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		err = options.Installer.InstallClient(client)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-	if options.ExecutionClient != "" {
-		client, err := utils.GetExecutionClient(options.ExecutionClient)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		err = options.Installer.InstallClient(client)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-	if options.StarknetClient != "" {
-		client, err := utils.GetStarknetClient(options.StarknetClient)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		err = options.Installer.InstallClient(client)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-
-	return
+	options.Installer.InstallClient(types.ClientStarkValidator)
 }
 
 func init() {

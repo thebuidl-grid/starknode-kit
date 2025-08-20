@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
@@ -138,11 +138,11 @@ func GetJunoMetrics() t.EthereumMetrics {
 
 // GetLatestLogs gets the latest log entries from client log files
 func GetLatestLogs(clientName string, lines int) []string {
-	logDir := filepath.Join(pkg.InstallClientsDir, clientName, "logs")
+	logDir := filepath.Join(constants.InstallClientsDir, clientName, "logs")
 
 	// NOTE minor fix
 	if clientName == "juno" {
-		logDir = filepath.Join(pkg.InstallStarknetDir, clientName, "logs")
+		logDir = filepath.Join(constants.InstallStarknetDir, clientName, "logs")
 	}
 
 	// Find the most recent log file

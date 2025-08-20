@@ -153,6 +153,9 @@ func FetchLatestPrysmVersion() (string, error) {
 func FetchLatestJunoVersion() (string, error) {
 	return fetchGitHubRelease("juno", "NethermindEth/juno")
 }
+func FetchLatestStarknetValidatorVersion() (string, error) {
+	return fetchGitHubRelease("starknet-staking-v2", "NethermindEth/starknet-staking-v2")
+}
 
 // getLatestPrysmVersion returns the hardcoded Prysm version as fallback
 // Prysm handles versioning differently through their script

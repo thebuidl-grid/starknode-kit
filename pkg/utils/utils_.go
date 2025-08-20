@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 
 	"github.com/joho/godotenv"
@@ -230,6 +230,6 @@ func defaultConfig() *t.StarkNodeKitConfig {
 }
 
 func writeToENV(ks map[string]string) error {
-	err := godotenv.Write(ks, pkg.EnvFIlePath)
+	err := godotenv.Write(ks, constants.EnvFIlePath)
 	return err
 }

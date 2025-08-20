@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 )
 
@@ -22,9 +22,9 @@ type gethConfig struct {
 func (_ gethConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
-		return filepath.Join(pkg.InstallClientsDir, "geth", "geth.exe")
+		return filepath.Join(constants.InstallClientsDir, "geth", "geth.exe")
 	}
-	return filepath.Join(pkg.InstallClientsDir, "geth", "geth")
+	return filepath.Join(constants.InstallClientsDir, "geth", "geth")
 }
 
 // BuildGethArgs builds the arguments for the geth command
@@ -38,7 +38,7 @@ func (c *gethConfig) buildArgs() []string {
 		"--http.corsdomain=*",
 		"--http.addr=0.0.0.0",
 		"--http.port=8545",
-		"--authrpc.jwtsecret=" + pkg.JWTPath,
+		"--authrpc.jwtsecret=" + constants.JWTPath,
 		"--authrpc.addr=0.0.0.0",
 		"--authrpc.port=8551",
 		"--authrpc.vhosts=*",
@@ -55,7 +55,7 @@ func (c *gethConfig) buildArgs() []string {
 	}
 
 	// Add data directory
-	dataDir := filepath.Join(pkg.InstallClientsDir, "geth", "database")
+	dataDir := filepath.Join(constants.InstallClientsDir, "geth", "database")
 	args = append(args, "--datadir="+dataDir)
 
 	return args
@@ -66,7 +66,7 @@ func (c *gethConfig) Start() error {
 	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 	logFilePath := filepath.Join(
-		pkg.InstallClientsDir,
+		constants.InstallClientsDir,
 		"geth",
 		"logs",
 		fmt.Sprintf("geth_%s.log", timestamp))

@@ -164,8 +164,6 @@ func DeployAccount() error {
 
 	ks, pub, priv := generateKeys()
 
-  fmt.Println(ks)
-
 	accnt, err := createAccount(client, pub, ks)
 	if err != nil {
 		return fmt.Errorf("failed to create account: %w", err)
@@ -197,7 +195,7 @@ func DeployAccount() error {
 	fmt.Printf("🔗 Transaction hash: %v\n", FormatTransactionHash(resp.Hash))
 	fmt.Printf("📍 Contract address: %v\n", FormatStarknetAddress(resp.ContractAddress))
 	walletKS := map[string]string{
-		"STARKNET_WALLET":      FormatStarknetAddress(resp.ContractAddress),
+		"STARKNET_WALLET":      FormatStarknetAddress(resp.ContractAddress), // TODO wrong
 		"STARKNET_PRIVATE_KEY": FormatStarknetAddress(priv),
 	}
 	err = writeToENV(walletKS)
