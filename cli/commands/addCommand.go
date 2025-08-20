@@ -7,20 +7,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO use loggers and not print
-var InstallCommand = &cobra.Command{
-	Use:   "add",
-	Short: "Add an Ethereum or Starknet client to the config",
-	Long: `The add command registers a new client (such as Prysm, Lighthouse, Geth, Reth, or Juno)
-to the local configuration. This sets up the necessary parameters for managing and running
-the client as part of your node setup.`,
-	Run: installCommand,
-}
+var (
+	AddCmd = &cobra.Command{
+		Use:   "add [client]",
+		Short: "Install a client",
+		Long: `Install a client to be used with StarkNode Kit.
+
+		It is recommended to use this command to install clients, as it will
+		install the correct versions and configure them for you.
+
+		You can also use this command to install a specific version of a client.
+
+		Example:
+		starknode-kit add geth@v1.13.12
+		`, // TODO: add version support
+		Run: installCommand,
+	}
+)
 
 func installCommand(cmd *cobra.Command, args []string) {
 	options.Installer.InstallClient(types.ClientStarkValidator)
 }
 
 func init() {
-	options.InitGlobalOptions(InstallCommand)
+	options.InitGlobalOptions(AddCmd)
 }
