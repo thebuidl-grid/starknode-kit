@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Configuration - Update these variables for your specific package
-GITHUB_REPO="thebuidl-grid/starknode-kit" 
-BINARY_NAME="starknode-kit" 
-INSTALL_DIR="/usr/local/bin" 
+GITHUB_REPO="thebuidl-grid/starknode-kit"
+BINARY_NAME="starknode-kit"
+INSTALL_DIR="/usr/local/bin"
 
 # Colors for output
 RED='\033[0;31m'
@@ -14,7 +14,7 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Node type selection variable
+# Node type selection variables
 SELECTED_NODE_TYPE=""
 SELECTED_NETWORK=""
 SELECTED_EL_CLIENT=""
@@ -102,7 +102,7 @@ show_node_selection() {
                 exit 0
                 ;;
             *)
-                                print_error "Invalid choice. Please select 1-4."
+                print_error "Invalid choice. Please select 1-4."
                 sleep 2
                 ;;
         esac
@@ -229,13 +229,12 @@ select_cl_client() {
     sleep 1
 }
 
-
 # Function to handle complete Ethereum selection flow
 handle_ethereum_selection() {
     select_ethereum_network
     select_el_client
     select_cl_client
-    show_node_config 
+    show_node_config
 }
 
 show_node_config() {
@@ -259,7 +258,6 @@ show_node_config() {
     fi
     echo
 }
-
 
 # Function to display node type specific information
 show_node_info() {
@@ -394,7 +392,6 @@ perform_installation() {
         "ethereum") BUILD_FLAGS="-tags ethereum" ;;
         "starknet") BUILD_FLAGS="-tags starknet" ;;
         "validator") BUILD_FLAGS="-tags validator" ;;
-        "custom") BUILD_FLAGS="-tags custom" ;;
     esac
     
     if ! go build $BUILD_FLAGS -o "$BINARY_NAME" .; then
@@ -444,6 +441,37 @@ perform_installation() {
             VERSION=$("$BINARY_NAME" -version)
             print_status "Installed version: $VERSION"
         fi
+
+        print_status "Configuring and installing clients based on your selections..."
+
+        CONFIG_CMD="$BINARY_NAME config new"
+
+        # Add network flag
+        CONFIG_CMD="$CONFIG_CMD --network $SELECTED_NETWORK"
+
+        CONFIG_CMD="$CONFIG_CMD --consensus-client $SELECTED_CL_CLIENT"
+        CONFIG_CMD="$CONFIG_CMD --execution-client $SELECTED_EL_CLIENT"
+
+        # Add starknet-node flag
+        if [ "$IS_STARKNET_NODE" == 0 ]; then # 0 means it's a starknet node (starknet or validator)
+            CONFIG_CMD="$CONFIG_CMD --starknet-node juno"
+        fi
+
+        # Add validator flag
+        if [ "$IS_VALIDATOR_NODE" == 0 ]; then # 0 means it's a validator node
+            CONFIG_CMD="$CONFIG_CMD --validator"
+        fi
+
+        # The --install flag defaults to true in newConfigCommand, so we don't need to explicitly add it unless we want to disable it.
+        # Since we want to install clients, we'll let it default to true.
+
+        print_status "Running configuration command: $CONFIG_CMD"
+        if ! $CONFIG_CMD; then
+            print_error "Failed to configure and install clients."
+            exit 1
+        fi
+        print_status "Client configuration and installation complete!"
+
     else
         print_warning "Installation completed but '$BINARY_NAME' is not in PATH"
         print_warning "You may need to add $INSTALL_DIR to your PATH or restart your terminal"
@@ -470,6 +498,24 @@ show_completion() {
 # Main execution
 main() {
     trap handle_keyboard_interrupt SIGINT
+    show_banner
+    check_prerequisites
+    show_node_selection
+
+    handle_ethereum_selection
+    case $SELECTED_NODE_TYPE in
+        "starknet")
+            IS_STARKNET_NODE=0
+            ;;
+        "validator")
+            IS_STARKNET_NODE=0
+            IS_VALIDATOR_NODE=0
+            ;;
+    esac
+
+    perform_installation
+    show_completion
+}
 
 # Run main function
 main
