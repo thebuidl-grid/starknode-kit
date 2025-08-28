@@ -75,5 +75,5 @@ func (c *gethConfig) Start() error {
 		return err
 	}
 
-	return process.StartClient("lighthouse", command, logFile, args...)
+	return process.StartClient("geth", command, logFile, args...)
 }
