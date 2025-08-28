@@ -13,7 +13,7 @@ var (
 )
 
 func InitGlobalOptions(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVarP(&ConsensusClient, "consensus_client", "c", "", "Specify the consensus client")
-	cmd.PersistentFlags().StringVarP(&ExecutionClient, "execution_client", "e", "", "Specify the execution client")
-	cmd.PersistentFlags().StringVarP(&StarknetClient, "starknet_client", "s", "", "Specify the Starknet client")
+	cmd.PersistentFlags().StringVarP(&ConsensusClient, "consensus-client", "c", "", "Specify the consensus client")
+	cmd.PersistentFlags().StringVarP(&ExecutionClient, "execution-client", "e", "", "Specify the execution client")
+	cmd.PersistentFlags().StringVarP(&StarknetClient, "starknet-client", "s", "", "Specify the Starknet client")
 }
