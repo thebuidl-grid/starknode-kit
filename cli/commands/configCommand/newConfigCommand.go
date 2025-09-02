@@ -49,7 +49,6 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	validator, _ := cmd.Flags().GetBool("validator")
 	install, _ := cmd.Flags().GetBool("install")
 
-	utils.DeployAccount()
 	if network != "mainnet" && network != "sepolia" {
 		errMessage := fmt.Sprintf("Invalid Network: %s", network)
 		fmt.Println(errMessage)
@@ -76,8 +75,12 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 
 	if starknet_node {
 		defaultJunoConfig.IsValidatorNode = validator
+		if validator {
+			utils.DeployAccount()
+		}
 		defaultConfig.JunoConfig = defaultJunoConfig
 	}
+
 	defaultConfig.ConsensusCientSettings = defaultConsensusClientSettings
 	defaultConfig.ExecutionCientSettings = defaultExecutionCientSettings
 
