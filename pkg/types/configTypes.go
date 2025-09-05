@@ -83,5 +83,6 @@ type (
 			OperationalAddress string `json:"operational_address"`
 			WalletPrivateKey   string `json:"privateKey"`
 		} `json:"signer" yaml:"signer"`
+		RewardAddress string `json:"reward_address" yaml:"reward_address"`
 	}
 )
