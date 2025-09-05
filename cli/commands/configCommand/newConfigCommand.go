@@ -49,6 +49,17 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	validator, _ := cmd.Flags().GetBool("validator")
 	install, _ := cmd.Flags().GetBool("install")
 
+	// Only deploy account if validator flag is set
+	var deployedWallet *types.Wallet
+	if validator {
+		wallet, err := utils.DeployAccount()
+		if err != nil {
+			fmt.Printf("Error deploying account: %v\n", err)
+			return
+		}
+		deployedWallet = wallet
+	}
+
 	if network != "mainnet" && network != "sepolia" {
 		errMessage := fmt.Sprintf("Invalid Network: %s", network)
 		fmt.Println(errMessage)
@@ -81,6 +92,42 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 		defaultConfig.JunoConfig = defaultJunoConfig
 	}
 
+	if validator && deployedWallet != nil {
+		walletConfig := types.WalletConfig{
+			Name: "default",
+			Wallet: types.Wallet{
+				Address:    "${STARKNET_WALLET}",
+				ClassHash:  "${STARKNET_CLASS_HASH}",
+				Deployed:   true,
+				Legacy:     false,
+				PrivateKey: "${STARKNET_PRIVATE_KEY}",
+				PublicKey:  "${STARKNET_PUBLIC_KEY}",
+				Salt:       "${STARKNET_SALT}",
+			},
+		}
+
+		// Set the main Wallet field and add to Wallets array
+		defaultConfig.Wallet = walletConfig
+		defaultConfig.Wallets = []types.WalletConfig{walletConfig}
+
+		// Set up validator config with environment variables
+		defaultConfig.ValidatorConfig = types.ValidatorConfig{
+			ProviderConfig: struct {
+				JunoRPC string `json:"http" yaml:"juno_rpc_http"`
+				JunoWS  string `json:"ws" yaml:"juno_rpc_ws"`
+			}{
+				JunoRPC: "http://localhost:6060",
+				JunoWS:  "ws://localhost:6060",
+			},
+			SignerConfig: struct {
+				OperationalAddress string `json:"operational_address"`
+				WalletPrivateKey   string `json:"privateKey"`
+			}{
+				OperationalAddress: "${STARKNET_WALLET}",
+				WalletPrivateKey:   "${STARKNET_PRIVATE_KEY}",
+			},
+		}
+	}
 	defaultConfig.ConsensusCientSettings = defaultConsensusClientSettings
 	defaultConfig.ExecutionCientSettings = defaultExecutionCientSettings
 
@@ -115,6 +162,6 @@ func init() {
 	options.InitGlobalOptions(newConfigCommand)
 	newConfigCommand.Flags().String("network", "sepolia", "Select the network to connect to (e.g., 'mainnet', 'sepolia')")
 	newConfigCommand.Flags().Bool("starknet-node", false, "Install a Starknet node")
-	newConfigCommand.Flags().Bool("validator", false, "Configure a validator node")
+	newConfigCommand.Flags().Bool("validator", false, "Configure a validator node (deploys account and sets up wallet config)")
 	newConfigCommand.Flags().BoolP("install", "i", true, "Install clients automatically after setup")
 }

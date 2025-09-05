@@ -36,12 +36,13 @@ type IClient interface {
 
 type (
 	StarkNodeKitConfig struct {
-		Network                string         `yaml:"network"`
-		Wallet                 WalletConfig   `wallet:"wallet,omitempty"`
-		ExecutionCientSettings ClientConfig   `yaml:"execution_client"`
-		ConsensusCientSettings ClientConfig   `yaml:"consensus_client"`
-		JunoConfig             JunoConfig     `yaml:"juno_client,omitempty"`
-		Wallets                []WalletConfig `yaml:"wallet"`
+		Network                string          `yaml:"network"`
+		Wallet                 WalletConfig    `yaml:"wallet"`
+		ExecutionCientSettings ClientConfig    `yaml:"execution_client"`
+		ConsensusCientSettings ClientConfig    `yaml:"consensus_client"`
+		JunoConfig             JunoConfig      `yaml:"juno_client,omitempty"`
+		ValidatorConfig        ValidatorConfig `yaml:"validator_config"`
+		Wallets                []WalletConfig  `yaml:"wallets"`
 	}
 
 	ClientConfig struct {
@@ -71,5 +72,16 @@ type (
 		PrivateKey string `json:"private_key"`
 		PublicKey  string `json:"public_key"`
 		Salt       string `json:"salt"`
+	}
+
+	ValidatorConfig struct {
+		ProviderConfig struct {
+			JunoRPC string `json:"http" yaml:"juno_rpc_http"`
+			JunoWS  string `json:"ws" yaml:"juno_rpc_ws"`
+		} `json:"provider" yaml:"provider_config"`
+		SignerConfig struct {
+			OperationalAddress string `json:"operational_address"`
+			WalletPrivateKey   string `json:"privateKey"`
+		} `json:"signer" yaml:"signer"`
 	}
 )
