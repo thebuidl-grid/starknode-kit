@@ -196,7 +196,7 @@ func DeployAccount() (*types.Wallet, error) {
 	fmt.Println("✅ Account deployment transaction successfully submitted!")
 	fmt.Printf("🔗 Transaction hash: %v\n", FormatTransactionHash(resp.Hash))
 	fmt.Printf("📍 Contract address: %v\n", FormatStarknetAddress(resp.ContractAddress))
-	
+
 	// Set all wallet-related environment variables for validator configuration
 	// These variables will be used in the config YAML with ${VAR_NAME} syntax
 	walletKS := map[string]string{

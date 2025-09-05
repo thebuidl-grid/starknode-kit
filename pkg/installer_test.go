@@ -17,15 +17,12 @@ func TestCompareClientVersions(t *testing.T) {
 	// We're testing the reth client which has a hardcoded LatestRethVersion
 	expectedVersion := versions.LatestRethVersion
 
-	isLatest, latest := CompareClientVersions("reth", installed)
+	isLatest := CompareClientVersions("reth", installed, expectedVersion)
 	if compareVersions(installed, expectedVersion) >= 0 && !isLatest {
 		t.Errorf("Expected latest, got not latest")
 	}
 	if compareVersions(installed, expectedVersion) < 0 && isLatest {
 		t.Errorf("Expected not latest, got latest")
-	}
-	if latest != expectedVersion {
-		t.Errorf("Expected latest %s, got %s", expectedVersion, latest)
 	}
 }
 
@@ -89,24 +86,24 @@ func TestGetVersionNumber(t *testing.T) {
 }
 
 func TestGetClientFileName(t *testing.T) {
-	installDir := "/tmp"
-	installer := NewInstaller(installDir)
+	installer := NewInstaller()
 
 	tests := []struct {
 		client  types.ClientType
+		version string
 		wantErr bool
 	}{
-		{types.ClientGeth, false},
-		{types.ClientReth, false},
-		{types.ClientLighthouse, false},
-		{types.ClientPrysm, false},
-		{types.ClientJuno, false},
-		{"unknown", true},
+		{types.ClientGeth, "1.15.10", false},
+		{types.ClientReth, "1.3.4", false},
+		{types.ClientLighthouse, "7.0.1", false},
+		{types.ClientPrysm, "4.5.6", false},
+		{types.ClientJuno, "0.11.7", false},
+		{"unknown", "1.0.0", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(string(tt.client), func(t *testing.T) {
-			fileName, err := installer.getClientFileName(tt.client)
+			fileName, err := installer.getClientFileName(tt.client, tt.version)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetClientFileName() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -120,25 +117,25 @@ func TestGetClientFileName(t *testing.T) {
 }
 
 func TestGetDownloadURL(t *testing.T) {
-	installDir := "/tmp"
-	installer := NewInstaller(installDir)
+	installer := NewInstaller()
 
 	tests := []struct {
 		client   types.ClientType
 		fileName string
+		version  string
 		wantErr  bool
 	}{
-		{types.ClientGeth, "geth-linux-amd64-1.15.10-2bf8a789", false},
-		{types.ClientReth, "reth-v1.3.4-x86_64-unknown-linux-gnu", false},
-		{types.ClientLighthouse, "lighthouse-v7.0.1-x86_64-unknown-linux-gnu", false},
-		{types.ClientPrysm, "prysm.sh", false},
-		{types.ClientJuno, "juno-" + versions.LatestJunoVersion, false},
-		{"unknown", "unknown", true},
+		{types.ClientGeth, "geth-linux-amd64-1.15.10-2bf8a789", "1.15.10", false},
+		{types.ClientReth, "reth-v1.3.4-x86_64-unknown-linux-gnu", "1.3.4", false},
+		{types.ClientLighthouse, "lighthouse-v7.0.1-x86_64-unknown-linux-gnu", "7.0.1", false},
+		{types.ClientPrysm, "prysm.sh", "4.5.6", false},
+		{types.ClientJuno, "juno-" + versions.LatestJunoVersion, versions.LatestJunoVersion, false},
+		{"unknown", "unknown", "1.0.0", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(string(tt.client), func(t *testing.T) {
-			url, err := installer.getDownloadURL(tt.client, tt.fileName)
+			url, err := installer.getDownloadURL(tt.client, tt.fileName, tt.version)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getDownloadURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -152,16 +149,12 @@ func TestGetDownloadURL(t *testing.T) {
 }
 
 func TestNewInstaller(t *testing.T) {
-	installDir := "/tmp"
-	installer := NewInstaller(installDir)
+	installer := NewInstaller()
 
-	if installer == nil {
-		t.Error("NewInstaller() returned nil")
-		return
-	}
-
-	if installer.InstallDir != installDir {
-		t.Errorf("NewInstaller() InstallDir = %v, want %v", installer.InstallDir, installDir)
+	// Since installer is a struct, it cannot be nil
+	// We can test that it has the expected InstallDir set
+	if installer.InstallDir == "" {
+		t.Error("NewInstaller() returned installer with empty InstallDir")
 	}
 }
 
@@ -189,30 +182,28 @@ func TestCompareVersions(t *testing.T) {
 	}
 }
 
-// TestIsClientLatestVersion tests the IsClientLatestVersion method
+// TestIsClientLatestVersion tests the CompareClientVersions function
 func TestIsClientLatestVersion(t *testing.T) {
-	installDir := "/tmp"
-	installer := NewInstaller(installDir)
-
 	tests := []struct {
 		client     types.ClientType
 		version    string
+		latest     string
 		wantLatest bool
 	}{
-		{types.ClientReth, "0.1.0", false},                               // Older version
-		{types.ClientReth, versions.LatestRethVersion, true},             // Latest version
-		{types.ClientReth, "999.999.999", true},                          // Future version
-		{types.ClientGeth, "1.0.0", false},                               // Older version
-		{types.ClientGeth, versions.LatestGethVersion, true},             // Latest version
-		{types.ClientLighthouse, "1.0.0", false},                         // Older version
-		{types.ClientLighthouse, versions.LatestLighthouseVersion, true}, // Latest version
+		{types.ClientReth, "0.1.0", versions.LatestRethVersion, false},                                     // Older version
+		{types.ClientReth, versions.LatestRethVersion, versions.LatestRethVersion, true},                   // Latest version
+		{types.ClientReth, "999.999.999", versions.LatestRethVersion, true},                                // Future version
+		{types.ClientGeth, "1.0.0", versions.LatestGethVersion, false},                                     // Older version
+		{types.ClientGeth, versions.LatestGethVersion, versions.LatestGethVersion, true},                   // Latest version
+		{types.ClientLighthouse, "1.0.0", versions.LatestLighthouseVersion, false},                         // Older version
+		{types.ClientLighthouse, versions.LatestLighthouseVersion, versions.LatestLighthouseVersion, true}, // Latest version
 	}
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s_%s", tt.client, tt.version), func(t *testing.T) {
-			isLatest, _ := installer.IsClientLatestVersion(tt.client, tt.version)
+			isLatest := CompareClientVersions(string(tt.client), tt.version, tt.latest)
 			if isLatest != tt.wantLatest {
-				t.Errorf("IsClientLatestVersion() isLatest = %v, want %v", isLatest, tt.wantLatest)
+				t.Errorf("CompareClientVersions() isLatest = %v, want %v", isLatest, tt.wantLatest)
 			}
 		})
 	}

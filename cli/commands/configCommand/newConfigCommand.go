@@ -104,11 +104,11 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 				Salt:       "${STARKNET_SALT}",
 			},
 		}
-		
+
 		// Set the main Wallet field and add to Wallets array
 		defaultConfig.Wallet = walletConfig
 		defaultConfig.Wallets = []types.WalletConfig{walletConfig}
-		
+
 		// Set up validator config with environment variables
 		defaultConfig.ValidatorConfig = types.ValidatorConfig{
 			ProviderConfig: struct {
