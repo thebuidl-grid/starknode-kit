@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+
 	"github.com/NethermindEth/juno/core/felt"
 	"github.com/NethermindEth/starknet.go/account"
 	"github.com/NethermindEth/starknet.go/rpc"
@@ -156,54 +158,73 @@ func executeDeployment(accnt *account.Account, deployTxn *rpc.BroadcastDeployAcc
 	return resp, nil
 }
 
-func DeployAccount() error {
+func DeployAccount() (*types.Wallet, error) {
 	client, err := createRPCProvider()
 	if err != nil {
-		return fmt.Errorf("failed to create RPC provider: %w", err)
+		return nil, fmt.Errorf("failed to create RPC provider: %w", err)
 	}
 
 	ks, pub, priv := generateKeys()
 
 	accnt, err := createAccount(client, pub, ks)
 	if err != nil {
-		return fmt.Errorf("failed to create account: %w", err)
+		return nil, fmt.Errorf("failed to create account: %w", err)
 	}
 
 	classHash, err := getClassHash()
 	if err != nil {
-		return fmt.Errorf("failed to get class hash: %w", err)
+		return nil, fmt.Errorf("failed to get class hash: %w", err)
 	}
 
 	deployTxn, precomputedAddr, err := buildDeployTransaction(accnt, pub, classHash)
 	if err != nil {
-		return fmt.Errorf("failed to build deploy transaction: %w", err)
+		return nil, fmt.Errorf("failed to build deploy transaction: %w", err)
 	}
 
 	requiredAmount, err := displayFundingInfoAndStartMonitoring(deployTxn, precomputedAddr)
 	if err != nil {
-		return fmt.Errorf("failed to start funding monitoring: %w", err)
+		return nil, fmt.Errorf("failed to start funding monitoring: %w", err)
 	}
 
 	waitForFundingWithMonitoring(client, precomputedAddr, requiredAmount)
 
 	resp, err := executeDeployment(accnt, deployTxn)
 	if err != nil {
-		return fmt.Errorf("failed to execute deployment: %w", err)
+		return nil, fmt.Errorf("failed to execute deployment: %w", err)
 	}
 
 	fmt.Println("✅ Account deployment transaction successfully submitted!")
 	fmt.Printf("🔗 Transaction hash: %v\n", FormatTransactionHash(resp.Hash))
 	fmt.Printf("📍 Contract address: %v\n", FormatStarknetAddress(resp.ContractAddress))
+	
+	// Set all wallet-related environment variables for validator configuration
+	// These variables will be used in the config YAML with ${VAR_NAME} syntax
 	walletKS := map[string]string{
-		"STARKNET_WALLET":      FormatStarknetAddress(resp.ContractAddress), // TODO wrong
-		"STARKNET_PRIVATE_KEY": FormatStarknetAddress(priv),
+		"STARKNET_WALLET":      FormatStarknetAddress(resp.ContractAddress), // Wallet contract address
+		"STARKNET_CLASS_HASH":  FormatStarknetAddress(classHash),            // Account contract class hash
+		"STARKNET_PRIVATE_KEY": FormatStarknetAddress(priv),                 // Private key for signing
+		"STARKNET_PUBLIC_KEY":  FormatStarknetAddress(pub),                  // Public key derived from private key
+		"STARKNET_SALT":        FormatStarknetAddress(pub),                  // Salt used for deployment (using pub as salt)
+		"STARKNET_DEPLOYED":    "true",                                      // Account deployment status
+		"STARKNET_LEGACY":      "false",                                     // Account type (Cairo v2)
 	}
 	err = writeToENV(walletKS)
 	if err != nil {
 		fmt.Println("Error writing to env file")
-		return err
+		return nil, err
 	}
 	fmt.Println("⏰ Wait a few minutes to see it in Voyager.")
 
-	return err
+	// Create and return the Wallet struct
+	wallet := &types.Wallet{
+		Address:    FormatStarknetAddress(resp.ContractAddress),
+		ClassHash:  FormatStarknetAddress(classHash),
+		Deployed:   true,
+		Legacy:     false,
+		PrivateKey: FormatStarknetAddress(priv),
+		PublicKey:  FormatStarknetAddress(pub),
+		Salt:       FormatStarknetAddress(pub), // Using pub as salt
+	}
+
+	return wallet, nil
 }

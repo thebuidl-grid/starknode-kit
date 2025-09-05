@@ -37,12 +37,12 @@ type IClient interface {
 type (
 	StarkNodeKitConfig struct {
 		Network                string          `yaml:"network"`
-		Wallet                 WalletConfig    `wallet:"wallet"`
+		Wallet                 WalletConfig    `yaml:"wallet"`
 		ExecutionCientSettings ClientConfig    `yaml:"execution_client"`
 		ConsensusCientSettings ClientConfig    `yaml:"consensus_client"`
 		JunoConfig             JunoConfig      `yaml:"juno_client,omitempty"`
 		ValidatorConfig        ValidatorConfig `yaml:"validator_config"`
-		Wallets                []WalletConfig  `yaml:"wallet"`
+		Wallets                []WalletConfig  `yaml:"wallets"`
 	}
 
 	ClientConfig struct {
