@@ -10,13 +10,13 @@ import (
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 )
 
-type stakingValidator struct {
-	provider stakingValidatorProviderConfig
-	wallet   stakingValidatorWalletConfig
+type StakingValidator struct {
+	Provider stakingValidatorProviderConfig
+	Wallet   stakingValidatorWalletConfig
 }
 
 type stakingValidatorProviderConfig struct {
-	starkentHttp string
+	starknetHttp string
 	starkentWS   string
 }
 
@@ -25,21 +25,21 @@ type stakingValidatorWalletConfig struct {
 	privatekey string
 }
 
-func (_ stakingValidator) getCommand() string {
+func (_ StakingValidator) getCommand() string {
 	return filepath.Join(constants.InstallStarknetDir, "starknet-staking-v2", "validator")
 }
 
-func (c stakingValidator) buildArgs() []string {
+func (c StakingValidator) buildArgs() []string {
 	args := []string{
-		"--provider-http" + c.provider.starkentHttp,
-		"--provider-ws" + c.provider.starkentWS,
-		"--signer-op-address" + c.wallet.address,
-		"--signer-priv-key" + c.wallet.privatekey,
+		"--provider-http" + c.Provider.starknetHttp,
+		"--provider-ws" + c.Provider.starkentWS,
+		"--signer-op-address" + c.Wallet.address,
+		"--signer-priv-key" + c.Wallet.privatekey,
 	}
 	return args
 }
 
-func (c *stakingValidator) Start() error {
+func (c *StakingValidator) Start() error {
 	args := c.buildArgs()
 	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
