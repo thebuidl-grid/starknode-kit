@@ -46,17 +46,17 @@ func NewJunoClient(config types.JunoConfig, network string) (types.IClient, erro
 	}, nil
 }
 
-func NewValidatorClient(config types.JunoConfig, network string) (types.IClient, error) {
+func NewValidatorClient(config types.ValidatorConfig) (types.IClient, error) {
 
-	// Get Juno binary path
-	junoPath := getJunoPath()
-	if junoPath == "" {
-		return nil, fmt.Errorf("Juno is not installed. Please install it first using 'starknode-kit add -s juno'")
-	}
-
-	return &JunoClient{
-		config:  config,
-		network: network,
+	return &StakingValidator{
+		Provider: stakingValidatorProviderConfig{
+			starknetHttp: config.ProviderConfig.JunoRPC,
+			starkentWS:   config.ProviderConfig.JunoWS,
+		},
+		Wallet: stakingValidatorWalletConfig{
+			address:    config.SignerConfig.OperationalAddress,
+			privatekey: config.SignerConfig.WalletPrivateKey,
+		},
 	}, nil
 }
 func RestartClient(pid int) error {
