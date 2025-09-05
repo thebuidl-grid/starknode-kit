@@ -92,7 +92,9 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 		defaultConfig.JunoConfig = defaultJunoConfig
 	}
 
+	// Set up validator configuration if validator flag is set
 	if validator && deployedWallet != nil {
+		// Populate WalletConfig with environment variable syntax
 		walletConfig := types.WalletConfig{
 			Name: "default",
 			Wallet: types.Wallet{
@@ -128,8 +130,9 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 			},
 		}
 	}
+
 	defaultConfig.ConsensusCientSettings = defaultConsensusClientSettings
-	defaultConfig.ExecutionCientSettings = defaultExecutionCientSettings
+	defaultConfig.ExecutionCientSettings = defaultExecutionCutionCientSettings
 
 	err := utils.CreateStarkNodeConfig(defaultConfig)
 	if err != nil {
