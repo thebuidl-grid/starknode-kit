@@ -43,6 +43,18 @@ Example:
 			fmt.Println(err)
 			return
 		}
+		if config.JunoConfig.IsValidatorNode {
+			validatorNode, err := clients.NewValidatorClient(config.ValidatorConfig)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			err = validatorNode.Start()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
 		fmt.Println("Juno started")
 	},
 }
