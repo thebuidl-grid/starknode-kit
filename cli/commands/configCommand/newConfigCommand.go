@@ -17,7 +17,7 @@ var (
 		Port:                []int{5052, 9000},
 		ConsensusCheckpoint: "https://mainnet-checkpoint-sync.stakely.io/",
 	}
-	defaultExecutionCientSettings = types.ClientConfig{
+	defaultExecutionClientSettings = types.ClientConfig{
 		Name:          types.ClientGeth,
 		Port:          []int{30303},
 		ExecutionType: "full",
@@ -81,7 +81,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 			fmt.Println(err)
 			return
 		}
-		defaultExecutionCientSettings.Name = client
+		defaultExecutionClientSettings.Name = client
 	}
 
 	if starknet_node {
@@ -132,7 +132,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	}
 
 	defaultConfig.ConsensusCientSettings = defaultConsensusClientSettings
-	defaultConfig.ExecutionCientSettings = defaultExecutionCutionCientSettings
+	defaultConfig.ExecutionCientSettings = defaultExecutionClientSettings
 
 	err := utils.CreateStarkNodeConfig(defaultConfig)
 	if err != nil {
@@ -141,7 +141,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	}
 
 	if install {
-		clients := []types.ClientType{defaultConsensusClientSettings.Name, defaultExecutionCientSettings.Name}
+		clients := []types.ClientType{defaultConsensusClientSettings.Name, defaultExecutionClientSettings.Name}
 		for _, i := range clients {
 			err := options.Installer.InstallClient(i)
 			if err != nil {
