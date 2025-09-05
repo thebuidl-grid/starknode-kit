@@ -46,6 +46,19 @@ func NewJunoClient(config types.JunoConfig, network string) (types.IClient, erro
 	}, nil
 }
 
+func NewValidatorClient(config types.JunoConfig, network string) (types.IClient, error) {
+
+	// Get Juno binary path
+	junoPath := getJunoPath()
+	if junoPath == "" {
+		return nil, fmt.Errorf("Juno is not installed. Please install it first using 'starknode-kit add -s juno'")
+	}
+
+	return &JunoClient{
+		config:  config,
+		network: network,
+	}, nil
+}
 func RestartClient(pid int) error {
 	// First stop the client
 	if err := process.StopClient(pid); err != nil {
