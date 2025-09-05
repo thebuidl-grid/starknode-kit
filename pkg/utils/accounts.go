@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	predeployedClassHash = "0x61dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f"
-	rpcURL               = "https://starknet-sepolia.public.blastapi.io/rpc/v0_8"
-	strkTokenAddress     = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
+	predeployedClassHash    = "0x61dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f"
+	rpcURL                  = "https://starknet-sepolia.public.blastapi.io/rpc/v0_8"
+	strkTokenAddress        = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
+	starknetStackingAddress = "0x03745ab04a431fc02871a139be6b93d9260b0ff3e779ad9c8b377183b23109f1"
 )
 
 // checkBalance queries the STRK balance of the given address
