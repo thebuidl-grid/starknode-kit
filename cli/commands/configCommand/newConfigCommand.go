@@ -162,6 +162,14 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 				fmt.Println(errMessage)
 				return
 			}
+			if validator {
+				err := options.Installer.InstallClient(types.ClientStarkValidator)
+				if err != nil {
+					errMessage := fmt.Sprintf("Could not install client Starknet Validator\nError: %v", err.Error())
+					fmt.Println(errMessage)
+					return
+				}
+			}
 		}
 	}
 }
