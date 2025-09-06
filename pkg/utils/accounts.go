@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
@@ -14,10 +15,25 @@ import (
 )
 
 const (
-	predeployedClassHash    = "0x61dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f"
-	rpcURL                  = "https://starknet-sepolia.public.blastapi.io/rpc/v0_8"
-	strkTokenAddress        = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
-	starknetStackingAddress = "0x03745ab04a431fc02871a139be6b93d9260b0ff3e779ad9c8b377183b23109f1"
+	predeployedClassHash     = "0x61dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f"
+	rpcURL                   = "https://starknet-sepolia.public.blastapi.io/rpc/v0_8"
+	strkTokenAddress         = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
+	validatorStackingAddress = "0x03745ab04a431fc02871a139be6b93d9260b0ff3e779ad9c8b377183b23109f1"
+)
+
+var (
+	mainnetStake   = "20000000000000000000000"
+	testnetStake   = "1000000000000000000"
+	stakeCommision = "500"
+
+	mainnetBig, _        = new(big.Int).SetString(mainnetStake, 10)
+	testnetBig, _        = new(big.Int).SetString(testnetStake, 10)
+	stakeCommisionBig, _ = new(big.Int).SetString(stakeCommision, 10)
+
+	stakes = map[string]*felt.Felt{
+		"mainnet": utils.BigIntToFelt(mainnetBig),
+		"testnet": utils.BigIntToFelt(testnetBig),
+	}
 )
 
 // checkBalance queries the STRK balance of the given address
@@ -228,4 +244,35 @@ func DeployAccount() (*types.Wallet, error) {
 	}
 
 	return wallet, nil
+}
+
+func StakeStark(validorConfig types.ValidatorConfig, network string) error {
+	client, err := rpc.NewProvider(rpcURL)
+	if err != nil {
+		return err
+	}
+	strkAddr, err := utils.HexToFelt(strkTokenAddress)
+	if err != nil {
+		return err
+	}
+	validatorAddress, err := utils.HexToFelt(validorConfig.SignerConfig.OperationalAddress)
+	if err != nil {
+		return err
+	}
+	rewardAddress, err := utils.HexToFelt(validorConfig.RewardAddress)
+	if err != nil {
+		return err
+	}
+	commsionFelt := utils.BigIntToFelt(stakeCommisionBig)
+	callReq := rpc.FunctionCall{
+		ContractAddress:    strkAddr,
+		EntryPointSelector: utils.GetSelectorFromNameFelt("stake"),
+		Calldata:           []*felt.Felt{rewardAddress, validatorAddress, stakes[network], &felt.One, commsionFelt},
+	}
+	result, err := client.Call(context.Background(), callReq, rpc.BlockID{Tag: "latest"})
+	if err != nil {
+		return err
+	}
+	fmt.Println(result)
+	return nil
 }

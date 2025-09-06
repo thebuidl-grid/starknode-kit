@@ -88,6 +88,11 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 		defaultJunoConfig.IsValidatorNode = validator
 		if validator {
 			utils.DeployAccount()
+			err := utils.StakeStark(defaultConfig.ValidatorConfig, defaultConfig.Network)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
 		defaultConfig.JunoConfig = defaultJunoConfig
 	}
