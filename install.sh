@@ -351,31 +351,35 @@ check_prerequisites() {
 
 # Main installation process
 perform_installation() {
-    # Create temporary directory
-    TEMP_DIR=$(mktemp -d)
-    print_status "Created temporary directory: $TEMP_DIR"
-    
-    # Cleanup function
-    cleanup() {
-        print_status "Cleaning up temporary files..."
-        rm -rf "$TEMP_DIR"
-    }
-    
-    # Set trap to cleanup on exit
-    trap cleanup EXIT
-    
-    # Clone the repository
-    print_status "Cloning repository: https://github.com/$GITHUB_REPO"
-    if ! git clone "https://github.com/$GITHUB_REPO.git" "$TEMP_DIR/$BINARY_NAME"; then
-        print_error "Failed to clone repository"
-        exit 1
+    if [ "$USE_LOCAL" = true ]; then
+        print_status "Using local main.go file for installation"
+    else
+        # Create temporary directory
+        TEMP_DIR=$(mktemp -d)
+        print_status "Created temporary directory: $TEMP_DIR"
+        
+        # Cleanup function
+        cleanup() {
+            print_status "Cleaning up temporary files..."
+            rm -rf "$TEMP_DIR"
+        }
+        
+        # Set trap to cleanup on exit
+        trap cleanup EXIT
+        
+        # Clone the repository
+        print_status "Cloning repository: https://github.com/$GITHUB_REPO"
+        if ! git clone "https://github.com/$GITHUB_REPO.git" "$TEMP_DIR/$BINARY_NAME"; then
+            print_error "Failed to clone repository"
+            exit 1
+        fi
+        
+        # Change to project directory
+        cd "$TEMP_DIR/$BINARY_NAME" || {
+            print_error "Failed to change to project directory"
+            exit 1
+        }
     fi
-    
-    # Change to project directory
-    cd "$TEMP_DIR/$BINARY_NAME" || {
-        print_error "Failed to change to project directory"
-        exit 1
-    }
     
     # Check if go.mod exists (Go modules)
     if [ -f "go.mod" ]; then
@@ -497,6 +501,13 @@ show_completion() {
 
 # Main execution
 main() {
+    USE_LOCAL=false
+    for arg in "$@"; do
+        if [ "$arg" == "--use-local" ]; then
+            USE_LOCAL=true
+        fi
+    done
+
     trap handle_keyboard_interrupt SIGINT
     show_banner
     check_prerequisites
@@ -518,4 +529,4 @@ main() {
 }
 
 # Run main function
-main
+main "$@" "$@"
