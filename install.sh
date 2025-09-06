@@ -352,7 +352,43 @@ check_prerequisites() {
 # Main installation process
 perform_installation() {
     if [ "$USE_LOCAL" = true ]; then
-        print_status "Using local main.go file for installation"
+        print_status "Using local main.go file for installation. No binary will be installed."
+    
+        # Check if go.mod exists (Go modules)
+        if [ -f "go.mod" ]; then
+            print_status "Go modules detected, downloading dependencies..."
+            go mod download
+        else
+            print_status "No go.mod found, assuming GOPATH mode..."
+        fi
+    
+        # Build the application with node type flag
+        print_status "Preparing to configure clients using local source for $SELECTED_NODE_TYPE node..."
+        BUILD_FLAGS=""
+        case $SELECTED_NODE_TYPE in
+            "ethereum") BUILD_FLAGS="-tags ethereum" ;;
+            "starknet") BUILD_FLAGS="-tags starknet" ;;
+            "validator") BUILD_FLAGS="-tags validator" ;;
+        esac
+
+        CONFIG_CMD="go run main.go config new"
+        CONFIG_CMD="$CONFIG_CMD --network $SELECTED_NETWORK"
+        CONFIG_CMD="$CONFIG_CMD --consensus-client $SELECTED_CL_CLIENT"
+        CONFIG_CMD="$CONFIG_CMD --execution-client $SELECTED_EL_CLIENT"
+        if [ "$IS_STARKNET_NODE" == 0 ]; then
+            CONFIG_CMD="$CONFIG_CMD --starknet-node juno"
+        fi
+        if [ "$IS_VALIDATOR_NODE" == 0 ]; then
+            CONFIG_CMD="$CONFIG_CMD --validator"
+        fi
+
+        print_status "Running configuration command: $CONFIG_CMD"
+        if ! eval "$CONFIG_CMD"; then
+            print_error "Failed to configure and install clients."
+            exit 1
+        fi
+        print_status "Client configuration and installation complete!"
+
     else
         # Create temporary directory
         TEMP_DIR=$(mktemp -d)
@@ -379,106 +415,103 @@ perform_installation() {
             print_error "Failed to change to project directory"
             exit 1
         }
-    fi
     
-    # Check if go.mod exists (Go modules)
-    if [ -f "go.mod" ]; then
-        print_status "Go modules detected, downloading dependencies..."
-        go mod download
-    else
-        print_status "No go.mod found, assuming GOPATH mode..."
-    fi
-    
-    # Build the application with node type flag
-    print_status "Building the application for $SELECTED_NODE_TYPE node..."
-    BUILD_FLAGS=""
-    case $SELECTED_NODE_TYPE in
-        "ethereum") BUILD_FLAGS="-tags ethereum" ;;
-        "starknet") BUILD_FLAGS="-tags starknet" ;;
-        "validator") BUILD_FLAGS="-tags validator" ;;
-    esac
-    
-    if ! go build $BUILD_FLAGS -o "$BINARY_NAME" .; then
-        print_error "Failed to build the application"
-        exit 1
-    fi
-    
-    # Check if binary was created
-    if [ ! -f "$BINARY_NAME" ]; then
-        print_error "Binary was not created successfully"
-        exit 1
-    fi
-    
-    # Create install directory if it doesn't exist
-    if [ ! -d "$INSTALL_DIR" ]; then
-        print_warning "Install directory $INSTALL_DIR does not exist, creating it..."
-        sudo mkdir -p "$INSTALL_DIR"
-    fi
-    
-    # Install the binary
-    print_status "Installing $BINARY_NAME to $INSTALL_DIR..."
-    if ! sudo cp "$BINARY_NAME" "$INSTALL_DIR/"; then
-        print_error "Failed to install binary to $INSTALL_DIR"
-        exit 1
-    fi
-    
-    # Make it executable
-    sudo chmod +x "$INSTALL_DIR/$BINARY_NAME"
-    
-    # Create config file with node type
-    CONFIG_DIR="$HOME/.starknode-kit"
-    mkdir -p "$CONFIG_DIR"
-    echo "node_type=$SELECTED_NODE_TYPE" > "$CONFIG_DIR/config"
-    
-    # Verify installation
-    if command_exists "$BINARY_NAME"; then
-        echo
-        print_status "✓ Installation successful!"
-        print_status "You can now use '$BINARY_NAME' from anywhere in your terminal"
-        print_status "Node type configured: $SELECTED_NODE_TYPE"
-        
-        # Show version if available
-        if "$BINARY_NAME" --version >/dev/null 2>&1; then
-            VERSION=$("$BINARY_NAME" --version)
-            print_status "Installed version: $VERSION"
-        elif "$BINARY_NAME" -version >/dev/null 2>&1; then
-            VERSION=$("$BINARY_NAME" -version)
-            print_status "Installed version: $VERSION"
+        # Check if go.mod exists (Go modules)
+        if [ -f "go.mod" ]; then
+            print_status "Go modules detected, downloading dependencies..."
+            go mod download
+        else
+            print_status "No go.mod found, assuming GOPATH mode..."
         fi
-
-        print_status "Configuring and installing clients based on your selections..."
-
-        CONFIG_CMD="$BINARY_NAME config new"
-
-        # Add network flag
-        CONFIG_CMD="$CONFIG_CMD --network $SELECTED_NETWORK"
-
-        CONFIG_CMD="$CONFIG_CMD --consensus-client $SELECTED_CL_CLIENT"
-        CONFIG_CMD="$CONFIG_CMD --execution-client $SELECTED_EL_CLIENT"
-
-        # Add starknet-node flag
-        if [ "$IS_STARKNET_NODE" == 0 ]; then # 0 means it's a starknet node (starknet or validator)
-            CONFIG_CMD="$CONFIG_CMD --starknet-node juno"
-        fi
-
-        # Add validator flag
-        if [ "$IS_VALIDATOR_NODE" == 0 ]; then # 0 means it's a validator node
-            CONFIG_CMD="$CONFIG_CMD --validator"
-        fi
-
-        # The --install flag defaults to true in newConfigCommand, so we don't need to explicitly add it unless we want to disable it.
-        # Since we want to install clients, we'll let it default to true.
-
-        print_status "Running configuration command: $CONFIG_CMD"
-        if ! $CONFIG_CMD; then
-            print_error "Failed to configure and install clients."
+    
+        # Build the application with node type flag
+        print_status "Building the application for $SELECTED_NODE_TYPE node..."
+        BUILD_FLAGS=""
+        case $SELECTED_NODE_TYPE in
+            "ethereum") BUILD_FLAGS="-tags ethereum" ;;
+            "starknet") BUILD_FLAGS="-tags starknet" ;;
+            "validator") BUILD_FLAGS="-tags validator" ;;
+        esac
+    
+        if ! go build $BUILD_FLAGS -o "$BINARY_NAME" .; then
+            print_error "Failed to build the application"
             exit 1
         fi
-        print_status "Client configuration and installation complete!"
+    
+        # Check if binary was created
+        if [ ! -f "$BINARY_NAME" ]; then
+            print_error "Binary was not created successfully"
+            exit 1
+        fi
+    
+        # Create install directory if it doesn't exist
+        if [ ! -d "$INSTALL_DIR" ]; then
+            print_warning "Install directory $INSTALL_DIR does not exist, creating it..."
+            sudo mkdir -p "$INSTALL_DIR"
+        fi
+    
+        # Install the binary
+        print_status "Installing $BINARY_NAME to $INSTALL_DIR..."
+        if ! sudo cp "$BINARY_NAME" "$INSTALL_DIR/"; then
+            print_error "Failed to install binary to $INSTALL_DIR"
+            exit 1
+        fi
+    
+        # Make it executable
+        sudo chmod +x "$INSTALL_DIR/$BINARY_NAME"
+    
+        # Create config file with node type
+        CONFIG_DIR="$HOME/.starknode-kit"
+        mkdir -p "$CONFIG_DIR"
+        echo "node_type=$SELECTED_NODE_TYPE" > "$CONFIG_DIR/config"
+    
+        # Verify installation
+        if command_exists "$BINARY_NAME"; then
+            echo
+            print_status "✓ Installation successful!"
+            print_status "You can now use '$BINARY_NAME' from anywhere in your terminal"
+            print_status "Node type configured: $SELECTED_NODE_TYPE"
+            
+            # Show version if available
+            if "$BINARY_NAME" --version >/dev/null 2>&1; then
+                VERSION=$("$BINARY_NAME" --version)
+                print_status "Installed version: $VERSION"
+            elif "$BINARY_NAME" -version >/dev/null 2>&1; then
+                VERSION=$("$BINARY_NAME" -version)
+                print_status "Installed version: $VERSION"
+            fi
 
-    else
-        print_warning "Installation completed but '$BINARY_NAME' is not in PATH"
-        print_warning "You may need to add $INSTALL_DIR to your PATH or restart your terminal"
+            print_status "Configuring and installing clients based on your selections..."
+
+            CONFIG_CMD="$BINARY_NAME config new"
+
+            # Add network flag
+            CONFIG_CMD="$CONFIG_CMD --network $SELECTED_NETWORK"
+
+            CONFIG_CMD="$CONFIG_CMD --consensus-client $SELECTED_CL_CLIENT"
+            CONFIG_CMD="$CONFIG_CMD --execution-client $SELECTED_EL_CLIENT"
+
+            # Add starknet-node flag
+            if [ "$IS_STARKNET_NODE" == 0 ]; then # 0 means it's a starknet node (starknet or validator)
+                CONFIG_CMD="$CONFIG_CMD --starknet-node juno"
+            fi
+
+            # Add validator flag
+            if [ "$IS_VALIDATOR_NODE" == 0 ]; then # 0 means it's a validator node
+                CONFIG_CMD="$CONFIG_CMD --validator"
+            fi
+
+            print_status "Running configuration command: $CONFIG_CMD"
+            if ! $CONFIG_CMD; then
+                print_error "Failed to configure and install clients."
+                exit 1
+            fi
+            print_status "Client configuration and installation complete!"
+
+        else
+            print_warning "Installation completed but '$BINARY_NAME' is not in PATH"
+            print_warning "You may need to add $INSTALL_DIR to your PATH or restart your terminal"
+        fi
     fi
 }
 
@@ -486,13 +519,23 @@ perform_installation() {
 show_completion() {
     echo
     echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
-    echo -e "${GREEN}                        Installation Complete!                       ${NC}"
+    if [ "$USE_LOCAL" = true ]; then
+        echo -e "${GREEN}                      Configuration Complete!                      ${NC}"
+    else
+        echo -e "${GREEN}                        Installation Complete!                       ${NC}"
+    fi
     echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
     echo
     echo -e "${CYAN}Next Steps:${NC}"
-    echo "1. Run '$BINARY_NAME --help' to see available commands"
-    echo "2. Initialize your $SELECTED_NODE_TYPE node with '$BINARY_NAME init'"
-    echo "3. Start your node with '$BINARY_NAME start'"
+    if [ "$USE_LOCAL" = true ]; then
+        echo "1. To see available commands, run: go run main.go --help"
+        echo "2. To initialize your $SELECTED_NODE_TYPE node, run: go run main.go init"
+        echo "3. To start your node, run: go run main.go start"
+    else
+        echo "1. Run '$BINARY_NAME --help' to see available commands"
+        echo "2. Initialize your $SELECTED_NODE_TYPE node with '$BINARY_NAME init'"
+        echo "3. Start your node with '$BINARY_NAME start'"
+    fi
     echo
     echo -e "${YELLOW}For support and documentation, visit:${NC}"
     echo "https://github.com/$GITHUB_REPO"
