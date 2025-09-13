@@ -4,41 +4,42 @@ import (
 	"context"
 	"fmt"
 	"math/big"
-	"time"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 
 	"github.com/NethermindEth/juno/core/felt"
 	"github.com/NethermindEth/starknet.go/account"
 	"github.com/NethermindEth/starknet.go/rpc"
-	"github.com/NethermindEth/starknet.go/utils"
+	starkutils "github.com/NethermindEth/starknet.go/utils"
 )
 
 const (
-	predeployedClassHash     = "0x61dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f"
-	rpcURL                   = "https://starknet-sepolia.public.blastapi.io/rpc/v0_8"
-	strkTokenAddress         = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
-	validatorStackingAddress = "0x03745ab04a431fc02871a139be6b93d9260b0ff3e779ad9c8b377183b23109f1"
+	mainnetStake = "20000000000000000000000"
+	testnetStake = "1000000000000000000"
+
+	predeployedClassHash = "0x61dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f"
+	strkTokenAddress     = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
+	stakingContract      = "0x03745ab04a431fc02871a139be6b93d9260b0ff3e779ad9c8b377183b23109f1"
 )
 
 var (
-	mainnetStake   = "20000000000000000000000"
-	testnetStake   = "1000000000000000000"
-	stakeCommision = "500"
+	mainnetBig, _ = starkutils.HexToU256Felt(starkutils.StrToHex(mainnetStake))
+	sepoliaBig, _ = starkutils.HexToU256Felt(starkutils.StrToHex(testnetStake))
 
-	mainnetBig, _        = new(big.Int).SetString(mainnetStake, 10)
-	testnetBig, _        = new(big.Int).SetString(testnetStake, 10)
-	stakeCommisionBig, _ = new(big.Int).SetString(stakeCommision, 10)
+	rpcURL = map[string]string{
+		"mainnet": "https://starknet-mainnet.public.blastapi.io/rpc/v0_9",
+		"sepolia": "https://starknet-sepolia.public.blastapi.io/rpc/v0_9",
+	}
 
-	stakes = map[string]*felt.Felt{
-		"mainnet": utils.BigIntToFelt(mainnetBig),
-		"testnet": utils.BigIntToFelt(testnetBig),
+	stakes = map[string][]*felt.Felt{
+		"mainnet": mainnetBig,
+		"sepolia": sepoliaBig,
 	}
 )
 
 // checkBalance queries the STRK balance of the given address
 func checkBalance(client *rpc.Provider, address *felt.Felt) (*felt.Felt, error) {
-	strkAddr, err := utils.HexToFelt(strkTokenAddress)
+	strkAddr, err := starkutils.HexToFelt(strkTokenAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func checkBalance(client *rpc.Provider, address *felt.Felt) (*felt.Felt, error) 
 	// Call balanceOf function on STRK token contract
 	callReq := rpc.FunctionCall{
 		ContractAddress:    strkAddr,
-		EntryPointSelector: utils.GetSelectorFromNameFelt("balanceOf"),
+		EntryPointSelector: starkutils.GetSelectorFromNameFelt("balanceOf"),
 		Calldata:           []*felt.Felt{address},
 	}
 
@@ -63,36 +64,13 @@ func checkBalance(client *rpc.Provider, address *felt.Felt) (*felt.Felt, error) 
 	return balance, nil
 }
 
-// monitorFunding monitors the account balance and notifies when funded
-func monitorFunding(client *rpc.Provider, address *felt.Felt, requiredAmount *felt.Felt, funded chan<- bool) {
-	fmt.Printf("🔍 Monitoring funding for address: %s\n", FormatStarknetAddress(address))
-	fmt.Printf("📊 Required amount: %.6f STRK\n", utils.FRIToSTRK(requiredAmount))
-	fmt.Println("⏳ Checking balance every 10 seconds...")
-
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			balance, err := checkBalance(client, address)
-			if err != nil {
-				fmt.Printf("❌ Error checking balance: %v\n", err)
-				return
-			}
-
-			if balance.Cmp(requiredAmount) >= 0 {
-				fmt.Println("✅ Account has been funded! Proceeding with deployment...")
-				funded <- true
-				return
-			}
-		}
-	}
-}
-
 // createRPCProvider initializes and returns an RPC provider
-func createRPCProvider() (*rpc.Provider, error) {
-	client, err := rpc.NewProvider(rpcURL)
+func createRPCProvider(network string) (*rpc.Provider, error) {
+	url, ok := rpcURL[network]
+	if !ok {
+		return nil, fmt.Errorf("Invalid network: %s", network)
+	}
+	client, err := rpc.NewProvider(url)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +93,7 @@ func createAccount(client *rpc.Provider, pub *felt.Felt, ks *account.MemKeystore
 
 // getClassHash converts the predefined class hash string to felt
 func getClassHash() (*felt.Felt, error) {
-	classHash, err := utils.HexToFelt(predeployedClassHash)
+	classHash, err := starkutils.HexToFelt(predeployedClassHash)
 	if err != nil {
 		return nil, err
 	}
@@ -141,12 +119,12 @@ func buildDeployTransaction(accnt *account.Account, pub *felt.Felt, classHash *f
 func displayFundingInfoAndStartMonitoring(deployTxn *rpc.BroadcastDeployAccountTxnV3, precomputedAddr *felt.Felt) (*felt.Felt, error) {
 	fmt.Printf("🏠 PrecomputedAddress: %s\n", FormatStarknetAddress(precomputedAddr))
 
-	overallFee, err := utils.ResBoundsMapToOverallFee(deployTxn.ResourceBounds, 1)
+	overallFee, err := starkutils.ResBoundsMapToOverallFee(deployTxn.ResourceBounds, 1)
 	if err != nil {
 		return nil, err
 	}
 
-	feeInSTRK := utils.FRIToSTRK(overallFee)
+	feeInSTRK := starkutils.FRIToSTRK(overallFee)
 
 	fmt.Println("\n📋 Funding Instructions:")
 	fmt.Printf("💸 The precomputed address needs approximately %.6f STRK to perform the transaction.\n", feeInSTRK)
@@ -155,28 +133,43 @@ func displayFundingInfoAndStartMonitoring(deployTxn *rpc.BroadcastDeployAccountT
 	return overallFee, nil
 }
 
-// waitForFundingWithMonitoring uses goroutine to monitor funding automatically
+// waitForFundingWithMonitoring waits for the user to fund the account and press Enter.
 func waitForFundingWithMonitoring(client *rpc.Provider, precomputedAddr *felt.Felt, requiredAmount *felt.Felt) {
-	funded := make(chan bool)
+	fmt.Println("Press Enter to check balance and proceed with deployment...")
+	fmt.Scanln()
 
-	go monitorFunding(client, precomputedAddr, requiredAmount, funded)
+	for {
+		balance, err := checkBalance(client, precomputedAddr)
+		if err != nil {
+			fmt.Printf("❌ Error checking balance: %v\n", err)
+			fmt.Println("Press Enter to try again...")
+			fmt.Scanln()
+			continue
+		}
 
-	// Wait for funding notification
-	<-funded
+		if balance.Cmp(requiredAmount) >= 0 {
+			fmt.Printf("✅ Sufficient balance found: %.6f STRK. Proceeding with deployment...\n", starkutils.FRIToSTRK(balance))
+			return
+		}
+
+		fmt.Printf("❌ Insufficient balance: %.6f STRK. Required: %.6f STRK\n", starkutils.FRIToSTRK(balance), starkutils.FRIToSTRK(requiredAmount))
+		fmt.Println("Please fund the account and press Enter to re-check balance...")
+		fmt.Scanln()
+	}
 }
 
-func executeDeployment(accnt *account.Account, deployTxn *rpc.BroadcastDeployAccountTxnV3) (*rpc.TransactionResponse, error) {
+func executeDeployment(accnt *account.Account, deployTxn *rpc.BroadcastDeployAccountTxnV3) (rpc.TransactionResponse, error) {
 	fmt.Println("🚀 Deploying account...")
 	resp, err := accnt.SendTransaction(context.Background(), deployTxn)
 	if err != nil {
 		fmt.Println("❌ Error returned from SendTransaction:")
-		return nil, err
+		return rpc.TransactionResponse{}, err
 	}
 	return resp, nil
 }
 
-func DeployAccount() (*types.Wallet, error) {
-	client, err := createRPCProvider()
+func DeployAccount(netowork string) (*types.Wallet, error) {
+	client, err := createRPCProvider(netowork)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create RPC provider: %w", err)
 	}
@@ -197,7 +190,6 @@ func DeployAccount() (*types.Wallet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to build deploy transaction: %w", err)
 	}
-
 	requiredAmount, err := displayFundingInfoAndStartMonitoring(deployTxn, precomputedAddr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start funding monitoring: %w", err)
@@ -242,37 +234,68 @@ func DeployAccount() (*types.Wallet, error) {
 		PublicKey:  FormatStarknetAddress(pub),
 		Salt:       FormatStarknetAddress(pub), // Using pub as salt
 	}
+	transactionUrl := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", FormatTransactionHash(resp.Hash))
+	fmt.Println("Transaction successfull, view here: ", transactionUrl)
 
 	return wallet, nil
 }
 
-func StakeStark(validorConfig types.ValidatorConfig, network string) error {
-	client, err := rpc.NewProvider(rpcURL)
+func StakeStark(network string, wallet types.WalletConfig) error {
+
+	stackingAddr, err := starkutils.HexToFelt(stakingContract)
+	if err != nil {
+		return fmt.Errorf("failed to convert staking contrct addr to felt: %w", err)
+	}
+	starkTokenAdress, err := starkutils.HexToFelt(strkTokenAddress)
+	if err != nil {
+		return fmt.Errorf("failed to convert starktoken address to felt: %w", err)
+	}
+	rewardAddress, err := starkutils.HexToFelt(wallet.RewardAddress)
 	if err != nil {
 		return err
 	}
-	strkAddr, err := utils.HexToFelt(strkTokenAddress)
+
+	userWalletAddress, err := starkutils.HexToFelt(wallet.Wallet.Address)
 	if err != nil {
 		return err
 	}
-	validatorAddress, err := utils.HexToFelt(validorConfig.SignerConfig.OperationalAddress)
+
+	client, err := createRPCProvider(network)
 	if err != nil {
 		return err
 	}
-	rewardAddress, err := utils.HexToFelt(validorConfig.RewardAddress)
+
+	ks := account.NewMemKeystore()
+	privKeyBI, ok := new(big.Int).SetString(wallet.Wallet.PrivateKey, 0)
+	if !ok {
+		return fmt.Errorf("Fail to convert privKey to bitInt")
+	}
+	ks.Put(wallet.Wallet.PublicKey, privKeyBI)
+
+	userAccount, _ := account.NewAccount(
+		client,
+		userWalletAddress,
+		wallet.Wallet.PublicKey,
+		ks,
+		account.CairoV2,
+	)
+
+	txn1 := rpc.InvokeFunctionCall{
+		ContractAddress: starkTokenAdress,
+		FunctionName:    "approve",
+		CallData:        []*felt.Felt{stackingAddr, stakes[network][0], stakes[network][1]},
+	}
+	txn2 := rpc.InvokeFunctionCall{
+		ContractAddress: stackingAddr,
+		FunctionName:    "stake",
+		CallData:        []*felt.Felt{rewardAddress, userAccount.Address, stakes[network][0]},
+	}
+
+	resp, err := userAccount.BuildAndSendInvokeTxn(context.Background(), []rpc.InvokeFunctionCall{txn1, txn2}, nil)
 	if err != nil {
 		return err
 	}
-	commsionFelt := utils.BigIntToFelt(stakeCommisionBig)
-	callReq := rpc.FunctionCall{
-		ContractAddress:    strkAddr,
-		EntryPointSelector: utils.GetSelectorFromNameFelt("stake"),
-		Calldata:           []*felt.Felt{rewardAddress, validatorAddress, stakes[network], &felt.One, commsionFelt},
-	}
-	result, err := client.Call(context.Background(), callReq, rpc.BlockID{Tag: "latest"})
-	if err != nil {
-		return err
-	}
-	fmt.Println(result)
+	transactionUrl := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", FormatTransactionHash(resp.Hash))
+	fmt.Println("Transaction successfull, view here: ", transactionUrl)
 	return nil
 }
