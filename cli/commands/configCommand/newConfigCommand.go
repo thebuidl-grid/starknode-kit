@@ -52,7 +52,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	// Only deploy account if validator flag is set
 	var deployedWallet *types.Wallet
 	if validator {
-		wallet, err := utils.DeployAccount()
+		wallet, err := utils.DeployAccount(network)
 		if err != nil {
 			fmt.Printf("Error deploying account: %v\n", err)
 			return
@@ -86,18 +86,16 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 
 	if starknet_node {
 		defaultJunoConfig.IsValidatorNode = validator
-		if validator {
-			err := utils.StakeStark(defaultConfig.ValidatorConfig, defaultConfig.Network)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-		}
+
 		defaultConfig.JunoConfig = defaultJunoConfig
 	}
 
 	// Set up validator configuration if validator flag is set
 	if validator && deployedWallet != nil {
+		var rewardAddr string
+		fmt.Printf("Enter your reward Address here: %s", rewardAddr)
+		fmt.Scan(&rewardAddr)
+
 		// Populate WalletConfig with environment variable syntax
 		walletConfig := types.WalletConfig{
 			Name: "default",
@@ -114,7 +112,6 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 
 		// Set the main Wallet field and add to Wallets array
 		defaultConfig.Wallet = walletConfig
-		defaultConfig.Wallets = []types.WalletConfig{walletConfig}
 
 		// Set up validator config with environment variables
 		defaultConfig.ValidatorConfig = types.ValidatorConfig{
@@ -132,7 +129,9 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 				OperationalAddress: "${STARKNET_WALLET}",
 				WalletPrivateKey:   "${STARKNET_PRIVATE_KEY}",
 			},
+			RewardAddress: rewardAddr,
 		}
+
 	}
 
 	defaultConfig.ConsensusCientSettings = defaultConsensusClientSettings
@@ -142,6 +141,19 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	if err != nil {
 		fmt.Println(err)
 		return
+	}
+
+	if validator {
+		loadConfig, err := utils.LoadConfig()
+		if err != nil {
+			fmt.Println("Could not load config")
+			return
+		}
+		err= utils.StakeStark(network, loadConfig.Wallet)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
 	if install {
