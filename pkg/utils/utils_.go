@@ -2,8 +2,10 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -230,6 +232,20 @@ func defaultConfig() *t.StarkNodeKitConfig {
 }
 
 func writeToENV(ks map[string]string) error {
-	err := godotenv.Write(ks, constants.EnvFIlePath)
+	var file *os.File
+
+	_, err := os.Stat(constants.EnvFIlePath)
+	if err := os.MkdirAll(constants.ConfigDir, 0755); err != nil {
+		return fmt.Errorf("failed to create config file: %w", err)
+	}
+	if os.IsNotExist(err) {
+		_, err := os.Create(constants.EnvFIlePath)
+		if err != nil {
+			return err
+		}
+	}
+	defer file.Close()
+
+	err = godotenv.Write(ks, constants.EnvFIlePath)
 	return err
 }

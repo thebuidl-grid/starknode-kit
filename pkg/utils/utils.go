@@ -97,7 +97,7 @@ func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
 
 func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
 	var setupConfig *types.StarkNodeKitConfig
-	if _, err := os.Stat(constants.ConfigDir); err == nil {
+	if _, err := os.Stat(constants.ConfigPath); err == nil {
 		return fmt.Errorf("Starknode-kit already initialized at %s", constants.ConfigDir)
 	}
 
