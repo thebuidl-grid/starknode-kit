@@ -371,7 +371,7 @@ perform_installation() {
             "validator") BUILD_FLAGS="-tags validator" ;;
         esac
 
-        CONFIG_CMD="go run main.go config new"
+        CONFIG_CMD="go run main.go config new -i"
         CONFIG_CMD="$CONFIG_CMD --network $SELECTED_NETWORK"
         CONFIG_CMD="$CONFIG_CMD --consensus-client $SELECTED_CL_CLIENT"
         CONFIG_CMD="$CONFIG_CMD --execution-client $SELECTED_EL_CLIENT"
@@ -483,7 +483,7 @@ perform_installation() {
 
             print_status "Configuring and installing clients based on your selections..."
 
-            CONFIG_CMD="$BINARY_NAME config new"
+            CONFIG_CMD="$BINARY_NAME config new -i"
 
             # Add network flag
             CONFIG_CMD="$CONFIG_CMD --network $SELECTED_NETWORK"
