@@ -1,9 +1,11 @@
 package configcommand
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/thebuidl-grid/starknode-kit/cli/options"
+	"github.com/thebuidl-grid/starknode-kit/pkg"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
@@ -98,7 +100,8 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 
 		// Populate WalletConfig with environment variable syntax
 		walletConfig := types.WalletConfig{
-			Name: "default",
+			Name:          "default",
+			RewardAddress: rewardAddr,
 			Wallet: types.Wallet{
 				Address:    "${STARKNET_WALLET}",
 				ClassHash:  "${STARKNET_CLASS_HASH}",
@@ -129,7 +132,6 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 				OperationalAddress: "${STARKNET_WALLET}",
 				WalletPrivateKey:   "${STARKNET_PRIVATE_KEY}",
 			},
-			RewardAddress: rewardAddr,
 		}
 
 	}
@@ -149,7 +151,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 			fmt.Println("Could not load config")
 			return
 		}
-		err= utils.StakeStark(network, loadConfig.Wallet)
+		err = utils.StakeStark(network, loadConfig.Wallet)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -160,6 +162,9 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 		clients := []types.ClientType{defaultConsensusClientSettings.Name, defaultExecutionClientSettings.Name}
 		for _, i := range clients {
 			err := options.Installer.InstallClient(i)
+			if errors.Is(err, pkg.ErrClientIsInstalled) {
+				continue
+			}
 			if err != nil {
 				errMessage := fmt.Sprintf("Could not install client %s\nError: %v", i, err.Error())
 				fmt.Println(errMessage)

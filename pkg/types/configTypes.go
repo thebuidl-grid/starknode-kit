@@ -42,7 +42,6 @@ type (
 		ConsensusCientSettings ClientConfig    `yaml:"consensus_client"`
 		JunoConfig             JunoConfig      `yaml:"juno_client,omitempty"`
 		ValidatorConfig        ValidatorConfig `yaml:"validator_config"`
-		Wallets                []WalletConfig  `yaml:"wallets"`
 	}
 
 	ClientConfig struct {
@@ -60,8 +59,9 @@ type (
 	}
 
 	WalletConfig struct {
-		Name   string `yaml:"name"`
-		Wallet Wallet
+		Name          string `yaml:"name"`
+		RewardAddress string `yaml:"reward_address"`
+		Wallet        Wallet `yaml:"wallet"`
 	}
 
 	Wallet struct {
@@ -83,6 +83,5 @@ type (
 			OperationalAddress string `json:"operational_address"`
 			WalletPrivateKey   string `json:"privateKey"`
 		} `json:"signer" yaml:"signer"`
-		RewardAddress string `json:"reward_address" yaml:"reward_address"`
 	}
 )

@@ -208,7 +208,7 @@ func (i *installer) InstallClient(client types.ClientType) error {
 	}
 	clientPath := i.getClientPath(client, clientDir)
 	if i.isClientInstalled(clientPath, client) {
-		return fmt.Errorf("Client %s is already installed", string(client))
+		return ErrClientIsInstalled
 	}
 	return i.installClient(client, clientPath, clientDir)
 }
