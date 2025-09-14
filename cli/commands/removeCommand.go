@@ -19,49 +19,51 @@ or deprovisioning resources.`,
 }
 
 func removeCommand(cmd *cobra.Command, args []string) {
+	if cmd.Flags().NFlag() == 0 {
+		cmd.Help()
+		return
+	}
 	if options.ConsensusClient != "" {
 		client, err := utils.GetConsensusClient(options.ConsensusClient)
 		if err != nil {
-			fmt.Printf("Error: %v\n\n", err)
-			fmt.Println("Supported consensus clients are:")
-			fmt.Println("  - prysm")
-			fmt.Println("  - lighthouse")
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid consensus client: %v", err)))
 			return
 		}
+		fmt.Println(utils.Cyan(fmt.Sprintf("⏳ Removing %s...", client)))
 		err = options.Installer.RemoveClient(client)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Failed to remove %s: %v", client, err)))
 			return
 		}
+		fmt.Println(utils.Green(fmt.Sprintf("✅ Client '%s' removed successfully.", client)))
 	}
 	if options.ExecutionClient != "" {
 		client, err := utils.GetExecutionClient(options.ExecutionClient)
 		if err != nil {
-			fmt.Printf("Error: %v\n\n", err)
-			fmt.Println("Supported execution clients are:")
-			fmt.Println("  - geth")
-			fmt.Println("  - reth")
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid execution client: %v", err)))
 			return
 		}
+		fmt.Println(utils.Cyan(fmt.Sprintf("⏳ Removing %s...", client)))
 		err = options.Installer.RemoveClient(client)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Failed to remove %s: %v", client, err)))
 			return
 		}
+		fmt.Println(utils.Green(fmt.Sprintf("✅ Client '%s' removed successfully.", client)))
 	}
 	if options.StarknetClient != "" {
 		client, err := utils.GetStarknetClient(options.StarknetClient)
 		if err != nil {
-			fmt.Printf("Error: %v\n\n", err)
-			fmt.Println("Supported Starknet clients are:")
-			fmt.Println("  - juno")
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid Starknet client: %v", err)))
 			return
 		}
+		fmt.Println(utils.Cyan(fmt.Sprintf("⏳ Removing %s...", client)))
 		err = options.Installer.RemoveClient(client)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Failed to remove %s: %v", client, err)))
 			return
 		}
+		fmt.Println(utils.Green(fmt.Sprintf("✅ Client '%s' removed successfully.", client)))
 	}
 }
 

@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/thebuidl-grid/starknode-kit/cli/options"
 	"github.com/thebuidl-grid/starknode-kit/pkg/clients"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
@@ -32,30 +33,23 @@ an Ethereum node URL using the --eth-node flag.
 Example:
   starknode-kit run juno`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, err := utils.LoadConfig()
-		if err != nil {
-			fmt.Println(err.Error())
+	if !options.LoadedConfig {
+			fmt.Println(utils.Red("❌ No config found."))
+			fmt.Println(utils.Yellow("💡 Run `starknode-kit config new` to create a config file."))
 			return
 		}
-		j, err := clients.NewJunoClient(config.JunoConfig, config.Network, config.IsValidatorNode)
+		fmt.Println(utils.Cyan("🚀 Starting Juno node..."))
+		j, err := clients.NewJunoClient(options.Config.JunoConfig, options.Config.Network, options.Config.IsValidatorNode)
+		if err != nil {
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating Juno client: %v", err)))
+			return
+		}
 		err = j.Start()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting Juno: %v", err)))
 			return
 		}
-		if config.IsValidatorNode {
-			validatorNode, err := clients.NewValidatorClient(config.ValidatorConfig)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			err = validatorNode.Start()
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-		}
-		fmt.Println("Juno started")
+		fmt.Println(utils.Green("✅ Juno started successfully."))
 	},
 }
 

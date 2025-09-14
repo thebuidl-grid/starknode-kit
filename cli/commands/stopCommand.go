@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/thebuidl-grid/starknode-kit/cli/options"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
@@ -18,18 +19,17 @@ that have been added to your local configuration.`,
 }
 
 func stopCommand(cmd *cobra.Command, args []string) {
-	_, err := utils.LoadConfig()
-	if err != nil {
-		fmt.Println("❌ No config found.")
-		fmt.Println("💡 Run `starknode-kit init` to create a config file.")
+	if !options.LoadedConfig {
+		fmt.Println(utils.Red("❌ No config found."))
+		fmt.Println(utils.Yellow("💡 Run `starknode-kit config new` to create a config file."))
 		return
 	}
 
-	fmt.Println("🔍 Checking for running clients...")
+	fmt.Println(utils.Cyan("🔍 Checking for running clients..."))
 
 	runningClients := utils.GetRunningClients()
 	if len(runningClients) == 0 {
-		fmt.Println("✅ No clients are currently running.")
+		fmt.Println(utils.Green("✅ No clients are currently running."))
 		return
 	}
 
@@ -42,11 +42,11 @@ func stopCommand(cmd *cobra.Command, args []string) {
 			if err.Error() == "os: process already finished" {
 				fmt.Printf("ℹ️  Client '%s' is already stopped.\n", client.Name)
 			} else {
-				fmt.Printf("❌ Failed to stop client '%s': %v\n", client.Name, err)
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Failed to stop client '%s': %v", client.Name, err)))
 				continue
 			}
 		} else {
-			fmt.Printf("✅ Client '%s' stopped successfully.\n", client.Name)
+			fmt.Println(utils.Green(fmt.Sprintf("✅ Client '%s' stopped successfully.", client.Name)))
 		}
 	}
 }

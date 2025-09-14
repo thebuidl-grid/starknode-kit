@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/thebuidl-grid/starknode-kit/cli/options"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
@@ -29,28 +30,29 @@ var setCLCmd = &cobra.Command{
 }
 
 func runSetCommand(target string, args []string) {
-	cfg, err := utils.LoadConfig()
-	if err != nil {
-		fmt.Println("No config found")
-		fmt.Println("Run `starknode-kit init` to create config file")
+	if !options.LoadedConfig {
+		fmt.Println(utils.Red("❌ No config found."))
+		fmt.Println(utils.Yellow("💡 Run `starknode-kit config new` to create a config file."))
 		return
 	}
 
-	if err := processConfigArgs(&cfg, args, target); err != nil {
-		fmt.Println(err)
+	if err := processConfigArgs(&options.Config, args, target); err != nil {
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error processing config arguments: %v", err)))
 		return
 	}
 
-	if err := utils.UpdateStarkNodeConfig(cfg); err != nil {
-		fmt.Println("Failed to save config:", err)
+	if err := utils.UpdateStarkNodeConfig(options.Config); err != nil {
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Failed to save config: %v", err)))
 	}
+
+	fmt.Println(utils.Green("✅ Configuration updated successfully!"))
 }
 
 func processConfigArgs(cfg *t.StarkNodeKitConfig, args []string, target string) error {
 	for _, arg := range args {
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) != 2 {
-			fmt.Printf("Invalid argument (must be key=value): %s\n", arg)
+			fmt.Println(utils.Yellow(fmt.Sprintf("⚠️ Invalid argument (must be key=value): %s", arg)))
 			continue
 		}
 		key := strings.ToLower(parts[0])
@@ -101,18 +103,13 @@ func setClientConfigValue(clientCfg t.ClientConfig, key, value, target string) (
 		case "execution":
 			client, err = utils.GetExecutionClient(value)
 			if err != nil {
-				return clientCfg, fmt.Errorf(`%w
-Supported execution clients are:
-  - geth
-  - reth`, err)
+				return clientCfg, fmt.Errorf(`%w\nSupported execution clients are:\n  - geth\n  - reth`, err)
 			}
 			clientCfg.Name = t.ClientType(client)
 		case "consensus":
 			client, err = utils.GetConsensusClient(value)
 			if err != nil {
-				return clientCfg, fmt.Errorf(`%w
-Supported consensus clients are:
-  - lighthouse 
+				return clientCfg, fmt.Errorf(`%w\nSupported consensus clients are:\n  - lighthouse 
   - prysm`, err)
 			}
 			clientCfg.Name = t.ClientType(client)
@@ -152,3 +149,4 @@ func parsePorts(value string) ([]int, error) {
 	}
 	return ports, nil
 }
+

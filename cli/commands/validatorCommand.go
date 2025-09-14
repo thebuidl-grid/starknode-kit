@@ -2,62 +2,130 @@ package commands
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/NethermindEth/starknet.go/rpc"
 	"github.com/spf13/cobra"
+	"github.com/thebuidl-grid/starknode-kit/cli/options"
+	"github.com/thebuidl-grid/starknode-kit/pkg/clients"
+	"github.com/thebuidl-grid/starknode-kit/pkg/process"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 	"github.com/thebuidl-grid/starknode-kit/pkg/validator"
 )
 
-// ANSI color codes
-const (
-	ColorGreen = "\033[32m"
-	ColorAqua  = "\033[36m"
-	ColorWhite = "\033[97m"
-	ColorReset = "\033[0m"
-)
+var rpcProvider *rpc.Provider
 
 var ValidatorCommand = &cobra.Command{
 	Use:   "validator",
+	Short: "Manage validator",
+	Long:  `Start, stop, and get information about the validator.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		var err error
+		rpcProvider, err = utils.CreateRPCProvider(options.Config.Network)
+		if err != nil {
+			fmt.Printf(utils.Red("❌ Error creating RPC provider: %v\n"), err)
+			os.Exit(0)
+		}
+	},
+}
+
+var validatorInfoCommand = &cobra.Command{
+	Use:   "info",
 	Short: "Get validator information",
 	Long:  `Displays information about the validator associated with the configured wallet.`,
-	Run:   validatorCommand,
+	Run:   validatorInfoCommandRun,
 }
 
-func validatorCommand(cmd *cobra.Command, args []string) {
-	config, err := utils.LoadConfig()
-	if err != nil {
-		fmt.Printf("❌ Error loading config: %v", err)
-		return
-	}
-
-	if !config.IsValidatorNode {
-		fmt.Printf("❌ Error No validator node configured")
-		return
-	}
-
-	rpcProvider, err := utils.CreateRPCProvider(config.Network)
-	if err != nil {
-		fmt.Printf("❌ Error creating RPC provider: %v", err)
-		return
-	}
-
-	validatorInfo, err := validator.GetValidatorInfo(*rpcProvider, config.Wallet.Wallet)
-	if err != nil {
-		fmt.Printf("❌ Error getting validator info: %v", err)
-		return
-	}
-
-	fmt.Printf("%s✅ Validator Information ✅%s\n\n", ColorGreen, ColorReset)
-
-	fmt.Printf("%s%s%s\n", ColorAqua, "Reward Address:", ColorReset)
-	fmt.Printf("%s%s%s\n\n", ColorWhite, validatorInfo.RewardAddress, ColorReset)
-
-	fmt.Printf("%s%s%s\n", ColorAqua, "Operational Address:", ColorReset)
-	fmt.Printf("%s%s%s\n\n", ColorWhite, validatorInfo.OperationalAddress, ColorReset)
-
-	fmt.Printf("%s%s%s\n", ColorAqua, "Total Staked:", ColorReset)
-	fmt.Printf("%s%.4f STRK%s\n\n", ColorWhite, validatorInfo.TotalStaked, ColorReset)
-
-	fmt.Printf("%s%s%s\n", ColorAqua, "Unclaimed Rewards:", ColorReset)
-	fmt.Printf("%s%.4f STRK%s\n", ColorWhite, validatorInfo.UnclaimedRewards, ColorReset)
+var validatorStopCommand = &cobra.Command{
+	Use:   "stop",
+	Short: "Stop the validator client",
+	Long:  `Stops the running starknet validator client process.`,
+	Run:   validatorStopCommandRun,
 }
+
+var validatorStartCommand = &cobra.Command{
+	Use:   "start",
+	Short: "start the validator client",
+	Long:  `Starts the running starknet validator client process.`,
+	Run:   validatorStartCommandRun,
+}
+
+func validatorInfoCommandRun(cmd *cobra.Command, args []string) {
+	if !options.LoadedConfig {
+		fmt.Println(utils.Red("❌ Config not found. Please run `starknode-kit config new`"))
+		return
+	}
+	if !options.Config.IsValidatorNode {
+		fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
+		return
+	}
+
+	validatorInfo, err := validator.GetValidatorInfo(*rpcProvider, options.Config.Wallet.Wallet)
+	if err != nil {
+		fmt.Printf(utils.Red("❌ Error getting validator info: %v\n"), err)
+		return
+	}
+
+	fmt.Printf("%s\n\n", utils.Green("✅ Validator Information ✅"))
+
+	utils.PrintKV("Reward Address", validatorInfo.RewardAddress)
+	utils.PrintKV("Operational Address", validatorInfo.OperationalAddress)
+	utils.PrintKV("Total Staked", fmt.Sprintf("%.4f STRK", validatorInfo.TotalStaked))
+	utils.PrintKV("Unclaimed Rewards", fmt.Sprintf("%.4f STRK", validatorInfo.UnclaimedRewards))
+}
+
+func validatorStopCommandRun(cmd *cobra.Command, args []string) {
+	if !options.LoadedConfig {
+		fmt.Println(utils.Red("❌ Config not found. Please run `starknode-kit config new`"))
+		return
+	}
+	if !options.Config.IsValidatorNode {
+		fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
+		return
+	}
+	processInfo := process.GetProcessInfo(string(types.ClientStarkValidator))
+	if processInfo == nil {
+		fmt.Println(utils.Yellow("Validator client is not running."))
+		return
+	}
+	err := process.StopClient(processInfo.PID)
+	if err != nil {
+		fmt.Printf(utils.Red("Could not stop validator process: %v\n"), err)
+		return
+	}
+	fmt.Println(utils.Green("✅ Validator client stopped successfully."))
+}
+
+func validatorStartCommandRun(cmd *cobra.Command, args []string) {
+	if !options.LoadedConfig {
+		fmt.Println(utils.Red("❌ Config not found. Please run `starknode-kit config new`"))
+		return
+	}
+	if !options.Config.IsValidatorNode {
+		fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
+		return
+	}
+	fmt.Println(utils.Cyan("🚀 Starting Validator client..."))
+	validatorNode, err := clients.NewValidatorClient(options.Config.ValidatorConfig)
+	if err != nil {
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating validator client: %v", err)))
+		return
+	}
+	err = validatorNode.Start()
+	if err != nil {
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting validator client: %v", err)))
+		return
+	}
+	fmt.Println(utils.Cyan("✅ Validator started"))
+}
+
+func init() {
+	ValidatorCommand.AddCommand(validatorInfoCommand)
+	ValidatorCommand.AddCommand(validatorStopCommand)
+	ValidatorCommand.AddCommand(validatorStartCommand)
+}
+

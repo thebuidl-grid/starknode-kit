@@ -54,17 +54,18 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	// Only deploy account if validator flag is set
 	var deployedWallet *types.Wallet
 	if validator {
+		fmt.Println(utils.Cyan("🚀 Deploying new wallet for validator..."))
 		wallet, err := utils.DeployAccount(network)
 		if err != nil {
-			fmt.Printf("Error deploying account: %v\n", err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Error deploying account: %v", err)))
 			return
 		}
 		deployedWallet = wallet
+		fmt.Println(utils.Green("✅ Wallet deployed successfully!"))
 	}
 
 	if network != "mainnet" && network != "sepolia" {
-		errMessage := fmt.Sprintf("Invalid Network: %s", network)
-		fmt.Println(errMessage)
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid Network: %s", network)))
 		return
 	}
 	defaultConfig.Network = network
@@ -72,7 +73,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	if options.ConsensusClient != "" {
 		client, err := utils.GetConsensusClient(options.ConsensusClient)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid consensus client: %v", err)))
 			return
 		}
 		defaultConsensusClientSettings.Name = client
@@ -80,7 +81,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	if options.ExecutionClient != "" {
 		client, err := utils.GetExecutionClient(options.ExecutionClient)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid execution client: %v", err)))
 			return
 		}
 		defaultExecutionClientSettings.Name = client
@@ -88,14 +89,13 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 
 	if starknet_node {
 		defaultConfig.IsValidatorNode = validator
-
 		defaultConfig.JunoConfig = defaultJunoConfig
 	}
 
 	// Set up validator configuration if validator flag is set
 	if validator && deployedWallet != nil {
 		var rewardAddr string
-		fmt.Printf("Enter your reward Address here: %s", rewardAddr)
+		fmt.Print(utils.Cyan("❓ Enter your reward Address here: "))
 		fmt.Scan(&rewardAddr)
 
 		// Populate WalletConfig with environment variable syntax
@@ -139,52 +139,58 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	defaultConfig.ConsensusCientSettings = defaultConsensusClientSettings
 	defaultConfig.ExecutionCientSettings = defaultExecutionClientSettings
 
+	fmt.Println(utils.Cyan("📝 Creating starknode.yaml configuration file..."))
 	err := utils.CreateStarkNodeConfig(defaultConfig)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating config file: %v", err)))
 		return
 	}
+	fmt.Println(utils.Green("✅ Configuration file 'starknode.yaml' created successfully."))
 
 	if validator {
+		fmt.Println(utils.Cyan("💰 Staking STARK for validator..."))
 		loadConfig, err := utils.LoadConfig()
 		if err != nil {
-			fmt.Println("Could not load config")
+			fmt.Println(utils.Red("❌ Could not load config"))
 			return
 		}
 		err = utils.StakeStark(network, loadConfig.Wallet)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Error staking STARK: %v", err)))
 			return
 		}
+		fmt.Println(utils.Green("✅ Staking successful!"))
 	}
 
 	if install {
+		fmt.Println(utils.Cyan("🚀 Installing clients..."))
 		clients := []types.ClientType{defaultConsensusClientSettings.Name, defaultExecutionClientSettings.Name}
 		for _, i := range clients {
 			err := options.Installer.InstallClient(i)
 			if errors.Is(err, pkg.ErrClientIsInstalled) {
+				fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client %s is already installed. Skipping.", i)))
 				continue
 			}
 			if err != nil {
-				errMessage := fmt.Sprintf("Could not install client %s\nError: %v", i, err.Error())
-				fmt.Println(errMessage)
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Could not install client %s: %v", i, err.Error())))
 				return
 			}
+			fmt.Println(utils.Green(fmt.Sprintf("✅ Client %s installed successfully.", i)))
 		}
 		if starknet_node {
 			err := options.Installer.InstallClient(types.ClientJuno)
 			if err != nil {
-				errMessage := fmt.Sprintf("Could not install client Juno\nError: %v", err.Error())
-				fmt.Println(errMessage)
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Could not install client Juno: %v", err.Error())))
 				return
 			}
+			fmt.Println(utils.Green("✅ Client Juno installed successfully."))
 			if validator {
 				err := options.Installer.InstallClient(types.ClientStarkValidator)
 				if err != nil {
-					errMessage := fmt.Sprintf("Could not install client Starknet Validator\nError: %v", err.Error())
-					fmt.Println(errMessage)
+					fmt.Println(utils.Red(fmt.Sprintf("❌ Could not install client Starknet Validator: %v", err.Error())))
 					return
 				}
+				fmt.Println(utils.Green("✅ Client Starknet Validator installed successfully."))
 			}
 		}
 	}

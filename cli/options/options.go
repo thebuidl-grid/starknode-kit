@@ -3,6 +3,7 @@ package options
 import (
 	"github.com/spf13/cobra"
 	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 )
 
 var (
@@ -10,6 +11,8 @@ var (
 	ExecutionClient string
 	StarknetClient  string
 	Installer       = pkg.NewInstaller()
+	Config          types.StarkNodeKitConfig
+	LoadedConfig    = false
 )
 
 func InitGlobalOptions(cmd *cobra.Command) {
