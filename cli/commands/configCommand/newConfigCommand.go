@@ -98,10 +98,28 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 		fmt.Print(utils.Cyan("❓ Enter your reward Address here: "))
 		fmt.Scan(&rewardAddr)
 
+		var stakeCommission int
+		for {
+			fmt.Print(utils.Cyan("❓ Enter your staking commission (1-100): "))
+			_, err := fmt.Scan(&stakeCommission)
+			if err != nil {
+				fmt.Println(utils.Red("❌ Invalid input. Please enter a number."))
+				var discard string
+				fmt.Scanln(&discard)
+				continue
+			}
+			if stakeCommission >= 1 && stakeCommission <= 100 {
+				break
+			} else {
+				fmt.Println(utils.Red("❌ Commission must be between 1 and 100."))
+			}
+		}
+
 		// Populate WalletConfig with environment variable syntax
 		walletConfig := types.WalletConfig{
-			Name:          "default",
-			RewardAddress: rewardAddr,
+			Name:           "default",
+			RewardAddress:  rewardAddr,
+			StakeCommision: fmt.Sprintf("%d", stakeCommission),
 			Wallet: types.Wallet{
 				Address:    "${STARKNET_WALLET}",
 				ClassHash:  "${STARKNET_CLASS_HASH}",

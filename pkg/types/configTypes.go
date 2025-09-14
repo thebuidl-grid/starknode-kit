@@ -59,9 +59,10 @@ type (
 	}
 
 	WalletConfig struct {
-		Name          string `yaml:"name"`
-		RewardAddress string `yaml:"reward_address"`
-		Wallet        Wallet `yaml:"wallet"`
+		Name           string `yaml:"name"`
+		RewardAddress  string `yaml:"reward_address"`
+		Wallet         Wallet `yaml:"wallet"`
+		StakeCommision string `yaml:"commision"`
 	}
 
 	Wallet struct {

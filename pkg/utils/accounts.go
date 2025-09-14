@@ -223,6 +223,12 @@ func StakeStark(network string, wallet types.WalletConfig) error {
 	if err != nil {
 		return fmt.Errorf("failed to convert staking contrct addr to felt: %w", err)
 	}
+
+	commisionInt, ok := new(big.Int).SetString(wallet.StakeCommision, 10)
+	if !ok {
+		return fmt.Errorf("Could not convert commsion to int")
+	}
+	commisionFelt := starkutils.BigIntToFelt(commisionInt)
 	starkTokenAdress, err := starkutils.HexToFelt(constants.StrkTokenAddress)
 	if err != nil {
 		return fmt.Errorf("failed to convert starktoken address to felt: %w", err)
@@ -267,8 +273,13 @@ func StakeStark(network string, wallet types.WalletConfig) error {
 		FunctionName:    "stake",
 		CallData:        []*felt.Felt{rewardAddress, userAccount.Address, constants.Stakes[network][0]},
 	}
+	txn3 := rpc.InvokeFunctionCall{
+		ContractAddress: stackingAddr,
+		FunctionName:    "set_commission",
+		CallData:        []*felt.Felt{commisionFelt},
+	}
 
-	resp, err := userAccount.BuildAndSendInvokeTxn(context.Background(), []rpc.InvokeFunctionCall{txn1, txn2}, nil)
+	resp, err := userAccount.BuildAndSendInvokeTxn(context.Background(), []rpc.InvokeFunctionCall{txn1, txn2, txn3}, nil)
 	if err != nil {
 		return err
 	}
@@ -276,3 +287,5 @@ func StakeStark(network string, wallet types.WalletConfig) error {
 	fmt.Println("Transaction successfull, view here: ", transactionUrl)
 	return nil
 }
+
+// TODO delegation pool
