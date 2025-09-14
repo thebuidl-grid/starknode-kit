@@ -20,13 +20,29 @@ var ValidatorCommand = &cobra.Command{
 	Use:   "validator",
 	Short: "Manage validator",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		if cmd.Flags().NFlag() == 0 {
+			cmd.Help()
+			return
+		}
+		versionFlag, _ := cmd.Flags().GetBool("version")
+		if versionFlag {
+			if !utils.IsInstalled(types.ClientStarkValidator) {
+				fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client %s is not installed.", types.ClientStarkValidator)))
+				return
+			}
+			version := utils.GetClientVersion(clientName)
+			fmt.Printf("%s version: %s\n", clientName, utils.Green(version))
+			return
+		}
 	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if cmd.Parent() != nil && cmd.Parent().PersistentPreRun != nil {
 			cmd.Parent().PersistentPreRun(cmd.Parent(), args)
 		}
-
+		if !options.Config.IsValidatorNode {
+			fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
+			os.Exit(0)
+		}
 		var err error
 		rpcProvider, err = utils.CreateRPCProvider(options.Config.Network)
 		if err != nil {
@@ -62,10 +78,6 @@ func validatorInfoCommandRun(cmd *cobra.Command, args []string) {
 		fmt.Println(utils.Red("❌ Config not found. Please run `starknode-kit config new`"))
 		return
 	}
-	if !options.Config.IsValidatorNode {
-		fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
-		return
-	}
 
 	validatorInfo, err := validator.GetValidatorInfo(rpcProvider, options.Config.Wallet.Wallet)
 	if err != nil {
@@ -86,10 +98,6 @@ func validatorStopCommandRun(cmd *cobra.Command, args []string) {
 		fmt.Println(utils.Red("❌ Config not found. Please run `starknode-kit config new`"))
 		return
 	}
-	if !options.Config.IsValidatorNode {
-		fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
-		return
-	}
 	processInfo := process.GetProcessInfo(string(types.ClientStarkValidator))
 	if processInfo == nil {
 		fmt.Println(utils.Yellow("Validator client is not running."))
@@ -108,10 +116,7 @@ func validatorStartCommandRun(cmd *cobra.Command, args []string) {
 		fmt.Println(utils.Red("❌ Config not found. Please run `starknode-kit config new`"))
 		return
 	}
-	if !options.Config.IsValidatorNode {
-		fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
-		return
-	}
+
 	fmt.Println(utils.Cyan("🚀 Starting Validator client..."))
 	validatorNode, err := clients.NewValidatorClient(options.Config.ValidatorConfig)
 	if err != nil {
@@ -138,10 +143,6 @@ func validatorBalanceCommandRun(cmd *cobra.Command, args []string) {
 		fmt.Println(utils.Red("❌ Config not found. Please run `starknode-kit config new`"))
 		return
 	}
-	if !options.Config.IsValidatorNode {
-		fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
-		return
-	}
 
 	balance, err := validator.GetValidatorBalance(rpcProvider, options.Config.Wallet.Wallet)
 	if err != nil {
@@ -153,6 +154,7 @@ func validatorBalanceCommandRun(cmd *cobra.Command, args []string) {
 }
 
 func init() {
+	ValidatorCommand.Flags().BoolP("version", "v", false, "Get validator version")
 	ValidatorCommand.AddCommand(validatorInfoCommand)
 	ValidatorCommand.AddCommand(validatorStopCommand)
 	ValidatorCommand.AddCommand(validatorStartCommand)

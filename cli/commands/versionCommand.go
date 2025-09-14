@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
-	"github.com/thebuidl-grid/starknode-kit/pkg/updater"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
@@ -35,13 +33,7 @@ var VersionCommand = &cobra.Command{
 			return
 		}
 
-		updateChecker := updater.NewUpdateChecker(constants.InstallDir)
-		info, err := updateChecker.CheckClientForUpdate(string(clientType), false)
-		if err != nil {
-			fmt.Println(utils.Red(fmt.Sprintf("❌ Could not get version for %s: %v", clientName, err)))
-			return
-		}
-
-		fmt.Printf("%s version: %s\n", clientName, utils.Green(info.CurrentVersion))
+		version := utils.GetClientVersion(clientName)
+		fmt.Printf("%s version: %s\n", clientName, utils.Green(version))
 	},
 }
