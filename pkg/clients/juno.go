@@ -13,8 +13,9 @@ import (
 
 // JunoClient represents a client for interacting with a local Juno node
 type JunoClient struct {
-	config  types.JunoConfig
-	network string
+	config          types.JunoConfig
+	isValidatorNode bool
+	network         string
 }
 
 // getJunoPath returns the path to the Juno binary
@@ -54,7 +55,7 @@ func (c *JunoClient) buildJunoArgs() []string {
 		"--http-host=0.0.0.0",
 		fmt.Sprintf("--db-path=%s", filepath.Join(constants.InstallStarknetDir, "juno", "database")),
 		fmt.Sprintf("--eth-node=%s", c.config.EthNode),
-		fmt.Sprintf("--ws=%s", c.config.IsValidatorNode),
+		fmt.Sprintf("--ws=%s", c.isValidatorNode),
 		"--ws-port=6061",
 		"--ws-host=0.0.0.0",
 	}

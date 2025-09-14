@@ -37,13 +37,13 @@ Example:
 			fmt.Println(err.Error())
 			return
 		}
-		j, err := clients.NewJunoClient(config.JunoConfig, config.Network)
+		j, err := clients.NewJunoClient(config.JunoConfig, config.Network, config.IsValidatorNode)
 		err = j.Start()
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		if config.JunoConfig.IsValidatorNode {
+		if config.IsValidatorNode {
 			validatorNode, err := clients.NewValidatorClient(config.ValidatorConfig)
 			if err != nil {
 				fmt.Println(err)

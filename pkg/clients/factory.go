@@ -32,7 +32,7 @@ func NewExecutionClient(cfg types.ClientConfig, network string) (types.IClient, 
 	}
 }
 
-func NewJunoClient(config types.JunoConfig, network string) (types.IClient, error) {
+func NewJunoClient(config types.JunoConfig, network string, isvalidator bool) (types.IClient, error) {
 
 	// Get Juno binary path
 	junoPath := getJunoPath()
@@ -41,8 +41,9 @@ func NewJunoClient(config types.JunoConfig, network string) (types.IClient, erro
 	}
 
 	return &JunoClient{
-		config:  config,
-		network: network,
+		config:          config,
+		network:         network,
+		isValidatorNode: isvalidator,
 	}, nil
 }
 
@@ -88,7 +89,7 @@ func RestartClient(pid int) error {
 		return err
 	}
 
-	j, _ := NewJunoClient(config.JunoConfig, config.Network)
+	j, _ := NewJunoClient(config.JunoConfig, config.Network, config.IsValidatorNode)
 	err = j.Start()
 	if err != nil {
 		return err

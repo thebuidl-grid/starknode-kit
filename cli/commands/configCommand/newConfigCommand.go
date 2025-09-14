@@ -87,7 +87,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	}
 
 	if starknet_node {
-		defaultJunoConfig.IsValidatorNode = validator
+		defaultConfig.IsValidatorNode = validator
 
 		defaultConfig.JunoConfig = defaultJunoConfig
 	}
