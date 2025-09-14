@@ -1,15 +1,15 @@
 .PHONY: build test clean install
 
-# Base directory containing main.go
-BASE_DIR = cli
+VERSION ?= 0.1.0
+LDFLAGS = -ldflags="-X 'github.com/thebuidl-grid/starknode-kit/pkg/versions.StarkNodeVersion=$(VERSION)'"
 
 # Build the application
 build:
-	go build -o bin/ethereum-installer ./$(BASE_DIR)
+	go build $(LDFLAGS) -o bin/starknode .
 
 # Run tests
 test:
-	cd pkg && go test -v ./
+	cd pkg && go test -v ./ 
 
 # Clean build artifacts
 clean:
@@ -21,4 +21,4 @@ install:
 		echo "Please specify a client with CLIENT=<client>"; \
 		exit 1; \
 	fi; \
-	./bin/ethereum-installer --client $(CLIENT)
+	./bin/starknode --client $(CLIENT)
