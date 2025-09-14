@@ -38,6 +38,7 @@ func init() {
 	rootCmd.AddCommand(commands.RemoveCommand)
 	rootCmd.AddCommand(commands.RunCmd)
 	rootCmd.AddCommand(commands.UpdateCommand)
+	rootCmd.AddCommand(commands.ValidatorCommand)
 	rootCmd.AddCommand(configcommand.ConfigCommand)
 }
 
