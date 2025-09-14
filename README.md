@@ -24,12 +24,11 @@
 
 ### Option 2: Install using Go
 
-Make sure you have Go installed (version 1.24 or later), then run:
+Make sure you have Go installed (version 1.24 or later). This method installs the latest version from the `main` branch.
 
 ```bash
-go install github.com/thebuidl-grid/starknode-kit@latest
+go install -ldflags="-X 'github.com/thebuidl-grid/starknode-kit/pkg/versions.StarkNodeVersion=main'" github.com/thebuidl-grid/starknode-kit@latest
 ```
-> **Note**: Installing with `go install` will not embed the version number.
 
 ### Option 3: Manual Installation from Source
 
