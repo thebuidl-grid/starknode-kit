@@ -71,7 +71,7 @@ starknode-kit config new
 | `help`       | Display help about any command                             |
 | `monitor`    | Launch real-time monitoring dashboard                      |
 | `remove`     | Remove a specified resource                                |
-| `run`        | Run local Starknet infrastructure services                 |
+| `run`        | Run a specific local infrastructure service                |
 | `start`      | Run the configured Ethereum clients                        |
 | `stop`       | Stop the configured Ethereum clients                       |
 | `update`     | Check for and install client updates                       |
@@ -134,12 +134,15 @@ starknode-kit start
 
 > ⚠️ **Note**: The `start` command only launches the configured **execution (EL)** and **consensus (CL)** clients. It does **not** start any Starknet clients.
 
-#### Run a Juno Starknet node
+#### Run a specific client
 
-To run a Starknet client like Juno, use the `run` command:
+To run a specific client using its configured settings:
 
 ```bash
 starknode-kit run juno
+starknode-kit run geth
+starknode-kit run lighthouse
+starknode-kit run validator
 ```
 
 #### Generate bash completion script
