@@ -14,7 +14,7 @@ var StopCommand = &cobra.Command{
 	Short: "Stop running clients",
 	Long: `Stops a specific running client or all clients if the --all flag is provided.
 
-Provide a client name (e.g., geth, lighthouse, juno) to stop a single client.`, 
+Provide a client name (e.g., geth, lighthouse, juno) to stop a single client.`,
 	Args: cobra.MaximumNArgs(1),
 	Run:  stopCommand,
 }
@@ -26,8 +26,7 @@ func stopClient(clientName string) {
 		return
 	}
 
-	fmt.Printf("🛑 Stopping client '%s' (PID %d)...
-", processInfo.Name, processInfo.PID)
+	fmt.Printf("🛑 Stopping client '%s' (PID %d)...", processInfo.Name, processInfo.PID)
 	err := process.StopClient(processInfo.PID)
 	if err != nil {
 		if err.Error() == "os: process already finished" {
@@ -70,7 +69,6 @@ func stopCommand(cmd *cobra.Command, args []string) {
 
 	if len(args) > 0 {
 		clientName := args[0]
-		// Validate the client name
 		_, err := utils.ResolveClientType(clientName)
 		if err != nil {
 			fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid client name: %s", clientName)))
@@ -80,7 +78,6 @@ func stopCommand(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	// If no client is specified and --all is not used
 	fmt.Println(utils.Yellow("Please specify a client to stop or use the --all flag."))
 	cmd.Help()
 }
@@ -88,3 +85,4 @@ func stopCommand(cmd *cobra.Command, args []string) {
 func init() {
 	StopCommand.Flags().Bool("all", false, "Stop all running clients")
 }
+

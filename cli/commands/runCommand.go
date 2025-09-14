@@ -20,11 +20,10 @@ This command starts a single client using its settings from your 'starknode.yaml
 Supported clients:
   - geth, reth (Execution)
   - lighthouse, prysm (Consensus)
-  - juno (Starknet)
-  - validator (Starknet Validator)`,
+  - juno (Starknet)`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if options.Config == nil {
+		if !options.LoadedConfig {
 			fmt.Println(utils.Red("❌ No config found."))
 			fmt.Println(utils.Yellow("💡 Run `starknode-kit config new` to create a config file."))
 			return
@@ -86,28 +85,8 @@ Supported clients:
 			}
 			fmt.Println(utils.Green("✅ Juno started successfully."))
 
-		case types.ClientStarkValidator:
-			if !options.Config.IsValidatorNode {
-				fmt.Println(utils.Red("❌ Node is not configured as a validator."))
-				return
-			}
-			validatorNode, err := clients.NewValidatorClient(options.Config.ValidatorConfig)
-			if err != nil {
-				fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating validator client: %v", err)))
-				return
-			}
-			if err = validatorNode.Start(); err != nil {
-				fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting validator client: %v", err)))
-				return
-			}
-			fmt.Println(utils.Green("✅ Validator client started successfully."))
-
 		default:
 			fmt.Println(utils.Red(fmt.Sprintf("❌ Don't know how to run client: %s", clientName)))
 		}
 	},
-}
-
-func init() {
-	// No subcommands to add anymore
 }
