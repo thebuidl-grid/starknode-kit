@@ -29,6 +29,7 @@ Make sure you have Go installed (version 1.24 or later), then run:
 ```bash
 go install github.com/thebuidl-grid/starknode-kit@latest
 ```
+> **Note**: Installing with `go install` will not embed the version number.
 
 ### Option 3: Manual Installation from Source
 
@@ -42,8 +43,8 @@ go install github.com/thebuidl-grid/starknode-kit@latest
 2. Build and install:
 
    ```bash
-   go build -o starknode-kit .
-   sudo mv starknode-kit /usr/local/bin/
+   make build
+   sudo mv bin/starknode /usr/local/bin/
    ```
 
 ### Verify Installation
@@ -56,8 +57,9 @@ starknode-kit --help
 #### Generate Config file
 
 ```bash
-starknode-kit init
+starknode-kit config new
 ```
+
 ---
 
 ## 📘 Available Commands
@@ -66,26 +68,15 @@ starknode-kit init
 | ------------ | ---------------------------------------------------------- |
 | `add`        | Add an Ethereum or Starknet client to the config           |
 | `completion` | Generate the autocompletion script for the specified shell |
-| `config`     | Show the configured Ethereum clients                       |
+| `config`     | Create, show, and update your Starknet node configuration. |
 | `help`       | Display help about any command                             |
-| `init`       | Create a default configuration file                        |
 | `monitor`    | Launch real-time monitoring dashboard                      |
 | `remove`     | Remove a specified resource                                |
 | `run`        | Run local Starknet infrastructure services                 |
 | `start`      | Run the configured Ethereum clients                        |
 | `stop`       | Stop the configured Ethereum clients                       |
 | `update`     | Check for and install client updates                       |
-
----
-
-## 🧰 Global Flags
-
-| Flag                       | Description                                            |
-| -------------------------- | ------------------------------------------------------ |
-| `-c`, `--consensus_client` | Specify the consensus client (e.g., Lighthouse, Prysm) |
-| `-e`, `--execution_client` | Specify the execution client (e.g., Geth, Reth)        |
-| `-s`, `--starknet_client`  | Specify the Starknet client (e.g., Juno)               |
-| `-h`, `--help`             | Show help for the `starknode-kit` command              |
+| `version`    | Show version of starknode-kit or a specific client         |
 
 ---
 
@@ -113,13 +104,27 @@ starknode-kit remove --starknet_client juno
 #### Change network
 
 ```bash
-starknode-kit config -n sepolia # Default network is mainnet
+starknode-kit config set network sepolia
 ```
 
 #### Set an execution client
 
 ```bash
-starknode-kit config el client=reth port=9000,9001
+starknode-kit config set el client=reth port=9000,9001
+```
+
+#### Show configuration
+
+```bash
+starknode-kit config show --all
+starknode-kit config show --el
+```
+
+#### Check version
+
+```bash
+starknode-kit version
+starknode-kit version geth
 ```
 
 #### Start Ethereum clients
@@ -206,4 +211,3 @@ Whether you're a seasoned validator, hobbyist, or first-time node runner, you're
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
