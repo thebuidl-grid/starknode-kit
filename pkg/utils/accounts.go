@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 
 	"github.com/NethermindEth/juno/core/felt"
@@ -13,33 +14,9 @@ import (
 	starkutils "github.com/NethermindEth/starknet.go/utils"
 )
 
-const (
-	mainnetStake = "20000000000000000000000"
-	testnetStake = "1000000000000000000"
-
-	predeployedClassHash = "0x61dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f"
-	strkTokenAddress     = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
-	stakingContract      = "0x03745ab04a431fc02871a139be6b93d9260b0ff3e779ad9c8b377183b23109f1"
-)
-
-var (
-	mainnetBig, _ = starkutils.HexToU256Felt(starkutils.StrToHex(mainnetStake))
-	sepoliaBig, _ = starkutils.HexToU256Felt(starkutils.StrToHex(testnetStake))
-
-	rpcURL = map[string]string{
-		"mainnet": "https://starknet-mainnet.public.blastapi.io/rpc/v0_9",
-		"sepolia": "https://starknet-sepolia.public.blastapi.io/rpc/v0_9",
-	}
-
-	stakes = map[string][]*felt.Felt{
-		"mainnet": mainnetBig,
-		"sepolia": sepoliaBig,
-	}
-)
-
 // checkBalance queries the STRK balance of the given address
-func checkBalance(client *rpc.Provider, address *felt.Felt) (*felt.Felt, error) {
-	strkAddr, err := starkutils.HexToFelt(strkTokenAddress)
+func CheckBalance(client *rpc.Provider, address *felt.Felt) (*felt.Felt, error) {
+	strkAddr, err := starkutils.HexToFelt(constants.StrkTokenAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -64,9 +41,9 @@ func checkBalance(client *rpc.Provider, address *felt.Felt) (*felt.Felt, error) 
 	return balance, nil
 }
 
-// createRPCProvider initializes and returns an RPC provider
-func createRPCProvider(network string) (*rpc.Provider, error) {
-	url, ok := rpcURL[network]
+// CreateRPCProvider initializes and returns an RPC provider
+func CreateRPCProvider(network string) (*rpc.Provider, error) {
+	url, ok := constants.RPCURL[network]
 	if !ok {
 		return nil, fmt.Errorf("Invalid network: %s", network)
 	}
@@ -93,7 +70,7 @@ func createAccount(client *rpc.Provider, pub *felt.Felt, ks *account.MemKeystore
 
 // getClassHash converts the predefined class hash string to felt
 func getClassHash() (*felt.Felt, error) {
-	classHash, err := starkutils.HexToFelt(predeployedClassHash)
+	classHash, err := starkutils.HexToFelt(constants.PredeployedClassHash)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +116,7 @@ func waitForFundingWithMonitoring(client *rpc.Provider, precomputedAddr *felt.Fe
 	fmt.Scanln()
 
 	for {
-		balance, err := checkBalance(client, precomputedAddr)
+		balance, err := CheckBalance(client, precomputedAddr)
 		if err != nil {
 			fmt.Printf("❌ Error checking balance: %v\n", err)
 			fmt.Println("Press Enter to try again...")
@@ -169,7 +146,7 @@ func executeDeployment(accnt *account.Account, deployTxn *rpc.BroadcastDeployAcc
 }
 
 func DeployAccount(netowork string) (*types.Wallet, error) {
-	client, err := createRPCProvider(netowork)
+	client, err := CreateRPCProvider(netowork)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create RPC provider: %w", err)
 	}
@@ -242,11 +219,11 @@ func DeployAccount(netowork string) (*types.Wallet, error) {
 
 func StakeStark(network string, wallet types.WalletConfig) error {
 
-	stackingAddr, err := starkutils.HexToFelt(stakingContract)
+	stackingAddr, err := starkutils.HexToFelt(constants.StakingContract)
 	if err != nil {
 		return fmt.Errorf("failed to convert staking contrct addr to felt: %w", err)
 	}
-	starkTokenAdress, err := starkutils.HexToFelt(strkTokenAddress)
+	starkTokenAdress, err := starkutils.HexToFelt(constants.StrkTokenAddress)
 	if err != nil {
 		return fmt.Errorf("failed to convert starktoken address to felt: %w", err)
 	}
@@ -260,7 +237,7 @@ func StakeStark(network string, wallet types.WalletConfig) error {
 		return err
 	}
 
-	client, err := createRPCProvider(network)
+	client, err := CreateRPCProvider(network)
 	if err != nil {
 		return err
 	}
@@ -283,12 +260,12 @@ func StakeStark(network string, wallet types.WalletConfig) error {
 	txn1 := rpc.InvokeFunctionCall{
 		ContractAddress: starkTokenAdress,
 		FunctionName:    "approve",
-		CallData:        []*felt.Felt{stackingAddr, stakes[network][0], stakes[network][1]},
+		CallData:        []*felt.Felt{stackingAddr, constants.Stakes[network][0], constants.Stakes[network][1]},
 	}
 	txn2 := rpc.InvokeFunctionCall{
 		ContractAddress: stackingAddr,
 		FunctionName:    "stake",
-		CallData:        []*felt.Felt{rewardAddress, userAccount.Address, stakes[network][0]},
+		CallData:        []*felt.Felt{rewardAddress, userAccount.Address, constants.Stakes[network][0]},
 	}
 
 	resp, err := userAccount.BuildAndSendInvokeTxn(context.Background(), []rpc.InvokeFunctionCall{txn1, txn2}, nil)
