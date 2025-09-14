@@ -12,7 +12,7 @@ import (
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 )
 
-func newAccount(wallet types.Wallet, rpcProvider rpc.Provider) (*account.Account, error) {
+func newAccount(wallet types.Wallet, rpcProvider *rpc.Provider) (*account.Account, error) {
 	userWalletAddress, err := starknet.HexToFelt(wallet.Address)
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func newAccount(wallet types.Wallet, rpcProvider rpc.Provider) (*account.Account
 	ks.Put(wallet.PublicKey, privKeyBI)
 
 	userAccount, err := account.NewAccount(
-		&rpcProvider,
+		rpcProvider,
 		userWalletAddress,
 		wallet.PublicKey,
 		ks,

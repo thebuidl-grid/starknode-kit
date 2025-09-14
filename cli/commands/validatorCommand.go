@@ -19,16 +19,19 @@ var rpcProvider *rpc.Provider
 var ValidatorCommand = &cobra.Command{
 	Use:   "validator",
 	Short: "Manage validator",
-	Long:  `Start, stop, and get information about the validator.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if cmd.Parent() != nil && cmd.Parent().PersistentPreRun != nil {
+			cmd.Parent().PersistentPreRun(cmd.Parent(), args)
+		}
+
 		var err error
 		rpcProvider, err = utils.CreateRPCProvider(options.Config.Network)
 		if err != nil {
 			fmt.Printf(utils.Red("❌ Error creating RPC provider: %v\n"), err)
-			os.Exit(0)
+			os.Exit(1)
 		}
 	},
 }
@@ -64,7 +67,7 @@ func validatorInfoCommandRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	validatorInfo, err := validator.GetValidatorInfo(*rpcProvider, options.Config.Wallet.Wallet)
+	validatorInfo, err := validator.GetValidatorInfo(rpcProvider, options.Config.Wallet.Wallet)
 	if err != nil {
 		fmt.Printf(utils.Red("❌ Error getting validator info: %v\n"), err)
 		return
@@ -123,9 +126,35 @@ func validatorStartCommandRun(cmd *cobra.Command, args []string) {
 	fmt.Println(utils.Cyan("✅ Validator started"))
 }
 
+var validatorBalanceCommand = &cobra.Command{
+	Use:   "balance",
+	Short: "Get validator balance",
+	Long:  `Get the STRK balance of the validator wallet.`,
+	Run:   validatorBalanceCommandRun,
+}
+
+func validatorBalanceCommandRun(cmd *cobra.Command, args []string) {
+	if !options.LoadedConfig {
+		fmt.Println(utils.Red("❌ Config not found. Please run `starknode-kit config new`"))
+		return
+	}
+	if !options.Config.IsValidatorNode {
+		fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
+		return
+	}
+
+	balance, err := validator.GetValidatorBalance(rpcProvider, options.Config.Wallet.Wallet)
+	if err != nil {
+		fmt.Printf(utils.Red("❌ Error getting validator balance: %v"), err)
+		return
+	}
+
+	fmt.Printf("%s %.4f STRK", utils.Green("✅ Validator Balance:"), balance)
+}
+
 func init() {
 	ValidatorCommand.AddCommand(validatorInfoCommand)
 	ValidatorCommand.AddCommand(validatorStopCommand)
 	ValidatorCommand.AddCommand(validatorStartCommand)
+	ValidatorCommand.AddCommand(validatorBalanceCommand)
 }
-
