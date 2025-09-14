@@ -54,7 +54,7 @@ func stopAllClients() {
 }
 
 func stopCommand(cmd *cobra.Command, args []string) {
-	if options.Config == nil {
+	if !options.LoadedConfig {
 		fmt.Println(utils.Red("❌ No config found."))
 		fmt.Println(utils.Yellow("💡 Run `starknode-kit config new` to create a config file."))
 		return
