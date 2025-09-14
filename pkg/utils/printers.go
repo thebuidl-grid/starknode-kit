@@ -9,7 +9,7 @@ func PrintSection(title string) {
 	fmt.Printf("\n%s\n", Cyan(title))
 }
 
-func PrintKV(key string, value interface{}) {
+func PrintKV(key string, value any) {
 	if value == nil {
 		return
 	}
