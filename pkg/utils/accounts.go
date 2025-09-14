@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strconv"
+	"time"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
@@ -224,10 +226,12 @@ func StakeStark(network string, wallet types.WalletConfig) error {
 		return fmt.Errorf("failed to convert staking contrct addr to felt: %w", err)
 	}
 
-	commisionInt, ok := new(big.Int).SetString(wallet.StakeCommision, 10)
-	if !ok {
-		return fmt.Errorf("Could not convert commsion to int")
+	commisionIntConv, err := strconv.Atoi(wallet.StakeCommision)
+	if err != nil {
+		return err
 	}
+	commisionInt := new(big.Int).SetUint64(uint64(commisionIntConv * 100))
+
 	commisionFelt := starkutils.BigIntToFelt(commisionInt)
 	starkTokenAdress, err := starkutils.HexToFelt(constants.StrkTokenAddress)
 	if err != nil {
@@ -283,9 +287,17 @@ func StakeStark(network string, wallet types.WalletConfig) error {
 	if err != nil {
 		return err
 	}
-	transactionUrl := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", FormatTransactionHash(resp.Hash))
+
+	txnReceipt, err := userAccount.WaitForTransactionReceipt(context.Background(), resp.Hash, 10*time.Second)
+	if err != nil {
+		transactionUrl := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", FormatTransactionHash(resp.Hash))
+		fmt.Println("Transaction error, view here: ", transactionUrl)
+		return err
+	}
+	transactionUrl := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", FormatTransactionHash(txnReceipt.Hash))
 	fmt.Println("Transaction successfull, view here: ", transactionUrl)
 	return nil
 }
 
 // TODO delegation pool
+// NOTE check balance may return early before the transaction is complete
