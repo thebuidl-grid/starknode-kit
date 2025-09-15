@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/NethermindEth/starknet.go/rpc"
 	"github.com/spf13/cobra"
@@ -71,6 +72,12 @@ var validatorStartCommand = &cobra.Command{
 	Short: "start the validator client",
 	Long:  `Starts the running starknet validator client process.`,
 	Run:   validatorStartCommandRun,
+}
+
+var validatorStatusCommand = &cobra.Command{
+	Use:   "status",
+	Short: "Check validator client status",
+	Run:   validatorStatusCommandRun,
 }
 
 func validatorInfoCommandRun(cmd *cobra.Command, args []string) {
@@ -153,9 +160,24 @@ func validatorBalanceCommandRun(cmd *cobra.Command, args []string) {
 	fmt.Printf("%s %.4f STRK", utils.Green("✅ Validator Balance:"), balance)
 }
 
+func validatorStatusCommandRun(cmd *cobra.Command, args []string) {
+
+	clientName := string(types.ClientStarkValidator)
+	processInfo := process.GetProcessInfo(clientName)
+	if processInfo != nil {
+		fmt.Printf("Client: %s\n", utils.Blue(processInfo.Name))
+		fmt.Printf("  Status: %s (PID: %d)\n", utils.Green("Running"), processInfo.PID)
+		fmt.Printf("  Uptime: %s\n", utils.Green(processInfo.Uptime.Round(time.Second).String()))
+	} else {
+		fmt.Printf("  Status: %s\n", utils.Red("Stopped"))
+	}
+
+}
+
 func init() {
 	ValidatorCommand.Flags().BoolP("version", "v", false, "Get validator version")
 	ValidatorCommand.AddCommand(validatorInfoCommand)
+	ValidatorCommand.AddCommand(validatorStatusCommand)
 	ValidatorCommand.AddCommand(validatorStopCommand)
 	ValidatorCommand.AddCommand(validatorStartCommand)
 	ValidatorCommand.AddCommand(validatorBalanceCommand)
