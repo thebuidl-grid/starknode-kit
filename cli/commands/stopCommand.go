@@ -29,9 +29,7 @@ func stopClient(clientName string) {
 	fmt.Printf("🛑 Stopping client '%s' (PID %d)...", processInfo.Name, processInfo.PID)
 	err := process.StopClient(processInfo.PID)
 	if err != nil {
-		if err.Error() == "os: process already finished" {
-			fmt.Printf("ℹ️  Client '%s' is already stopped.\n", processInfo.Name)
-		} else {
+		if err.Error() != "os: process already finished" {
 			fmt.Println(utils.Red(fmt.Sprintf("❌ Failed to stop client '%s': %v", processInfo.Name, err)))
 		}
 	} else {
@@ -85,4 +83,3 @@ func stopCommand(cmd *cobra.Command, args []string) {
 func init() {
 	StopCommand.Flags().Bool("all", false, "Stop all running clients")
 }
-
