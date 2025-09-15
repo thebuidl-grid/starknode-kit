@@ -42,7 +42,7 @@ var ValidatorCommand = &cobra.Command{
 		}
 		if !options.Config.IsValidatorNode {
 			fmt.Println(utils.Red("❌ This is not a validator node. Check your configuration."))
-			os.Exit(0)
+			os.Exit(1)
 		}
 		var err error
 		rpcProvider, err = utils.CreateRPCProvider(options.Config.Network)
