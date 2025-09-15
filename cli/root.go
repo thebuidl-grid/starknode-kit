@@ -49,6 +49,6 @@ func init() {
 	rootCmd.AddCommand(commands.RunCmd)
 	rootCmd.AddCommand(commands.UpdateCommand)
 	rootCmd.AddCommand(commands.ValidatorCommand)
+	rootCmd.AddCommand(commands.StatusCommand)
 	rootCmd.AddCommand(configcommand.ConfigCommand)
 }
-
