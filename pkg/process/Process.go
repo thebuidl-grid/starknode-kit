@@ -3,6 +3,7 @@ package process
 import (
 	"io"
 	"os/exec"
+	"strings"
 	"syscall"
 
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
@@ -34,5 +35,5 @@ func StopClient(pid int) error {
 }
 
 func GetProcessInfo(p string) *t.ProcessInfo {
-	return getProcessInfo(p)
+	return getProcessInfo(strings.ToLower(p))
 }
