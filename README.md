@@ -72,6 +72,7 @@ starknode-kit config new
 | `monitor`    | Launch real-time monitoring dashboard                      |
 | `remove`     | Remove a specified resource                                |
 | `run`        | Run a specific local infrastructure service                |
+| `status`     | Display status of running clients                          |
 | `start`      | Run the configured Ethereum clients                        |
 | `stop`       | Stop the configured Ethereum clients                       |
 | `update`     | Check for and install client updates                       |
