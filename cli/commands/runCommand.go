@@ -35,6 +35,10 @@ Supported clients:
 			fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid client name: %s", clientName)))
 			return
 		}
+		if !utils.IsInstalled(clientType) {
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Client %s not installed", clientName)))
+			return
+		}
 
 		fmt.Println(utils.Cyan(fmt.Sprintf("🚀 Attempting to run %s...", clientName)))
 

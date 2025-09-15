@@ -48,7 +48,8 @@ func GetConsensusClient(c string) (t.ClientType, error) {
 }
 
 func IsInstalled(c t.ClientType) bool {
-	dir := path.Join(constants.InstallClientsDir, string(c))
+	client := strings.ToLower(string(c))
+	dir := path.Join(constants.InstallClientsDir, client)
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		return false
