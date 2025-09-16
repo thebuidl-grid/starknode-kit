@@ -345,7 +345,7 @@ func (m *MonitorApp) updateStatusBox(ctx context.Context) {
 			l1statusContent += fmt.Sprintf("Peers: [green]%d[white]\n", peers)
 			l1statusContent += fmt.Sprintf("Syncing: [green]%t[white]\n", isSyncing)
 
-			l2Status := GetJunoMetrics()
+			l2Status := utils.GetJunoMetrics(netowrk)
 			l2statusContent := fmt.Sprintf("Current Block: [green]%d[white]\n", l2Status.CurrentBlock)
 			l2statusContent += fmt.Sprintf("Syncing: [green]%t[white]\n", l2Status.IsSyncing)
 			l2statusContent += fmt.Sprintf("Syncing Percent: [green]%.2f[white]\n", l2Status.SyncPercent)
