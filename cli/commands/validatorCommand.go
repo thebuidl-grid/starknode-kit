@@ -161,7 +161,6 @@ func validatorBalanceCommandRun(cmd *cobra.Command, args []string) {
 }
 
 func validatorStatusCommandRun(cmd *cobra.Command, args []string) {
-
 	clientName := string(types.ClientStarkValidator)
 	processInfo := process.GetProcessInfo(clientName)
 	if processInfo != nil {
@@ -172,6 +171,16 @@ func validatorStatusCommandRun(cmd *cobra.Command, args []string) {
 		fmt.Printf("  Status: %s\n", utils.Red("Stopped"))
 	}
 
+	junoMetrics := utils.GetJunoMetrics(options.Config.Network)
+	fmt.Printf("\nJuno Node Status:\n")
+	if junoMetrics.IsSyncing {
+		fmt.Printf("  Sync Status: %s\n", utils.Yellow("Syncing"))
+		fmt.Printf("  Sync Percent: %s\n", utils.Yellow(fmt.Sprintf("%.2f%", junoMetrics.SyncPercent)))
+	} else {
+		fmt.Printf("  Sync Status: %s\n", utils.Green("Synced"))
+	}
+	fmt.Printf("  Current Block: %s\n", utils.Green(fmt.Sprintf("%d", junoMetrics.CurrentBlock)))
+	fmt.Printf("  Network: %s\n", utils.Green(junoMetrics.NetworkName))
 }
 
 func init() {
