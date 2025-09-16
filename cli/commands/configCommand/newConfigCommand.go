@@ -161,7 +161,6 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 	err := utils.CreateStarkNodeConfig(defaultConfig)
 	if err != nil {
 		fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating config file: %v", err)))
-		return
 	}
 	fmt.Println(utils.Green("✅ Configuration file 'starknode.yaml' created successfully."))
 
