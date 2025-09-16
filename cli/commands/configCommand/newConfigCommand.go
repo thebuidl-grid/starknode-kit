@@ -53,7 +53,7 @@ func runNewConfigCommand(cmd *cobra.Command, args []string) {
 
 	// Only deploy account if validator flag is set
 	var deployedWallet *types.Wallet
-	if validator {
+	if validator && !options.LoadedConfig {
 		fmt.Println(utils.Cyan("🚀 Deploying new wallet for validator..."))
 		wallet, err := utils.DeployAccount(network)
 		if err != nil {
