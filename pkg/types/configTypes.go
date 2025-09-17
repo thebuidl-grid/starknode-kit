@@ -86,3 +86,11 @@ type (
 		} `json:"signer" yaml:"signer"`
 	}
 )
+
+func (c *Wallet) Normalize() {
+	c.Address = "${STARKNET_WALLET}"
+	c.ClassHash = "${STARKNET_CLASS_HASH}"
+	c.PrivateKey = "${STARKNET_PRIVATE_KEY}"
+	c.PublicKey = "${STARKNET_PUBLIC_KEY}"
+	c.Salt = "${STARKNET_SALT}"
+}
