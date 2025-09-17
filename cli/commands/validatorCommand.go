@@ -157,7 +157,7 @@ func validatorBalanceCommandRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Printf("%s %.4f STRK", utils.Green("✅ Validator Balance:"), balance)
+	fmt.Printf("%s %.4f STRK\n", utils.Green("✅ Validator Balance:"), balance)
 }
 
 func validatorStatusCommandRun(cmd *cobra.Command, args []string) {

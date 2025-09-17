@@ -35,6 +35,10 @@ func GetValidatorInfo(rpcProvider *rpc.Provider, wallet types.Wallet) (types.Val
 		return types.ValidatorInfo{}, err
 	}
 
+	if len(result) == 1 {
+		return types.ValidatorInfo{}, fmt.Errorf("address not a validator")
+	}
+
 	return types.ValidatorInfo{
 		RewardAddress:      result[1].String(),
 		OperationalAddress: result[2].String(),
@@ -63,6 +67,12 @@ func StakeStark(network string, rpcProvider *rpc.Provider, wallet types.WalletCo
 		return fmt.Errorf("failed to create account: %w", err)
 	}
 
+	_, err = GetValidatorInfo(rpcProvider, wallet.Wallet)
+	if err == nil {
+		fmt.Println(utils.Yellow("Address already a staker"))
+		return nil
+	}
+
 	balance, err := utils.CheckBalance(rpcProvider, accnt.Address)
 	if err != nil {
 		return fmt.Errorf("failed to check balance: %w", err)
@@ -70,12 +80,6 @@ func StakeStark(network string, rpcProvider *rpc.Provider, wallet types.WalletCo
 
 	if err := approveStakes(network, accnt, rpcProvider, balance); err != nil {
 		return err
-	}
-
-	_, err = GetValidatorInfo(rpcProvider, wallet.Wallet)
-	if err == nil {
-		fmt.Println("Address already validator")
-		return nil
 	}
 
 	return stakeAndSetCommission(network, accnt, wallet, balance)

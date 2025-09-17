@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"strconv"
@@ -76,7 +77,7 @@ func approveStakes(network string, accnt *account.Account, rpcProvider *rpc.Prov
 	if balance.Cmp(requiredAmount) < 0 {
 		needed := starkutils.FRIToSTRK(requiredAmount)
 		have := starkutils.FRIToSTRK(balance)
-		return fmt.Errorf("insufficient balance to approve. Have: %.6f STRK, Need: %.6f STRK", have, needed)
+		return errors.New(fmt.Sprintf(utils.Red("insufficient balance to approve. Have: %.6f STRK, Need: %.6f STRK"), have, needed))
 	}
 
 	return executeTxn(accnt, invokeTxn)
@@ -123,7 +124,7 @@ func stakeAndSetCommission(network string, accnt *account.Account, wallet types.
 	if balance.Cmp(requiredAmount) < 0 {
 		needed := starkutils.FRIToSTRK(requiredAmount)
 		have := starkutils.FRIToSTRK(balance)
-		return fmt.Errorf("insufficient balance to stake. Have: %.6f STRK, Need: %.6f STRK", have, needed)
+		return errors.New(fmt.Sprintf(utils.Red("insufficient balance to stake. Have: %.6f STRK, Need: %.6f STRK"), have, needed))
 	}
 
 	return executeTxn(accnt, invokeTxn)
@@ -151,7 +152,7 @@ func getAllowance(rpcProvider *rpc.Provider, owner, spender *felt.Felt) (*felt.F
 
 // estimateFee estimates the fee for a set of transactions.
 func estimateFee(accnt *account.Account, calls []rpc.FunctionCall) (*rpc.BroadcastInvokeTxnV3, *felt.Felt, error) {
-	fmt.Println("Estimating transaction fees...")
+	fmt.Println(utils.Cyan("Estimating transaction fees..."))
 	invokeTxn, feesEstimate, err := utils.EstimateGasFee(accnt, calls)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to estimate gas fee: %w", err)
@@ -159,7 +160,7 @@ func estimateFee(accnt *account.Account, calls []rpc.FunctionCall) (*rpc.Broadca
 
 	estimatedFee := feesEstimate[0].OverallFee
 	estimatedFeeStark := starkutils.FRIToSTRK(estimatedFee)
-	fmt.Printf("Estimated fee: %.6f STRK. Adjusting for a higher success rate...\n", estimatedFeeStark)
+	fmt.Printf(utils.Cyan("Estimated fee: %.6f STRK. Adjusting for a higher success rate...\n"), estimatedFeeStark)
 
 	invokeTxn.ResourceBounds = starkutils.FeeEstToResBoundsMap(feesEstimate[0], 1.5)
 
@@ -172,23 +173,23 @@ func estimateFee(accnt *account.Account, calls []rpc.FunctionCall) (*rpc.Broadca
 
 // executeTxn sends a transaction and waits for its confirmation.
 func executeTxn(accnt *account.Account, invokeTxn *rpc.BroadcastInvokeTxnV3) error {
-	fmt.Println("Sending transactions...")
+	fmt.Println(utils.Cyan("Sending transactions..."))
 	resp, err := accnt.SendTransaction(context.Background(), invokeTxn)
 	if err != nil {
 		return fmt.Errorf("failed to send transaction: %w", err)
 	}
 
-	fmt.Printf("Transaction successfully submitted! Transaction hash: %s\n", utils.FormatTransactionHash(resp.Hash))
-	fmt.Println("Waiting for transaction confirmation...")
+	fmt.Printf(utils.Green("Transaction successfully submitted! Transaction hash: %s\n"), utils.FormatTransactionHash(resp.Hash))
+	fmt.Println(utils.Cyan("Waiting for transaction confirmation..."))
 
 	receipt, err := accnt.WaitForTransactionReceipt(context.Background(), resp.Hash, 15*time.Second)
 	if err != nil {
 		transactionURL := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", utils.FormatTransactionHash(resp.Hash))
-		fmt.Printf("Transaction failed or timed out. View details here: %s\n", transactionURL)
+		fmt.Printf(utils.Red("Transaction failed or timed out. View details here: %s\n"), transactionURL)
 		return fmt.Errorf("error waiting for transaction receipt: %w", err)
 	}
 
 	transactionURL := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", utils.FormatTransactionHash(receipt.Hash))
-	fmt.Printf("Transaction successful! View details here: %s\n", transactionURL)
+	fmt.Printf(utils.Green("Transaction successful! View details here: %s\n"), transactionURL)
 	return nil
 }
