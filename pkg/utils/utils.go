@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,9 +17,13 @@ import (
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
+
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 
 	"github.com/NethermindEth/juno/core/felt"
+	"github.com/NethermindEth/starknet.go/account"
+	"github.com/NethermindEth/starknet.go/rpc"
+	starkutils "github.com/NethermindEth/starknet.go/utils"
 	envsubt "github.com/emperorsixpacks/envsubst"
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
@@ -99,7 +104,7 @@ func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
 func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
 	var setupConfig *types.StarkNodeKitConfig
 	if _, err := os.Stat(constants.ConfigPath); err == nil {
-		return fmt.Errorf("Starknode-kit already initialized at %s", constants.ConfigDir)
+		fmt.Println(Yellow(fmt.Sprintf("Starknode-kit already initialized at %s", constants.ConfigDir)))
 	}
 
 	if cfg == nil {
@@ -109,6 +114,9 @@ func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
 	}
 	if err := os.MkdirAll(constants.ConfigDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
+	}
+	if setupConfig.Wallet.Name != "" {
+		setupConfig.Wallet.Wallet.Normalize()
 	}
 	conigBytes, err := yaml.Marshal(*setupConfig)
 	if err != nil {
@@ -309,4 +317,52 @@ func CheckRPCStatus(rpcURL, method string) (string, error) {
 func StringTile(s string) string {
 	r, size := utf8.DecodeRuneInString(s)
 	return strings.ToUpper(string(r)) + s[size:]
+}
+
+func EstimateGasFee(accnt *account.Account, callData []rpc.FunctionCall) (*rpc.BroadcastInvokeTxnV3, []rpc.FeeEstimation, error) {
+	nonce, err := accnt.Nonce(context.Background())
+	if err != nil {
+		return nil, nil, err
+	}
+	calldata, err := accnt.FmtCalldata(callData)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	InvokeTx := starkutils.BuildInvokeTxn(
+		accnt.Address,
+		nonce,
+		calldata,
+		&rpc.ResourceBoundsMapping{
+			L1Gas: rpc.ResourceBounds{
+				MaxAmount:       "0x0",
+				MaxPricePerUnit: "0x0",
+			},
+			L1DataGas: rpc.ResourceBounds{
+				MaxAmount:       "0x0",
+				MaxPricePerUnit: "0x0",
+			},
+			L2Gas: rpc.ResourceBounds{
+				MaxAmount:       "0x0",
+				MaxPricePerUnit: "0x0",
+			},
+		},
+		nil,
+	)
+
+	err = accnt.SignInvokeTransaction(context.Background(), InvokeTx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	feeRes, err := accnt.Provider.EstimateFee(
+		context.Background(),
+		[]rpc.BroadcastTxn{InvokeTx},
+		[]rpc.SimulationFlag{},
+		rpc.WithBlockTag(rpc.BlockTagLatest),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+	return InvokeTx, feeRes, nil
 }

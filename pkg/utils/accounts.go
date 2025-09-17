@@ -3,9 +3,6 @@ package utils
 import (
 	"context"
 	"fmt"
-	"math/big"
-	"strconv"
-	"time"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
@@ -133,7 +130,9 @@ func waitForFundingWithMonitoring(client *rpc.Provider, precomputedAddr *felt.Fe
 
 		fmt.Printf("❌ Insufficient balance: %.6f STRK. Required: %.6f STRK\n", starkutils.FRIToSTRK(balance), starkutils.FRIToSTRK(requiredAmount))
 		fmt.Println("Please fund the account and press Enter to re-check balance...")
-		fmt.Scanln()
+		var discard string
+		fmt.Scanln(&discard)
+		continue
 	}
 }
 
@@ -193,8 +192,6 @@ func DeployAccount(netowork string) (*types.Wallet, error) {
 		"STARKNET_PRIVATE_KEY": FormatStarknetAddress(priv),                 // Private key for signing
 		"STARKNET_PUBLIC_KEY":  FormatStarknetAddress(pub),                  // Public key derived from private key
 		"STARKNET_SALT":        FormatStarknetAddress(pub),                  // Salt used for deployment (using pub as salt)
-		"STARKNET_DEPLOYED":    "true",                                      // Account deployment status
-		"STARKNET_LEGACY":      "false",                                     // Account type (Cairo v2)
 	}
 	err = writeToENV(walletKS)
 	if err != nil {
@@ -217,86 +214,6 @@ func DeployAccount(netowork string) (*types.Wallet, error) {
 	fmt.Println("Transaction successfull, view here: ", transactionUrl)
 
 	return wallet, nil
-}
-
-func StakeStark(network string, wallet types.WalletConfig) error {
-
-	stackingAddr, err := starkutils.HexToFelt(constants.StakingContract)
-	if err != nil {
-		return fmt.Errorf("failed to convert staking contrct addr to felt: %w", err)
-	}
-
-	commisionIntConv, err := strconv.Atoi(wallet.StakeCommision)
-	if err != nil {
-		return err
-	}
-	commisionInt := new(big.Int).SetUint64(uint64(commisionIntConv * 100))
-
-	commisionFelt := starkutils.BigIntToFelt(commisionInt)
-	starkTokenAdress, err := starkutils.HexToFelt(constants.StrkTokenAddress)
-	if err != nil {
-		return fmt.Errorf("failed to convert starktoken address to felt: %w", err)
-	}
-	rewardAddress, err := starkutils.HexToFelt(wallet.RewardAddress)
-	if err != nil {
-		return err
-	}
-
-	userWalletAddress, err := starkutils.HexToFelt(wallet.Wallet.Address)
-	if err != nil {
-		return err
-	}
-
-	client, err := CreateRPCProvider(network)
-	if err != nil {
-		return err
-	}
-
-	ks := account.NewMemKeystore()
-	privKeyBI, ok := new(big.Int).SetString(wallet.Wallet.PrivateKey, 0)
-	if !ok {
-		return fmt.Errorf("Fail to convert privKey to bitInt")
-	}
-	ks.Put(wallet.Wallet.PublicKey, privKeyBI)
-
-	userAccount, _ := account.NewAccount(
-		client,
-		userWalletAddress,
-		wallet.Wallet.PublicKey,
-		ks,
-		account.CairoV2,
-	)
-
-	txn1 := rpc.InvokeFunctionCall{
-		ContractAddress: starkTokenAdress,
-		FunctionName:    "approve",
-		CallData:        []*felt.Felt{stackingAddr, constants.Stakes[network][0], constants.Stakes[network][1]},
-	}
-	txn2 := rpc.InvokeFunctionCall{
-		ContractAddress: stackingAddr,
-		FunctionName:    "stake",
-		CallData:        []*felt.Felt{rewardAddress, userAccount.Address, constants.Stakes[network][0]},
-	}
-	txn3 := rpc.InvokeFunctionCall{
-		ContractAddress: stackingAddr,
-		FunctionName:    "set_commission",
-		CallData:        []*felt.Felt{commisionFelt},
-	}
-
-	resp, err := userAccount.BuildAndSendInvokeTxn(context.Background(), []rpc.InvokeFunctionCall{txn1, txn2, txn3}, nil)
-	if err != nil {
-		return err
-	}
-
-	txnReceipt, err := userAccount.WaitForTransactionReceipt(context.Background(), resp.Hash, 10*time.Second)
-	if err != nil {
-		transactionUrl := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", FormatTransactionHash(resp.Hash))
-		fmt.Println("Transaction error, view here: ", transactionUrl)
-		return err
-	}
-	transactionUrl := fmt.Sprintf("https://sepolia.voyager.online/tx/%s", FormatTransactionHash(txnReceipt.Hash))
-	fmt.Println("Transaction successfull, view here: ", transactionUrl)
-	return nil
 }
 
 // TODO delegation pool
