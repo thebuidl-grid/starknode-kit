@@ -13,10 +13,10 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
-	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
 
@@ -137,7 +137,7 @@ func (i *installer) getClientFileName(client types.ClientType, version string) (
 		if goarch == "amd64" {
 			goarch = "x86_64"
 		}
-		fileName = fmt.Sprintf("starknet-staking-v2_v%s_%s_%s", version, utils.StringTile(goos), goarch)
+		fileName = fmt.Sprintf("starknet-staking-v2_v%s_%s_%s", version, stringTile(goos), goarch)
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -586,7 +586,7 @@ func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	}
 	defer os.Chdir(currentDir)
 
-	version := GetVersionNumber(string(client))
+	version := versions.GetVersionNumber(string(client))
 	if version == "" {
 		return "", fmt.Errorf("failed to get version for %s", client)
 	}
@@ -623,75 +623,6 @@ func downloadFile(url, filepath string) error {
 	}
 
 	return nil
-}
-
-func GetVersionNumber(client string) string {
-
-	var argument string
-
-	switch client {
-	case "juno":
-		path := filepath.Join(constants.InstallStarknetDir, "juno", ".version")
-		version, _ := os.ReadFile(path)
-		versionMatch := regexp.MustCompile(`juno version (\d+\.\d+\.\d+)`).FindStringSubmatch(string(version))
-		if len(versionMatch) > 1 {
-			return versionMatch[1]
-		}
-		return ""
-	case "reth", "lighthouse", "geth":
-		argument = "--version"
-	case "prysm":
-		argument = "beacon-chain --version"
-	default:
-		fmt.Printf("Unknown client: %s\n", client)
-		return ""
-	}
-
-	var clientCommand string
-	switch runtime.GOOS {
-	case "darwin", "linux":
-		if client == "prysm" {
-			clientCommand = filepath.Join(constants.InstallClientsDir, client, fmt.Sprintf("%s.sh", client))
-		} else {
-			clientCommand = filepath.Join(constants.InstallClientsDir, client, client)
-		}
-	case "windows":
-		fmt.Println("getVersionNumber() for windows is not yet implemented")
-		os.Exit(1)
-	default:
-		fmt.Printf("Unsupported platform: %s\n", runtime.GOOS)
-		return ""
-	}
-
-	cmdParts := strings.Split(argument, " ")
-	cmd := execCommand(clientCommand, cmdParts...)
-	output, err := cmd.Output()
-	if err != nil {
-		fmt.Printf("Error executing command for %s: %v\n", client, err)
-		return ""
-	}
-
-	versionOutput := strings.TrimSpace(string(output))
-	var versionMatch []string
-
-	switch client {
-	case "reth":
-		versionMatch = regexp.MustCompile(`reth Version: (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
-	case "lighthouse":
-		versionMatch = regexp.MustCompile(`Lighthouse v(\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
-	case "geth":
-		versionMatch = regexp.MustCompile(`geth version (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
-	case "prysm":
-		versionMatch = regexp.MustCompile(`beacon-chain-v(\d+\.\d+\.\d+)-`).FindStringSubmatch(versionOutput)
-
-	}
-
-	if len(versionMatch) > 1 {
-		return versionMatch[1]
-	}
-
-	fmt.Printf("Unable to parse version number for %s\n", client)
-	return ""
 }
 
 func CompareClientVersions(client, installedVersion, latestVersion string) bool {
@@ -733,4 +664,9 @@ func readFoldersWithReadDir(dirPath string) ([]types.ClientType, error) {
 		}
 	}
 	return clients, nil
+}
+
+func stringTile(s string) string {
+	r, size := utf8.DecodeRuneInString(s)
+	return strings.ToUpper(string(r)) + s[size:]
 }

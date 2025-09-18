@@ -67,7 +67,7 @@ func (u *UpdateChecker) CheckAllClientsForUpdates(useOnline bool) ([]UpdateInfo,
 // CheckClientForUpdate checks if a specific client has an update available
 func (u *UpdateChecker) CheckClientForUpdate(client string, useOnline bool) (*UpdateInfo, error) {
 	// Get current installed version (this would need to be implemented to check actual installations)
-	currentVersion := pkg.GetVersionNumber(client)
+	currentVersion := versions.GetVersionNumber(client)
 
 	// Get latest version
 	var latestVersion string
@@ -75,12 +75,8 @@ func (u *UpdateChecker) CheckClientForUpdate(client string, useOnline bool) (*Up
 		var err error
 		latestVersion, err = versions.FetchOnlineVersion(client)
 		if err != nil {
-			// Fallback to static version
-			latestVersion = u.getStaticVersion(client)
-			fmt.Printf("Warning: Failed to fetch online version for %s, using static version: %s\n", client, latestVersion)
+      return nil, err
 		}
-	} else {
-		latestVersion = u.getStaticVersion(client)
 	}
 
 	// Compare versions using the existing function
@@ -104,14 +100,8 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 	}
 
 	// Get current version for backup info (placeholder implementation)
-	currentVersion := pkg.GetVersionNumber(client)
+	currentVersion := versions.GetVersionNumber(client)
 	result.PreviousVersion = currentVersion
-
-	// Stop client if running
-	if err := u.stopClientIfRunning(client); err != nil {
-		result.Error = fmt.Sprintf("Failed to stop %s: %v", client, err)
-		return result
-	}
 
 	// Create backup
 	backupPath, err := u.backupClient(client)
@@ -131,38 +121,20 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 	// Install new version
 	if err := installer.UpdateClient(clientType); err != nil {
 		result.Error = fmt.Sprintf("Failed to install new %s: %v", client, err)
-		// Try to restore backup
-		u.restoreBackup(client, backupPath)
 		return result
 	}
 
 	// Get new version (placeholder - you'd implement actual version detection)
-	newVersion := u.getStaticVersion(client) // Placeholder
+	newVersion, err := versions.FetchOnlineVersion(client) // Placeholder
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
 	result.NewVersion = newVersion
 	result.Success = true
 
 	return result
 }
-
-// getStaticVersion returns the hardcoded version for a client
-func (u *UpdateChecker) getStaticVersion(client string) string {
-	switch client {
-	case "geth":
-		return versions.LatestGethVersion
-	case "reth":
-		return versions.LatestRethVersion
-	case "lighthouse":
-		return versions.LatestLighthouseVersion
-	case "prysm":
-		return "latest"
-	case "juno":
-		return versions.LatestJunoVersion
-	default:
-		return "unknown"
-	}
-}
-
-// getClientType converts client name to ClientType
 
 // getClientTypeString returns the client type category as string
 func getClientTypeString(client string) string {
@@ -178,14 +150,6 @@ func getClientTypeString(client string) string {
 	}
 }
 
-// stopClientIfRunning stops the client if it's currently running
-func (u *UpdateChecker) stopClientIfRunning(client string) error {
-	// TODO: Implement client stopping logic
-	// This would integrate with your process management system
-	fmt.Printf("Stopping %s if running...\n", client)
-	return nil
-}
-
 // backupClient creates a backup of the client installation
 func (u *UpdateChecker) backupClient(client string) (string, error) {
 	// TODO: Implement backup logic
@@ -193,11 +157,4 @@ func (u *UpdateChecker) backupClient(client string) (string, error) {
 	backupPath := fmt.Sprintf("/tmp/%s_backup_%d", client, 123456)
 	fmt.Printf("Creating backup for %s at %s...\n", client, backupPath)
 	return backupPath, nil
-}
-
-// restoreBackup restores a client from backup
-func (u *UpdateChecker) restoreBackup(client, backupPath string) error {
-	// TODO: Implement restore logic
-	fmt.Printf("Restoring %s from backup %s...\n", client, backupPath)
-	return nil
 }

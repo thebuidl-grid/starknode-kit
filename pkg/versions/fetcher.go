@@ -54,20 +54,7 @@ func FetchLatestVersions() (*ClientVersions, error) {
 	for i := 0; i < len(repos); i++ {
 		res := <-results
 		if res.err != nil {
-			errors = append(errors, fmt.Sprintf("%s: %v", res.client, res.err))
-			// Use fallback versions
-			switch res.client {
-			case "geth":
-				versions.Geth = LatestGethVersion
-			case "reth":
-				versions.Reth = LatestRethVersion
-			case "lighthouse":
-				versions.Lighthouse = LatestLighthouseVersion
-			case "prysm":
-				versions.Prysm = getLatestPrysmVersion()
-			case "juno":
-				versions.Juno = LatestJunoVersion
-			}
+			return nil, res.err
 		} else {
 			switch res.client {
 			case "geth":
@@ -161,15 +148,4 @@ func FetchLatestStarknetValidatorVersion() (string, error) {
 // Prysm handles versioning differently through their script
 func getLatestPrysmVersion() string {
 	return "latest" // Prysm script auto-downloads latest
-}
-
-// GetStaticVersions returns the hardcoded versions as fallback
-func GetStaticVersions() *ClientVersions {
-	return &ClientVersions{
-		Geth:       LatestGethVersion,
-		Reth:       LatestRethVersion,
-		Lighthouse: LatestLighthouseVersion,
-		Prysm:      "latest",
-		Juno:       LatestJunoVersion,
-	}
 }

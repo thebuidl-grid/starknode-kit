@@ -8,6 +8,7 @@ import (
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
+	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
 
 var StatusCommand = &cobra.Command{
@@ -53,7 +54,7 @@ func displayClientStatus(clientType types.ClientType) {
 		return
 	}
 
-	version := utils.GetClientVersion(clientName)
+	version := versions.GetVersionNumber(clientName)
 	fmt.Printf("  Version: %s\n", utils.Green(version))
 
 	processInfo := process.GetProcessInfo(clientName)
@@ -64,4 +65,3 @@ func displayClientStatus(clientType types.ClientType) {
 		fmt.Printf("  Status: %s\n", utils.Red("Stopped"))
 	}
 }
-

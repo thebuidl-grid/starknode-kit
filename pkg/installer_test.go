@@ -77,7 +77,7 @@ func TestGetVersionNumber(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.client, func(t *testing.T) {
-			version := GetVersionNumber(tt.client)
+			version := versions.GetVersionNumber(tt.client)
 			if version != tt.expected {
 				t.Errorf("expected %s, got %s", tt.expected, version)
 			}

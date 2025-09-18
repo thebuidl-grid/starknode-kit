@@ -33,7 +33,8 @@ var VersionCommand = &cobra.Command{
 			return
 		}
 
-		version := utils.GetClientVersion(clientName)
+    version := versions.GetVersionNumber(clientName)
+
 		fmt.Printf("%s version: %s\n", clientName, utils.Green(version))
 	},
 }

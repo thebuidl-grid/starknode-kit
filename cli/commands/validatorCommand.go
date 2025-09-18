@@ -13,6 +13,7 @@ import (
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 	"github.com/thebuidl-grid/starknode-kit/pkg/validator"
+	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
 
 var rpcProvider *rpc.Provider
@@ -31,7 +32,8 @@ var ValidatorCommand = &cobra.Command{
 				fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client %s is not installed.", types.ClientStarkValidator)))
 				return
 			}
-			version := utils.GetClientVersion(clientName)
+			version := versions.GetVersionNumber(string(types.ClientStarkValidator))
+
 			fmt.Printf("%s version: %s\n", clientName, utils.Green(version))
 			return
 		}

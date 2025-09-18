@@ -11,13 +11,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
-
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 
 	"github.com/NethermindEth/juno/core/felt"
@@ -133,23 +131,6 @@ func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
 	return nil
 }
 
-func GetClientVersion(clientName string) string {
-	// This would typically be cached or retrieved from a version check
-	// For now, return a placeholder
-	switch clientName {
-	case "geth":
-		return versions.LatestGethVersion
-	case "reth":
-		return versions.LatestRethVersion
-	case "lighthouse":
-		return versions.LatestLighthouseVersion
-	case "prysm":
-		return "" //versions.LatestPrysmVersion
-	default:
-		return "unknown"
-	}
-}
-
 func GetRunningClients() []types.ClientStatus {
 	var clients []types.ClientStatus
 
@@ -160,7 +141,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:     gethInfo.Status,
 			PID:        gethInfo.PID,
 			Uptime:     gethInfo.Uptime,
-			Version:    GetClientVersion("geth"),
+			Version:    versions.GetVersionNumber("geth"),
 			SyncStatus: GetGethSyncStatus(),
 		}
 		clients = append(clients, status)
@@ -173,7 +154,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:     rethInfo.Status,
 			PID:        rethInfo.PID,
 			Uptime:     rethInfo.Uptime,
-			Version:    GetClientVersion("reth"),
+			Version:    versions.GetVersionNumber("reth"),
 			SyncStatus: GetRethSyncStatus(),
 		}
 		clients = append(clients, status)
@@ -186,7 +167,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:     lighthouseInfo.Status,
 			PID:        lighthouseInfo.PID,
 			Uptime:     lighthouseInfo.Uptime,
-			Version:    GetClientVersion("lighthouse"),
+			Version:    versions.GetVersionNumber("lighthouse"),
 			SyncStatus: GetLighthouseSyncStatus(),
 		}
 		clients = append(clients, status)
@@ -199,7 +180,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:     prysmInfo.Status,
 			PID:        prysmInfo.PID,
 			Uptime:     prysmInfo.Uptime,
-			Version:    GetClientVersion("prysm"),
+			Version:    versions.GetVersionNumber("prysm"),
 			SyncStatus: GetPrysmSyncStatus(),
 		}
 		clients = append(clients, status)
@@ -212,7 +193,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:  junoInfo.Status,
 			PID:     junoInfo.PID,
 			Uptime:  junoInfo.Uptime,
-			Version: GetClientVersion("juno"),
+			Version: versions.GetVersionNumber("juno"),
 		}
 		clients = append(clients, status)
 	}
@@ -316,11 +297,6 @@ func CheckRPCStatus(rpcURL, method string) (string, error) {
 		return "⚠️ Slow", nil
 	}
 	return "✅ Connected", nil
-}
-
-func StringTile(s string) string {
-	r, size := utf8.DecodeRuneInString(s)
-	return strings.ToUpper(string(r)) + s[size:]
 }
 
 func EstimateGasFee(accnt *account.Account, callData []rpc.FunctionCall) (*rpc.BroadcastInvokeTxnV3, []rpc.FeeEstimation, error) {
