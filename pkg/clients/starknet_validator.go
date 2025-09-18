@@ -2,6 +2,7 @@ package clients
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -43,7 +44,6 @@ func (c *StakingValidator) Start() error {
 	args := c.buildArgs()
 	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	filepath.Join(constants.InstallStarknetDir, "starknet-staking-v2", "validator")
 
 	logFilePath := filepath.Join(constants.InstallStarknetDir, "starknet-staking-v2",
 		"logs",
@@ -53,5 +53,6 @@ func (c *StakingValidator) Start() error {
 		return err
 	}
 
-	return process.StartClient("staking-validator", command, logFile, args...)
+	multiWriter := io.MultiWriter(os.Stdout, logFile)
+	return process.StartClient("staking-validator", command, multiWriter, args...)
 }

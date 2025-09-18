@@ -2,6 +2,7 @@ package clients
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -43,8 +44,11 @@ func (c *JunoClient) Start() error {
 	if err != nil {
 		return fmt.Errorf("failed to create log file: %w", err)
 	}
+
+	multiWriter := io.MultiWriter(os.Stdout, logFile)
+
 	args := c.buildJunoArgs()
-	return process.StartClient("juno", getJunoPath(), logFile, args...)
+	return process.StartClient("juno", getJunoPath(), multiWriter, args...)
 }
 
 // buildJunoArgs builds the command line arguments for Juno

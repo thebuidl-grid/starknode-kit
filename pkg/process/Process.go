@@ -1,9 +1,7 @@
 package process
 
 import (
-	"fmt"
 	"io"
-	"log"
 	"os/exec"
 	"strings"
 	"syscall"
@@ -29,14 +27,6 @@ func StartClient(name, command string, logPath io.Writer, args ...string) error 
 	if err != nil {
 		return err
 	}
-
-	go func() {
-    fmt.Println("knkn")
-		err := cmd.Wait()
-		if err != nil {
-			log.Printf("Command %s finished with error: %v", name, err)
-		}
-	}()
 
 	return nil
 }
