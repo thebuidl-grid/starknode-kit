@@ -55,7 +55,7 @@ func (c *JunoClient) buildJunoArgs() []string {
 		"--http-host=0.0.0.0",
 		fmt.Sprintf("--db-path=%s", filepath.Join(constants.InstallStarknetDir, "juno", "database")),
 		fmt.Sprintf("--eth-node=%s", c.config.EthNode),
-		fmt.Sprintf("--ws=%s", c.isValidatorNode),
+		fmt.Sprintf("--ws=%t", c.isValidatorNode),
 		"--ws-port=6061",
 		"--ws-host=0.0.0.0",
 	}
