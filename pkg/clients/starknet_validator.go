@@ -31,10 +31,10 @@ func (_ StakingValidator) getCommand() string {
 
 func (c StakingValidator) buildArgs() []string {
 	args := []string{
-		"--provider-http" + c.Provider.starknetHttp,
-		"--provider-ws" + c.Provider.starkentWS,
-		"--signer-op-address" + c.Wallet.address,
-		"--signer-priv-key" + c.Wallet.privatekey,
+		"--provider-http " + c.Provider.starknetHttp,
+		"--provider-ws " + c.Provider.starkentWS,
+		"--signer-op-address " + c.Wallet.address,
+		"--signer-priv-key " + c.Wallet.privatekey,
 	}
 	return args
 }
