@@ -136,6 +136,7 @@ func validatorStartCommandRun(cmd *cobra.Command, args []string) {
 		return
 	}
 	fmt.Println(utils.Cyan("✅ Validator started"))
+	options.Wait()
 }
 
 var validatorBalanceCommand = &cobra.Command{

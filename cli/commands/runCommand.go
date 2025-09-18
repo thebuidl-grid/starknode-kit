@@ -92,5 +92,8 @@ Supported clients:
 		default:
 			fmt.Println(utils.Red(fmt.Sprintf("❌ Don't know how to run client: %s", clientName)))
 		}
+		options.Wait()
+
 	},
 }
+

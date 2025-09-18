@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 
 	"github.com/thebuidl-grid/starknode-kit/cli/options"
 	"github.com/thebuidl-grid/starknode-kit/pkg/clients"
@@ -69,5 +71,10 @@ func startCommand(cmd *cobra.Command, args []string) {
 		return
 	}
 	fmt.Println(utils.Green("✅ Clients started successfully."))
-	fmt.Println(utils.Cyan("Run `starknode-kit monitor` to view logs."))
+	fmt.Println(utils.Cyan("Showing logs. Press Ctrl+C to exit."))
+
+	// Wait for a Ctrl+C signal
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
 }

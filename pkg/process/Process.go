@@ -2,7 +2,6 @@ package process
 
 import (
 	"io"
-	"log"
 	"os/exec"
 	"strings"
 	"syscall"
@@ -24,17 +23,11 @@ func StartClient(name, command string, logPath io.Writer, args ...string) error 
 	}
 	cmd.Stdout = logPath
 	cmd.Stderr = logPath
+
 	err := cmd.Start()
 	if err != nil {
 		return err
 	}
-
-	go func() {
-		err := cmd.Wait()
-		if err != nil {
-			log.Printf("Command %s finished with error: %v", name, err)
-		}
-	}()
 
 	return nil
 }
@@ -46,3 +39,4 @@ func StopClient(pid int) error {
 func GetProcessInfo(p string) *t.ProcessInfo {
 	return getProcessInfo(strings.ToLower(p))
 }
+
