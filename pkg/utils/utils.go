@@ -55,6 +55,9 @@ func GetConsensusClient(c string) (t.ClientType, error) {
 func IsInstalled(c t.ClientType) bool {
 	client := strings.ToLower(string(c))
 	dir := path.Join(constants.InstallClientsDir, client)
+	if c == t.ClientStarkValidator || c == t.ClientJuno {
+		dir = path.Join(constants.InstallStarknetDir, client)
+	}
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		return false
