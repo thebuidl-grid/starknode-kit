@@ -18,7 +18,6 @@ var (
 	defaultConsensusClientSettings = types.ClientConfig{
 		Name:                types.ClientPrysm,
 		Port:                []int{5052, 9000},
-		ConsensusCheckpoint: "https://mainnet-checkpoint-sync.stakely.io/",
 	}
 	defaultExecutionClientSettings = types.ClientConfig{
 		Name:          types.ClientGeth,

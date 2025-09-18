@@ -109,6 +109,7 @@ func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
 	if _, err := os.Stat(constants.ConfigPath); err == nil {
 		fmt.Println(Yellow(fmt.Sprintf("Starknode-kit already initialized at %s", constants.ConfigDir)))
 	}
+	cfg.ConsensusCientSettings.ConsensusCheckpoint = fmt.Sprintf("https://%s-checkpoint-sync.stakely.io/", cfg.Network)
 
 	if cfg == nil {
 		setupConfig = defaultConfig()
