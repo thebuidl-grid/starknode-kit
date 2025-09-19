@@ -138,7 +138,8 @@ func validatorStartCommandRun(cmd *cobra.Command, args []string) {
 		return
 	}
 	fmt.Println(utils.Cyan("✅ Validator started"))
-	options.Wait()
+	fmt.Println(utils.Cyan("⏳ Waiting for log files to be created..."))
+	options.LoadLogs([]string{string(types.ClientStarkValidator)})
 }
 
 var validatorBalanceCommand = &cobra.Command{

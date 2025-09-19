@@ -92,7 +92,8 @@ Supported clients:
 		default:
 			fmt.Println(utils.Red(fmt.Sprintf("❌ Don't know how to run client: %s", clientName)))
 		}
-		options.Wait()
+		fmt.Println(utils.Cyan("⏳ Waiting for log files to be created..."))
+		options.LoadLogs([]string{string(clientType)})
 
 	},
 }
