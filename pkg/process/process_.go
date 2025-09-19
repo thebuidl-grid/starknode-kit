@@ -40,8 +40,8 @@ func stopProcess(pid int) error {
 		return err
 	}
 	err = p.Signal(syscall.SIGTERM)
-	if err != nil {
-		return err
+	if err == nil {
+		return nil
 	}
 	time.Sleep(time.Second * 3)
 	if running := IsProcessRunning(pid); running {

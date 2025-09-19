@@ -224,7 +224,8 @@ func SetNetwork(cfg *t.StarkNodeKitConfig, network string) error {
 
 func GetStarknetClient(c string) (t.ClientType, error) {
 	sprtClients := map[string]t.ClientType{
-		"juno": t.ClientJuno,
+		"juno":                t.ClientJuno,
+		"starknet-staking-v2": t.ClientStarkValidator,
 	}
 	client, ok := sprtClients[c]
 	if !ok {
