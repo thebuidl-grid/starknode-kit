@@ -2,7 +2,6 @@ package clients
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -53,6 +52,5 @@ func (c *StakingValidator) Start() error {
 		return err
 	}
 
-	multiWriter := io.MultiWriter(os.Stdout, logFile)
-	return process.StartClient("staking-validator", command, multiWriter, args...)
+	return process.StartClient("staking-validator", command, logFile, args...)
 }

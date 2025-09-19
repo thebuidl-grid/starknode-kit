@@ -2,7 +2,6 @@ package clients
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -72,7 +71,6 @@ func (c *rethConfig) Start() error {
 		return err
 	}
 
-	multiWriter := io.MultiWriter(os.Stdout, logFile)
-
-	return process.StartClient("reth", command, multiWriter, args...)
+	return process.StartClient("reth", command, logFile, args...)
 }
+

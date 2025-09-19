@@ -2,7 +2,6 @@ package clients
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -70,7 +69,6 @@ func (c *prysmConfig) Start() error {
 		return err
 	}
 
-	multiWriter := io.MultiWriter(os.Stdout, logFile)
-
-	return process.StartClient("prysm", command, multiWriter, args...)
+	return process.StartClient("prysm", command, logFile, args...)
 }
+

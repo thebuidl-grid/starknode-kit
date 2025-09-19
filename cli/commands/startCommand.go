@@ -2,14 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
 
+	"github.com/spf13/cobra"
 	"github.com/thebuidl-grid/starknode-kit/cli/options"
 	"github.com/thebuidl-grid/starknode-kit/pkg/clients"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
-
-	"github.com/spf13/cobra"
 )
 
 var StartCommand = &cobra.Command{
@@ -29,52 +26,50 @@ func startCommand(cmd *cobra.Command, args []string) {
 	}
 	el := options.Config.ExecutionCientSettings
 	cl := options.Config.ConsensusCientSettings
-	elClient, err := utils.GetExecutionClient(string(el.Name))
+	elClientName := string(el.Name)
+	clClientName := string(cl.Name)
+
+	// Validate clients are installed
+	elClientType, err := utils.GetExecutionClient(elClientName)
 	if err != nil {
-		fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid execution client in config: %v", err)))
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid execution client in config: %%v", err)))
 		return
 	}
-	clClient, err := utils.GetConsensusClient(string(cl.Name))
+	clClientType, err := utils.GetConsensusClient(clClientName)
 	if err != nil {
-		fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid consensus client in config: %v", err)))
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid consensus client in config: %%v", err)))
 		return
 	}
-	if !utils.IsInstalled(elClient) {
-		fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client '%s' is not installed.", elClient)))
-		fmt.Printf("Please run: starknode-kit add -e %s\n", elClient)
+	if !utils.IsInstalled(elClientType) {
+		fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client '%s' is not installed.", elClientType)))
+		fmt.Printf("Please run: starknode-kit add -e %s\n", elClientType)
+		return
+	}
+	if !utils.IsInstalled(clClientType) {
+		fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client '%s' is not installed.", clClientType)))
+		fmt.Printf("Please run: starknode-kit add -c %s\n", clClientType)
 		return
 	}
 
-	if !utils.IsInstalled(clClient) {
-		fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client '%s' is not installed.", clClient)))
-		fmt.Printf("Please run: starknode-kit add -c %s\n", clClient)
-		return
-	}
-	fmt.Println(utils.Cyan("🚀 Starting consensus and execution clients..."))
+	fmt.Println(utils.Cyan("🚀 Starting consensus and execution clients in the background..."))
 	cClient, err := clients.NewConsensusClient(cl, options.Config.Network)
 	if err != nil {
-		fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating consensus client: %v", err)))
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating consensus client: %%v", err)))
 		return
 	}
 	eClient, err := clients.NewExecutionClient(el, options.Config.Network)
 	if err != nil {
-		fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating execution client: %v", err)))
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating execution client: %%v", err)))
 		return
 	}
 
 	if err = cClient.Start(); err != nil {
-		fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting consensus client: %v", err)))
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting consensus client: %%v", err)))
 		return
 	}
 	if err = eClient.Start(); err != nil {
-		fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting execution client: %v", err)))
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting execution client: %%v", err)))
 		return
 	}
-	fmt.Println(utils.Green("✅ Clients started successfully."))
-	fmt.Println(utils.Cyan("Showing logs. Press Ctrl+C to exit."))
-
-	// Wait for a Ctrl+C signal
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	<-c
+	fmt.Println(utils.Green("✅ Clients started successfully in the background."))
 }
