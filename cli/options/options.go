@@ -2,8 +2,11 @@ package options
 
 import (
 	"fmt"
+	"log"
 	"os"
-	"os/signal"
+	"os/exec"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/thebuidl-grid/starknode-kit/pkg"
@@ -26,9 +29,35 @@ func InitGlobalOptions(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVarP(&StarknetClient, "starknet-client", "s", "", "Specify the Starknet client")
 }
 
-func Wait() {
-	fmt.Println(utils.Cyan("Showing logs. Press Ctrl+C to exit."))
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	<-c
+func LoadLogs(clients []string) {
+
+	time.Sleep(3 * time.Second)
+
+	logs := []string{"-f"}
+
+	for _, i := range clients {
+
+		ilog, err := getLatestLogFile(i)
+		if err != nil {
+			log.Fatalf(utils.Red("❌ Could not find client log file: %v for client %s"), err, i)
+			continue
+		}
+		logs = append(logs, ilog)
+	}
+
+	tailCmd := exec.Command("tail", logs...)
+	tailCmd.Stdout = os.Stdout
+	tailCmd.Stderr = os.Stderr
+
+	if err := tailCmd.Run(); err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			if strings.Contains(exitErr.Error(), "signal: interrupt") {
+				fmt.Println(utils.Green("\n✅ Stopped tailing logs. Clients are still running in the background."))
+				fmt.Println(utils.Yellow("💡 Use `starknode-kit stop --all` to stop them."))
+				return
+			}
+		}
+		log.Printf(utils.Red("❌ Error tailing logs: %%v"), err)
+	}
+
 }
