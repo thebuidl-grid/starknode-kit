@@ -142,10 +142,10 @@ func init() {
 	setCmd.AddCommand(setNetworkCmd)
 	setCmd.AddCommand(setCLCmd)
 	setCmd.AddCommand(setELCmd)
+	setCmd.AddCommand(setStarknetCmd)
 
 	// Add top-level commands to config
 	ConfigCommand.AddCommand(showCmd)
 	ConfigCommand.AddCommand(setCmd)
 	ConfigCommand.AddCommand(newConfigCommand)
 }
-

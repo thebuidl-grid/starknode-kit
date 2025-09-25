@@ -2,6 +2,7 @@ package configcommand
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -26,6 +27,15 @@ var setCLCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		runSetCommand("consensus", args)
+	},
+}
+
+var setStarknetCmd = &cobra.Command{
+	Use:   "starknet key=value [key=value...]",
+	Short: "Set starknet client configuration",
+	Args:  cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		runSetCommand("starknet", args)
 	},
 }
 
@@ -67,23 +77,39 @@ func processConfigArgs(cfg *t.StarkNodeKitConfig, args []string, target string) 
 
 func applyConfigUpdate(cfg *t.StarkNodeKitConfig, key, value, target string) error {
 	var (
-		updated t.ClientConfig
+		updated any
 		err     error
 	)
 
 	switch target {
 	case "execution":
-		updated, err = setClientConfigValue(cfg.ExecutionCientSettings, key, value, target)
+		_, err := utils.GetExecutionClient(value)
+		if err != nil {
+			return fmt.Errorf(`%w\nSupported execution clients are:\n  - geth\n  - reth`, err)
+		}
+		updated, err = setClientConfigValue(cfg.ExecutionCientSettings, key, value)
 		if err == nil {
-			cfg.ExecutionCientSettings = updated
+			cfg.ExecutionCientSettings = updated.(t.ClientConfig)
 		}
 	case "consensus":
-		updated, err = setClientConfigValue(cfg.ConsensusCientSettings, key, value, target)
+		_, err := utils.GetConsensusClient(value)
+		if err != nil {
+			return fmt.Errorf(`%w\nSupported execution clients are:\n  - geth\n  - reth`, err)
+		}
+		updated, err = setClientConfigValue(cfg.ConsensusCientSettings, key, value)
 		if err == nil {
-			cfg.ConsensusCientSettings = updated
+			cfg.ConsensusCientSettings = updated.(t.ClientConfig)
+		}
+	case "starknet":
+		if options.Config.JunoConfig.EthNode == "" {
+			return fmt.Errorf("This is not a starknet node")
+		}
+		updated, err = setClientConfigValue(cfg.JunoConfig, key, value)
+		if err == nil {
+			cfg.JunoConfig = updated.(t.JunoConfig)
 		}
 	default:
-		return fmt.Errorf("invalid config target: %s (must be 'execution' or 'consensus')", target)
+		return fmt.Errorf("invalid config target: %s (must be 'execution', 'consensus' or 'starknet')", target)
 	}
 
 	if err != nil {
@@ -93,44 +119,40 @@ func applyConfigUpdate(cfg *t.StarkNodeKitConfig, key, value, target string) err
 	return nil
 }
 
-func setClientConfigValue(clientCfg t.ClientConfig, key, value, target string) (t.ClientConfig, error) {
-	switch key {
-	case "client":
-		var client t.ClientType
-		var err error
-
-		switch target {
-		case "execution":
-			client, err = utils.GetExecutionClient(value)
-			if err != nil {
-				return clientCfg, fmt.Errorf(`%w\nSupported execution clients are:\n  - geth\n  - reth`, err)
-			}
-			clientCfg.Name = t.ClientType(client)
-		case "consensus":
-			client, err = utils.GetConsensusClient(value)
-			if err != nil {
-				return clientCfg, fmt.Errorf(`%w\nSupported consensus clients are:\n  - lighthouse 
-  - prysm`, err)
-			}
-			clientCfg.Name = t.ClientType(client)
+func setClientConfigValue[T t.ClientConfig | t.JunoConfig](clientCfg T, key, value string) (T, error) {
+	switch c := any(clientCfg).(type) {
+	case t.JunoConfig:
+		if key != "eth_node" {
+			return clientCfg, fmt.Errorf("invalid key '%s' for starknet config: only 'eth_node' is accepted", key)
 		}
-	case "port":
-		ports, err := parsePorts(value)
-		if err != nil {
-			return clientCfg, err
+		if _, err := url.ParseRequestURI(value); err != nil {
+			return clientCfg, fmt.Errorf("invalid URL format for eth_node: '%s'", value)
 		}
-		clientCfg.Port = ports
-	case "type":
-		clientCfg.ExecutionType = value
-
-	default:
-		return clientCfg, fmt.Errorf(`
+		c.EthNode = value
+		return any(c).(T), nil
+	case t.ClientConfig:
+		switch key {
+		case "client":
+			c.Name = t.ClientType(value)
+		case "port":
+			ports, err := parsePorts(value)
+			if err != nil {
+				return clientCfg, err
+			}
+			c.Port = ports
+		case "type":
+			c.ExecutionType = value
+		default:
+			return clientCfg, fmt.Errorf(`
 "unknown config key: %s", key
 Available keys you can set:
   - client           (client name)
   - port             (client ports, comma-separated)`, key)
+		}
+		return any(c).(T), nil
+	default:
+		return clientCfg, fmt.Errorf("unsupported config type")
 	}
-	return clientCfg, nil
 }
 
 func parsePorts(value string) ([]int, error) {
@@ -143,10 +165,9 @@ func parsePorts(value string) ([]int, error) {
 		}
 		port, err := strconv.Atoi(trimmed)
 		if err != nil {
-			return nil, err // you might want to wrap this with more context
+			return nil, fmt.Errorf("invalid port '%s': must be a number", trimmed)
 		}
 		ports = append(ports, port)
 	}
 	return ports, nil
 }
-
