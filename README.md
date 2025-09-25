@@ -59,6 +59,18 @@ starknode-kit --help
 starknode-kit config new
 ```
 
+### 🧹 Uninstallation
+
+To uninstall `starknode-kit`, remove the binary and the configuration directory:
+
+```bash
+sudo rm /usr/local/bin/starknode-kit
+rm -rf ~/.starknode-kit
+```
+
+> **Note**: This will not remove any of the client data (e.g., blockchain data). The data is stored in the locations specified in your `~/.starknode-kit/starknode.yml` file.
+
+
 ---
 
 ## 📘 Available Commands
@@ -76,6 +88,7 @@ starknode-kit config new
 | `start`      | Run the configured Ethereum clients                        |
 | `stop`       | Stop the configured Ethereum clients                       |
 | `update`     | Check for and install client updates                       |
+| `validator`  | Manage the Starknet validator client                       |
 | `version`    | Show version of starknode-kit or a specific client         |
 
 ---
@@ -143,8 +156,26 @@ To run a specific client using its configured settings:
 starknode-kit run juno
 starknode-kit run geth
 starknode-kit run lighthouse
-starknode-kit run validator
 ```
+
+#### Validator Commands
+
+Manage the Starknet validator client.
+
+- **Get validator status:**
+  ```bash
+  starknode-kit validator status
+  ```
+
+- **Get validator version:**
+  ```bash
+  starknode-kit validator --version
+  ```
+
+- **Set Juno RPC endpoint:**
+  ```bash
+  starknode-kit validator --rpc <YOUR_RPC_URL>
+  ```
 
 #### Generate bash completion script
 
@@ -205,7 +236,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 Join the community to stay updated, ask questions, or contribute:
 
-- Telegram: [https://t.me/+SCPbza9fk8dkYWI0](https://t.me/+SCPbza9fk8dkYWI0)
+- Telegram: [https://t.g/+-SCPbza9fk8dkYWI0](https://t.me/+SCPbza9fk8dkYWI0)
 
 Whether you're a seasoned validator, hobbyist, or first-time node runner, you're welcome!
 
