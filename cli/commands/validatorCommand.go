@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"time"
 
@@ -27,6 +28,7 @@ var ValidatorCommand = &cobra.Command{
 			return
 		}
 		versionFlag, _ := cmd.Flags().GetBool("version")
+		rpc_url, _ := cmd.Flags().GetString("rpc")
 		if versionFlag {
 			if !utils.IsInstalled(types.ClientStarkValidator) {
 				fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client %s is not installed.", types.ClientStarkValidator)))
@@ -36,6 +38,31 @@ var ValidatorCommand = &cobra.Command{
 
 			fmt.Printf("%s version: %s\n", clientName, utils.Green(version))
 			return
+		}
+		if rpc_url != "" {
+			var err error
+			url, err := url.ParseRequestURI(rpc_url)
+			if err != nil {
+				fmt.Printf("invalid URL format for rpc_url: '%s'", utils.Red(rpc_url))
+				return
+			}
+			switch url.Scheme {
+			case "https", "http":
+				options.Config.ValidatorConfig.ProviderConfig.JunoRPC = rpc_url
+				fmt.Printf("Successfully set Provider HTTP url to '%s'\n", utils.Green(rpc_url))
+			case "wss", "ws":
+				options.Config.ValidatorConfig.ProviderConfig.JunoWS = rpc_url
+				fmt.Printf("Successfully set Provider WS url to '%s'\n", utils.Green(rpc_url))
+			default:
+				err = fmt.Errorf("Inalid scheme '%s'", utils.Red(url.Scheme))
+			}
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			if err := utils.UpdateStarkNodeConfig(options.Config); err != nil {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Failed to save config: %v", err)))
+			}
 		}
 	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -189,6 +216,7 @@ func validatorStatusCommandRun(cmd *cobra.Command, args []string) {
 
 func init() {
 	ValidatorCommand.Flags().BoolP("version", "v", false, "Get validator version")
+	ValidatorCommand.Flags().String("rpc", "", "Set juno RPC endpoint")
 	ValidatorCommand.AddCommand(validatorInfoCommand)
 	ValidatorCommand.AddCommand(validatorStatusCommand)
 	ValidatorCommand.AddCommand(validatorStopCommand)
