@@ -252,5 +252,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ```bash
 sudo rm /usr/local/bin/starknode-kit
-rm -rf ~/.starknode-kit
+rm -rf ~/.config/starknode-kit
 ```
