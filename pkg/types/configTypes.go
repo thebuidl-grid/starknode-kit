@@ -55,7 +55,7 @@ type (
 	JunoConfig struct {
 		Port        int      `yaml:"port"`
 		EthNode     string   `yaml:"eth_node"`
-		Environment []string `yaml:"environment"`
+		Environment []string `yaml:"environment"` // NOTE currently not being used
 	}
 
 	WalletConfig struct {
