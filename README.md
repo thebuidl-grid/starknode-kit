@@ -11,7 +11,7 @@
 1. Download and run the installation script:
 
    ```bash
-   curl -sSL https://raw.githubusercontent.com/thebuidl-grid/starknode-kit/main/install.sh | bash
+   /bin/bash -c "$(curl -sSL https://raw.githubusercontent.com/thebuidl-grid/starknode-kit/main/install.sh)" 
    ```
 
 2. Or download the script first and then run it:
