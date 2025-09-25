@@ -42,15 +42,6 @@ var showCmd = &cobra.Command{
 	},
 }
 
-// set subcommands
-var setCmd = &cobra.Command{
-	Use:   "set",
-	Short: "Set configuration settings",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
-
 var setNetworkCmd = &cobra.Command{
 	Use:   "network [network]",
 	Short: "Set network (e.g., 'mainnet', 'sepolia')",
@@ -139,13 +130,12 @@ func init() {
 	showCmd.Flags().Bool("cl", false, "Show consensus client settings")
 
 	// Add set commands
-	setCmd.AddCommand(setNetworkCmd)
-	setCmd.AddCommand(setCLCmd)
-	setCmd.AddCommand(setELCmd)
-	setCmd.AddCommand(setStarknetCmd)
+	ConfigCommand.AddCommand(setNetworkCmd)
+	ConfigCommand.AddCommand(setCLCmd)
+	ConfigCommand.AddCommand(setELCmd)
+	ConfigCommand.AddCommand(setStarknetCmd)
 
 	// Add top-level commands to config
 	ConfigCommand.AddCommand(showCmd)
-	ConfigCommand.AddCommand(setCmd)
 	ConfigCommand.AddCommand(newConfigCommand)
 }
