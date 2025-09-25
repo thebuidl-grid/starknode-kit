@@ -179,7 +179,7 @@ func validatorStatusCommandRun(cmd *cobra.Command, args []string) {
 	fmt.Printf("\nJuno Node Status:\n")
 	if junoMetrics.IsSyncing {
 		fmt.Printf("  Sync Status: %s\n", utils.Yellow("Syncing"))
-		fmt.Printf("  Sync Percent: %s\n", utils.Yellow(fmt.Sprintf("%.2f%", junoMetrics.SyncPercent)))
+		fmt.Printf("  Sync Percent: %s\n", utils.Yellow(fmt.Sprintf("%.2f%%", junoMetrics.SyncPercent)))
 	} else {
 		fmt.Printf("  Sync Status: %s\n", utils.Green("Synced"))
 	}
