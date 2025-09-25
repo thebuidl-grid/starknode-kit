@@ -3,6 +3,7 @@ package pkg
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,17 +24,39 @@ import (
 var (
 	// execCommand allows mocking exec.Command in tests
 	execCommand = exec.Command
-
-	// This can be overridden in tests
-
-	// GethHash maps Geth versions to their commit hashes
-	GethHash = map[string]string{
-		"1.14.3":  "ab48ba42",
-		"1.14.12": "293a300d",
-		"1.15.10": "2bf8a789",
-		"1.16.1":  "12b4131f",
-	}
 )
+
+type GitHubTag struct {
+	Object struct {
+		SHA string `json:"sha"`
+	} `json:"object"`
+}
+
+func getGethHash(version string) (string, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/ethereum/go-ethereum/git/ref/tags/%s", version)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to fetch tag info: %s", resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var tagInfo GitHubTag
+	if err := json.Unmarshal(body, &tagInfo); err != nil {
+		return "", err
+	}
+
+	return tagInfo.Object.SHA, nil
+}
 
 func getDistro() (string, error) {
 	f, err := os.Open("/etc/os-release")
@@ -123,8 +146,12 @@ func (i *installer) getClientFileName(client types.ClientType, version string) (
 		if goarch == "arm64" {
 			gethArch = "arm64"
 		}
+		gethHash, err := getGethHash("v" + version)
+		if err != nil {
+			return "", err
+		}
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
-			goos, gethArch, version, GethHash[version])
+    goos, gethArch, version, gethHash[:8])
 	case types.ClientReth:
 		fileName = fmt.Sprintf("reth-v%s-%s", version, archName)
 	case types.ClientLighthouse:
