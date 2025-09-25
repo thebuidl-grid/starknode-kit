@@ -245,3 +245,12 @@ Whether you're a seasoned validator, hobbyist, or first-time node runner, you're
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## Uninstallation
+
+```bash
+sudo rm /usr/local/bin/starknode-kit
+rm -rf ~/.starknode-kit
+```
