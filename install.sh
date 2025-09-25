@@ -429,7 +429,7 @@ perform_installation() {
         print_status "Building version: $VERSION"
 
         # Construct linker flags
-        LDFLAGS="-ldflags="-X 'github.com/thebuidl-grid/starknode-kit/pkg/versions.StarkNodeVersion=$VERSION'"
+        LDFLAGS="-X github.com/thebuidl-grid/starknode-kit/pkg/versions.StarkNodeVersion=$VERSION"
 
         # Build the application with node type flag
         print_status "Building the application for $SELECTED_NODE_TYPE node..."
@@ -440,7 +440,7 @@ perform_installation() {
             "validator") BUILD_FLAGS="-tags validator" ;;
         esac
     
-        if ! go build $BUILD_FLAGS $LDFLAGS -o "$BINARY_NAME" .; then
+        if ! go build $BUILD_FLAGS -ldflags="$LDFLAGS" -o "$BINARY_NAME" .; then
             print_error "Failed to build the application"
             exit 1
         fi
