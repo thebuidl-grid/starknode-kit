@@ -429,7 +429,7 @@ perform_installation() {
         print_status "Building version: $VERSION"
 
         # Construct linker flags
-        LDFLAGS="-ldflags=-X 'github.com/thebuidl-grid/starknode-kit/pkg/versions.StarkNodeVersion=$VERSION'"
+        LDFLAGS="-ldflags="-X 'github.com/thebuidl-grid/starknode-kit/pkg/versions.StarkNodeVersion=$VERSION'"
 
         # Build the application with node type flag
         print_status "Building the application for $SELECTED_NODE_TYPE node..."
