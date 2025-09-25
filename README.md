@@ -24,10 +24,10 @@
 
 ### Option 2: Install using Go
 
-Make sure you have Go installed (version 1.24 or later), then run:
+Make sure you have Go installed (version 1.24 or later). This method installs the latest version from the `main` branch.
 
 ```bash
-go install github.com/thebuidl-grid/starknode-kit@latest
+go install -ldflags="-X 'github.com/thebuidl-grid/starknode-kit/pkg/versions.StarkNodeVersion=main'" github.com/thebuidl-grid/starknode-kit@latest
 ```
 
 ### Option 3: Manual Installation from Source
@@ -42,8 +42,8 @@ go install github.com/thebuidl-grid/starknode-kit@latest
 2. Build and install:
 
    ```bash
-   go build -o starknode-kit .
-   sudo mv starknode-kit /usr/local/bin/
+   make build
+   sudo mv bin/starknode /usr/local/bin/
    ```
 
 ### Verify Installation
@@ -56,8 +56,21 @@ starknode-kit --help
 #### Generate Config file
 
 ```bash
-starknode-kit init
+starknode-kit config new
 ```
+
+### 🧹 Uninstallation
+
+To uninstall `starknode-kit`, remove the binary and the configuration directory:
+
+```bash
+sudo rm /usr/local/bin/starknode-kit
+rm -rf ~/.starknode-kit
+```
+
+> **Note**: This will not remove any of the client data (e.g., blockchain data). The data is stored in the locations specified in your `~/.starknode-kit/starknode.yml` file.
+
+
 ---
 
 ## 📘 Available Commands
@@ -66,26 +79,17 @@ starknode-kit init
 | ------------ | ---------------------------------------------------------- |
 | `add`        | Add an Ethereum or Starknet client to the config           |
 | `completion` | Generate the autocompletion script for the specified shell |
-| `config`     | Show the configured Ethereum clients                       |
+| `config`     | Create, show, and update your Starknet node configuration. |
 | `help`       | Display help about any command                             |
-| `init`       | Create a default configuration file                        |
 | `monitor`    | Launch real-time monitoring dashboard                      |
 | `remove`     | Remove a specified resource                                |
-| `run`        | Run local Starknet infrastructure services                 |
+| `run`        | Run a specific local infrastructure service                |
+| `status`     | Display status of running clients                          |
 | `start`      | Run the configured Ethereum clients                        |
 | `stop`       | Stop the configured Ethereum clients                       |
 | `update`     | Check for and install client updates                       |
-
----
-
-## 🧰 Global Flags
-
-| Flag                       | Description                                            |
-| -------------------------- | ------------------------------------------------------ |
-| `-c`, `--consensus_client` | Specify the consensus client (e.g., Lighthouse, Prysm) |
-| `-e`, `--execution_client` | Specify the execution client (e.g., Geth, Reth)        |
-| `-s`, `--starknet_client`  | Specify the Starknet client (e.g., Juno)               |
-| `-h`, `--help`             | Show help for the `starknode-kit` command              |
+| `validator`  | Manage the Starknet validator client                       |
+| `version`    | Show version of starknode-kit or a specific client         |
 
 ---
 
@@ -113,13 +117,27 @@ starknode-kit remove --starknet_client juno
 #### Change network
 
 ```bash
-starknode-kit config -n sepolia # Default network is mainnet
+starknode-kit config set network sepolia
 ```
 
 #### Set an execution client
 
 ```bash
-starknode-kit config el client=reth port=9000,9001
+starknode-kit config set el client=reth port=9000,9001
+```
+
+#### Show configuration
+
+```bash
+starknode-kit config show --all
+starknode-kit config show --el
+```
+
+#### Check version
+
+```bash
+starknode-kit version
+starknode-kit version geth
 ```
 
 #### Start Ethereum clients
@@ -130,13 +148,34 @@ starknode-kit start
 
 > ⚠️ **Note**: The `start` command only launches the configured **execution (EL)** and **consensus (CL)** clients. It does **not** start any Starknet clients.
 
-#### Run a Juno Starknet node
+#### Run a specific client
 
-To run a Starknet client like Juno, use the `run` command:
+To run a specific client using its configured settings:
 
 ```bash
 starknode-kit run juno
+starknode-kit run geth
+starknode-kit run lighthouse
 ```
+
+#### Validator Commands
+
+Manage the Starknet validator client.
+
+- **Get validator status:**
+  ```bash
+  starknode-kit validator status
+  ```
+
+- **Get validator version:**
+  ```bash
+  starknode-kit validator --version
+  ```
+
+- **Set Juno RPC endpoint:**
+  ```bash
+  starknode-kit validator --rpc <YOUR_RPC_URL>
+  ```
 
 #### Generate bash completion script
 
@@ -197,7 +236,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 Join the community to stay updated, ask questions, or contribute:
 
-- Telegram: [https://t.me/+SCPbza9fk8dkYWI0](https://t.me/+SCPbza9fk8dkYWI0)
+- Telegram: [https://t.g/+-SCPbza9fk8dkYWI0](https://t.me/+SCPbza9fk8dkYWI0)
 
 Whether you're a seasoned validator, hobbyist, or first-time node runner, you're welcome!
 
@@ -207,3 +246,11 @@ Whether you're a seasoned validator, hobbyist, or first-time node runner, you're
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
+---
+
+## Uninstallation
+
+```bash
+sudo rm /usr/local/bin/starknode-kit
+rm -rf ~/.starknode-kit
+```

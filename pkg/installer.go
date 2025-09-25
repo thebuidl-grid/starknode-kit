@@ -13,7 +13,9 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 )
@@ -56,11 +58,11 @@ type installer struct {
 }
 
 // Newinstaller creates a new installer instance
-func NewInstaller(Installpath string) *installer {
+func NewInstaller() installer {
 	if err := setupJWTSecret(); err != nil {
 		panic(err)
 	}
-	return &installer{InstallDir: Installpath}
+	return installer{InstallDir: constants.InstallClientsDir}
 }
 
 func (installer) GetInsalledClients(dir string) ([]types.ClientType, error) {
@@ -130,8 +132,12 @@ func (i *installer) getClientFileName(client types.ClientType, version string) (
 	case types.ClientPrysm:
 		fileName = "prysm.sh"
 	case types.ClientJuno:
-		// Juno is a Go binary, we'll build it from source
 		fileName = fmt.Sprintf("juno-%s", version)
+	case types.ClientStarkValidator:
+		if goarch == "amd64" {
+			goarch = "x86_64"
+		}
+		fileName = fmt.Sprintf("starknet-staking-v2_v%s_%s_%s", version, stringTile(goos), goarch)
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -139,6 +145,7 @@ func (i *installer) getClientFileName(client types.ClientType, version string) (
 	return fileName, nil
 }
 
+// TODO use ClientReleaseUrls map
 // getDownloadURL returns the appropriate URL for downloading a client
 func (i *installer) getDownloadURL(client types.ClientType, fileName, version string) (string, error) {
 
@@ -155,6 +162,8 @@ func (i *installer) getDownloadURL(client types.ClientType, fileName, version st
 		return "https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh", nil
 	case types.ClientJuno:
 		return fmt.Sprintf("https://github.com/NethermindEth/juno/archive/refs/tags/%s.tar.gz", version), nil
+	case types.ClientStarkValidator:
+		return fmt.Sprintf("https://github.com/NethermindEth/starknet-staking-v2/releases/download/v%s/%s.tar.gz", version, fileName), nil
 	default:
 		return "", fmt.Errorf("unknown client: %s", client)
 	}
@@ -166,7 +175,7 @@ func (i *installer) installClient(client types.ClientType, clientPath, clientDir
 	version, err := versions.FetchOnlineVersion(string(client))
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	fileName, err := i.getClientFileName(client, version)
@@ -187,7 +196,6 @@ func (i *installer) installClient(client types.ClientType, clientPath, clientDir
 
 	fmt.Printf("%s installed successfully.\n", client)
 	return nil
-
 }
 
 // InstallClient installs the specified Ethereum client
@@ -200,7 +208,7 @@ func (i *installer) InstallClient(client types.ClientType) error {
 	}
 	clientPath := i.getClientPath(client, clientDir)
 	if i.isClientInstalled(clientPath, client) {
-		return nil
+		return ErrClientIsInstalled
 	}
 	return i.installClient(client, clientPath, clientDir)
 }
@@ -213,10 +221,10 @@ func (i *installer) UpdateClient(client types.ClientType) error {
 
 // getClientDirectory returns the appropriate directory for the client
 func (i *installer) getClientDirectory(client types.ClientType) string {
-	if client == types.ClientJuno {
-		return filepath.Join(InstallStarknetDir, string(client))
+	if client == types.ClientJuno || client == types.ClientStarkValidator {
+		return filepath.Join(constants.InstallStarknetDir, string(client))
 	}
-	return filepath.Join(InstallClientsDir, string(client))
+	return filepath.Join(constants.InstallClientsDir, string(client))
 }
 
 // setupClientDirectories creates the necessary directories for a client
@@ -324,6 +332,7 @@ func (i *installer) installStandardClient(client types.ClientType, clientDir, do
 	// Download file
 	fmt.Printf("Downloading %s.\n", client)
 	if err := downloadFile(downloadURL, archivePath); err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -378,7 +387,7 @@ func (i *installer) handleJunoPostExtraction(clientDir, fileName string) error {
 	fileName = strings.Replace(fileName, "v", "", 1)
 	extractedDir := filepath.Join(clientDir, fileName)
 	junoPath := filepath.Join(clientDir, "juno")
-	version_file := filepath.Join(InstallStarknetDir, "juno", ".version")
+	version_file := filepath.Join(constants.InstallStarknetDir, "juno", ".version")
 	version := strings.Replace(fileName, "juno-", "", 1)
 
 	file, err := os.Create(version_file)
@@ -475,12 +484,12 @@ func (i *installer) installLinuxDependencies() error {
 func setupJWTSecret() error {
 
 	// Check if JWT already exists
-	if _, err := os.Stat(JwtDir); err == nil {
+	if _, err := os.Stat(constants.JwtDir); err == nil {
 		return nil
 	}
 
 	// Create JWT directory
-	if err := os.MkdirAll(JwtDir, 0755); err != nil {
+	if err := os.MkdirAll(constants.JwtDir, 0755); err != nil {
 		return fmt.Errorf("failed to create JWT directory: %w", err)
 	}
 
@@ -492,7 +501,7 @@ func setupJWTSecret() error {
 	}
 
 	// Write JWT to file
-	if err := os.WriteFile(JWTPath, jwt, 0600); err != nil {
+	if err := os.WriteFile(constants.JWTPath, jwt, 0600); err != nil {
 		return fmt.Errorf("failed to write JWT secret: %w", err)
 	}
 
@@ -503,7 +512,7 @@ func setupJWTSecret() error {
 func (i *installer) RemoveClient(client types.ClientType) error {
 	var clientDir string
 	if client == types.ClientJuno {
-		clientDir = filepath.Join(InstallStarknetDir, string(types.ClientJuno))
+		clientDir = filepath.Join(constants.InstallStarknetDir, string(types.ClientJuno))
 	} else {
 		clientDir = filepath.Join(i.InstallDir, string(client))
 	}
@@ -540,7 +549,7 @@ func (i *installer) RemoveClient(client types.ClientType) error {
 func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	var clientDir string
 	if client == types.ClientJuno {
-		clientDir = filepath.Join(InstallStarknetDir, string(types.ClientJuno))
+		clientDir = filepath.Join(constants.InstallStarknetDir, string(types.ClientJuno))
 	} else {
 		clientDir = filepath.Join(i.InstallDir, string(client))
 	}
@@ -559,7 +568,7 @@ func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 
 	// Handle Juno version checking differently (npm-based)
 	if client == types.ClientJuno {
-		path := filepath.Join(InstallStarknetDir, "juno", ".version")
+		path := filepath.Join(constants.InstallStarknetDir, "juno", ".version")
 		version, _ := os.ReadFile(path)
 		versionMatch := regexp.MustCompile(`juno version (\d+\.\d+\.\d+)`).FindStringSubmatch(string(version))
 		if len(versionMatch) > 1 {
@@ -577,7 +586,7 @@ func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 	}
 	defer os.Chdir(currentDir)
 
-	version := GetVersionNumber(string(client))
+	version := versions.GetVersionNumber(string(client))
 	if version == "" {
 		return "", fmt.Errorf("failed to get version for %s", client)
 	}
@@ -587,6 +596,7 @@ func (i *installer) GetClientVersion(client types.ClientType) (string, error) {
 
 // downloadFile downloads a file from a URL to a local path
 func downloadFile(url, filepath string) error {
+
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
@@ -613,75 +623,6 @@ func downloadFile(url, filepath string) error {
 	}
 
 	return nil
-}
-
-func GetVersionNumber(client string) string {
-
-	var argument string
-
-	switch client {
-	case "juno":
-		path := filepath.Join(InstallStarknetDir, "juno", ".version")
-		version, _ := os.ReadFile(path)
-		versionMatch := regexp.MustCompile(`juno version (\d+\.\d+\.\d+)`).FindStringSubmatch(string(version))
-		if len(versionMatch) > 1 {
-			return versionMatch[1]
-		}
-		return ""
-	case "reth", "lighthouse", "geth":
-		argument = "--version"
-	case "prysm":
-		argument = "beacon-chain --version"
-	default:
-		fmt.Printf("Unknown client: %s\n", client)
-		return ""
-	}
-
-	var clientCommand string
-	switch runtime.GOOS {
-	case "darwin", "linux":
-		if client == "prysm" {
-			clientCommand = filepath.Join(InstallClientsDir, client, fmt.Sprintf("%s.sh", client))
-		} else {
-			clientCommand = filepath.Join(InstallClientsDir, client, client)
-		}
-	case "windows":
-		fmt.Println("getVersionNumber() for windows is not yet implemented")
-		os.Exit(1)
-	default:
-		fmt.Printf("Unsupported platform: %s\n", runtime.GOOS)
-		return ""
-	}
-
-	cmdParts := strings.Split(argument, " ")
-	cmd := execCommand(clientCommand, cmdParts...)
-	output, err := cmd.Output()
-	if err != nil {
-		fmt.Printf("Error executing command for %s: %v\n", client, err)
-		return ""
-	}
-
-	versionOutput := strings.TrimSpace(string(output))
-	var versionMatch []string
-
-	switch client {
-	case "reth":
-		versionMatch = regexp.MustCompile(`reth Version: (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
-	case "lighthouse":
-		versionMatch = regexp.MustCompile(`Lighthouse v(\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
-	case "geth":
-		versionMatch = regexp.MustCompile(`geth version (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
-	case "prysm":
-		versionMatch = regexp.MustCompile(`beacon-chain-v(\d+\.\d+\.\d+)-`).FindStringSubmatch(versionOutput)
-
-	}
-
-	if len(versionMatch) > 1 {
-		return versionMatch[1]
-	}
-
-	fmt.Printf("Unable to parse version number for %s\n", client)
-	return ""
 }
 
 func CompareClientVersions(client, installedVersion, latestVersion string) bool {
@@ -723,4 +664,9 @@ func readFoldersWithReadDir(dirPath string) ([]types.ClientType, error) {
 		}
 	}
 	return clients, nil
+}
+
+func stringTile(s string) string {
+	r, size := utf8.DecodeRuneInString(s)
+	return strings.ToUpper(string(r)) + s[size:]
 }

@@ -3,50 +3,98 @@ package commands
 import (
 	"fmt"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg/clients"
-	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
-
 	"github.com/spf13/cobra"
+	"github.com/thebuidl-grid/starknode-kit/cli/options"
+	"github.com/thebuidl-grid/starknode-kit/pkg/clients"
+	"github.com/thebuidl-grid/starknode-kit/pkg/types"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 )
 
-// RunJunoCmd represents the run juno command
 var RunCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run local Starknet infrastructure services",
-	Long: `Run local Starknet infrastructure services using Starknode Kit.
+	Use:   "run [client]",
+	Short: "Run a specific local infrastructure service",
+	Long: `Run a specific local infrastructure service by name.
 
-This command serves as a parent for specific components like Juno (a Starknet full node).
-You can use subcommands to run individual services such as a Juno node with custom configuration.`,
-}
+This command starts a single client using its settings from your 'starknode.yaml' configuration file.
 
-var runJunoCmd = &cobra.Command{
-	Use:   "juno",
-	Short: "Run a local Juno Starknet node",
-	Long: `Run a local Juno Starknet node with configurable options.
-Juno is a Go-based Starknet node implementation by Nethermind that provides
-full JSON-RPC support for Starknet networks.
-
-Juno requires an Ethereum node connection to verify L1 state. You can specify
-an Ethereum node URL using the --eth-node flag.
-
-Example:
-  starknode-kit run juno`,
+Supported clients:
+  - geth, reth (Execution)
+  - lighthouse, prysm (Consensus)
+  - juno (Starknet)`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		config, err := utils.LoadConfig()
-		if err != nil {
-			fmt.Println(err.Error())
+		if !options.LoadedConfig {
+			fmt.Println(utils.Red("❌ No config found."))
+			fmt.Println(utils.Yellow("💡 Run `starknode-kit config new` to create a config file."))
 			return
 		}
-		j, err := clients.NewJunoClient(config.JunoConfig, config.Network)
-		err = j.Start()
+
+		clientName := args[0]
+		clientType, err := utils.ResolveClientType(clientName)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Invalid client name: %s", clientName)))
 			return
 		}
-		fmt.Println("Juno started")
+		if !utils.IsInstalled(clientType) {
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Client %s not installed", clientName)))
+			return
+		}
+
+		fmt.Println(utils.Cyan(fmt.Sprintf("🚀 Attempting to run %s...", clientName)))
+
+		switch clientType {
+		case types.ClientGeth, types.ClientReth:
+			// It's an execution client
+			if options.Config.ExecutionCientSettings.Name != clientType {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Configured execution client is %s, not %s.", options.Config.ExecutionCientSettings.Name, clientName)))
+				return
+			}
+			eClient, err := clients.NewExecutionClient(options.Config.ExecutionCientSettings, options.Config.Network)
+			if err != nil {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating execution client: %v", err)))
+				return
+			}
+			if err = eClient.Start(); err != nil {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting execution client: %v", err)))
+				return
+			}
+			fmt.Println(utils.Green(fmt.Sprintf("✅ %s started successfully.", clientName)))
+
+		case types.ClientLighthouse, types.ClientPrysm:
+			// It's a consensus client
+			if options.Config.ConsensusCientSettings.Name != clientType {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Configured consensus client is %s, not %s.", options.Config.ConsensusCientSettings.Name, clientName)))
+				return
+			}
+			cClient, err := clients.NewConsensusClient(options.Config.ConsensusCientSettings, options.Config.Network)
+			if err != nil {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating consensus client: %v", err)))
+				return
+			}
+			if err = cClient.Start(); err != nil {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting consensus client: %v", err)))
+				return
+			}
+			fmt.Println(utils.Green(fmt.Sprintf("✅ %s started successfully.", clientName)))
+
+		case types.ClientJuno:
+			j, err := clients.NewJunoClient(options.Config.JunoConfig, options.Config.Network, options.Config.IsValidatorNode)
+			if err != nil {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating Juno client: %v", err)))
+				return
+			}
+			if err = j.Start(); err != nil {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting Juno: %v", err)))
+				return
+			}
+			fmt.Println(utils.Green("✅ Juno started successfully."))
+
+		default:
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Don't know how to run client: %s", clientName)))
+		}
+		fmt.Println(utils.Cyan("⏳ Waiting for log files to be created..."))
+		options.LoadLogs([]string{string(clientType)})
+
 	},
 }
 
-func init() {
-	RunCmd.AddCommand(runJunoCmd)
-}

@@ -2,13 +2,15 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 
 	"github.com/joho/godotenv"
@@ -183,28 +185,57 @@ func GetPrysmSyncStatus() t.SyncInfo {
 	return syncInfo
 }
 
-// getJunoSyncStatus gets sync status from Juno's HTTP API
-func GetJunoSyncStatus() t.SyncInfo {
-	syncInfo := t.SyncInfo{IsSyncing: false, SyncPercent: 100.0}
+func GetJunoMetrics(network string) t.EthereumMetrics {
+	metrics := t.EthereumMetrics{
+		NetworkName: network,
+		IsSyncing:   false,
+		SyncPercent: 100.0,
+	}
 
-	// Juno doesn't have a standard HTTP API endpoint like Ethereum clients
-	// For now, we'll default to not syncing unless we detect log patterns
-	// In the future, this could be enhanced to check Juno-specific endpoints
-	// or parse log files for sync status
+	client := &http.Client{Timeout: 2 * time.Second}
 
-	// Try to check if Juno process is running and assume it's operational
-	// This is a simplified implementation - real Juno sync status would need
-	// to check Starknet block height vs network height
-	syncInfo.IsSyncing = false
-	syncInfo.SyncPercent = 100.0
-	syncInfo.CurrentBlock = 650000 // Placeholder Starknet block
-	syncInfo.HighestBlock = 650000
+	// Get current block number
+	blockPayload := `{"jsonrpc":"2.0","method":"starknet_blockNumber","params":[],"id":1}`
+	resp, err := client.Post("http://localhost:6060", "application/json", strings.NewReader(blockPayload))
+	if err == nil {
+		defer resp.Body.Close()
+		body, _ := io.ReadAll(resp.Body)
+		var result map[string]any
+		if json.Unmarshal(body, &result) == nil {
+			if block, ok := result["result"].(float64); ok {
+				metrics.CurrentBlock = uint64(block)
+			}
+		}
+	}
 
-	return syncInfo
+	// Get gas price
+	gasPricePayload := `{"jsonrpc":"2.0","method":"starknet_syncing","params":[],"id":3}`
+	gasResp, err := client.Post("http://localhost:6060", "application/json", strings.NewReader(gasPricePayload))
+	if err == nil {
+		defer gasResp.Body.Close()
+		syncBody, _ := io.ReadAll(gasResp.Body)
+		var syncResult map[string]any
+		if json.Unmarshal(syncBody, &syncResult) == nil {
+			if result, ok := syncResult["result"].(map[string]any); ok {
+				currentBlock, ok := result["current_block_num"].(float64)
+				if !ok {
+					return t.EthereumMetrics{}
+				}
+				hightestBlock, ok := result["highest_block_num"].(float64)
+				if !ok {
+					return t.EthereumMetrics{}
+				}
+				metrics.IsSyncing = hightestBlock > currentBlock
+				metrics.CurrentBlock = uint64(currentBlock)
+				metrics.SyncPercent = (currentBlock / hightestBlock) * 100
+			}
+		}
+	}
+	return metrics
 }
 
-func defaultConfig() t.StarkNodeKitConfig {
-	return t.StarkNodeKitConfig{
+func defaultConfig() *t.StarkNodeKitConfig {
+	return &t.StarkNodeKitConfig{
 		// WalletAddress: "${STARKNET_WALLET}",
 		// PrivateKey:    "${STARKNET_PRIVATE_KEY}",
 		Network: "mainnet",
@@ -230,6 +261,22 @@ func defaultConfig() t.StarkNodeKitConfig {
 }
 
 func writeToENV(ks map[string]string) error {
-	err := godotenv.Write(ks, pkg.EnvFIlePath)
+	var file *os.File
+
+	_, err := os.Stat(constants.EnvFIlePath)
+	if err := os.MkdirAll(constants.ConfigDir, 0755); err != nil {
+		return fmt.Errorf("failed to create config file: %w", err)
+	}
+	if os.IsNotExist(err) {
+		_, err := os.Create(constants.EnvFIlePath)
+		if err != nil {
+			return err
+		}
+	}
+	defer file.Close()
+
+	err = godotenv.Write(ks, constants.EnvFIlePath)
 	return err
 }
+
+// TODO change juno get metrics url

@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 )
 
@@ -21,9 +21,9 @@ type prysmConfig struct {
 func (_ prysmConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
-		return filepath.Join(pkg.InstallClientsDir, "prysm", "prysm.exe")
+		return filepath.Join(constants.InstallClientsDir, "prysm", "prysm.exe")
 	}
-	return filepath.Join(pkg.InstallClientsDir, "prysm", "prysm.sh")
+	return filepath.Join(constants.InstallClientsDir, "prysm", "prysm.sh")
 }
 
 // BuildGethArgs builds the arguments for the geth command
@@ -42,7 +42,7 @@ func (c *prysmConfig) buildArgs() []string {
 		fmt.Sprintf("--genesis-beacon-api-url=%s", c.consensusCheckpoint),
 		"--accept-terms-of-use=true",
 		"--jwt-secret",
-		pkg.JWTPath,
+		constants.JWTPath,
 		"--monitoring-host",
 		"127.0.0.1",
 		"--monitoring-port",
@@ -51,7 +51,7 @@ func (c *prysmConfig) buildArgs() []string {
 
 	// TODO still too large
 	// Add data directory
-	dataDir := filepath.Join(pkg.InstallClientsDir, "prsym", "database")
+	dataDir := filepath.Join(constants.InstallClientsDir, "prsym", "database")
 	args = append(args, "--datadir="+dataDir)
 
 	return args
@@ -62,7 +62,7 @@ func (c *prysmConfig) Start() error {
 	args := c.buildArgs()
 	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	logFilePath := filepath.Join(pkg.InstallClientsDir, "prysm", "logs", fmt.Sprintf("prysm_%s.log", timestamp))
+	logFilePath := filepath.Join(constants.InstallClientsDir, "prysm", "logs", fmt.Sprintf("prysm_%s.log", timestamp))
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
@@ -71,3 +71,4 @@ func (c *prysmConfig) Start() error {
 
 	return process.StartClient("prysm", command, logFile, args...)
 }
+

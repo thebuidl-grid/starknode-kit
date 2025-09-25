@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 )
 
@@ -21,9 +21,9 @@ type lightHouseConfig struct {
 func (_ lightHouseConfig) getCommand() string {
 	platform := runtime.GOOS
 	if platform == "windows" {
-		return filepath.Join(pkg.InstallClientsDir, "lighthouse", "lighthouse.exe")
+		return filepath.Join(constants.InstallClientsDir, "lighthouse", "lighthouse.exe")
 	}
-	return filepath.Join(pkg.InstallClientsDir, "lighthouse", "lighthouse")
+	return filepath.Join(constants.InstallClientsDir, "lighthouse", "lighthouse")
 }
 
 // BuildGethArgs builds the arguments for the geth command
@@ -42,7 +42,7 @@ func (c *lightHouseConfig) buildArgs() []string {
 		"1200",
 		"--disable-deposit-contract-sync",
 		"--execution-jwt",
-		pkg.JWTPath,
+		constants.JWTPath,
 		"--metrics",
 		"--metrics-address",
 		"127.0.0.1",
@@ -54,7 +54,7 @@ func (c *lightHouseConfig) buildArgs() []string {
 
 	// TODO still too large
 	// Add data directory
-	dataDir := filepath.Join(pkg.InstallClientsDir, "lighthouse", "database")
+	dataDir := filepath.Join(constants.InstallClientsDir, "lighthouse", "database")
 	args = append(args, "--datadir="+dataDir)
 
 	return args
@@ -64,7 +64,7 @@ func (c *lightHouseConfig) Start() error {
 	args := c.buildArgs()
 	command := c.getCommand()
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	logFilePath := filepath.Join(pkg.InstallClientsDir, "lighthouse", "logs", fmt.Sprintf("lighthouse_%s.log", timestamp))
+	logFilePath := filepath.Join(constants.InstallClientsDir, "lighthouse", "logs", fmt.Sprintf("lighthouse_%s.log", timestamp))
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
@@ -73,3 +73,4 @@ func (c *lightHouseConfig) Start() error {
 
 	return process.StartClient("lighthouse", command, logFile, args...)
 }
+

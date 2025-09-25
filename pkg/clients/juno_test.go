@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 )
 
 func TestDefaultJunoConfig(t *testing.T) {
@@ -65,9 +65,9 @@ func TestNewJunoClient(t *testing.T) {
 		t.Fatalf("Failed to create dummy juno binary: %v", err)
 	}
 	// Save and override InstallClientsDir
-	origInstallClientsDir := pkg.InstallClientsDir
-	pkg.InstallClientsDir = tempDir
-	defer func() { pkg.InstallClientsDir = origInstallClientsDir }()
+	origInstallClientsDir := constants.InstallClientsDir
+	constants.InstallClientsDir = tempDir
+	defer func() { constants.InstallClientsDir = origInstallClientsDir }()
 
 	// Test with nil config
 	client, err := NewJunoClient(nil)

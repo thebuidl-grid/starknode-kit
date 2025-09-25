@@ -1,6 +1,7 @@
 package process
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -11,14 +12,36 @@ import (
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 )
 
+func getSystemBootTime() (time.Time, error) {
+	content, err := os.ReadFile("/proc/stat")
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	lines := strings.SplitSeq(string(content), "\n")
+	for line := range lines {
+		if strings.HasPrefix(line, "btime") {
+			fields := strings.Fields(line)
+			if len(fields) >= 2 {
+				bootTimeUnix, err := strconv.ParseInt(fields[1], 10, 64)
+				if err != nil {
+					return time.Time{}, err
+				}
+				return time.Unix(bootTimeUnix, 0), nil
+			}
+		}
+	}
+	return time.Time{}, fmt.Errorf("btime not found in /proc/stat")
+}
+
 func stopProcess(pid int) error {
 	p, err := os.FindProcess(pid)
 	if err != nil {
 		return err
 	}
 	err = p.Signal(syscall.SIGTERM)
-	if err != nil {
-		return err
+	if err == nil {
+		return nil
 	}
 	time.Sleep(time.Second * 3)
 	if running := IsProcessRunning(pid); running {
@@ -66,9 +89,17 @@ func getProcessInfo(processName string) *t.ProcessInfo {
 			if len(statFields) > 21 {
 				startTimeJiffies, err := strconv.ParseUint(statFields[21], 10, 64)
 				if err == nil {
-					// Calculate uptime (simplified)
-					uptimeSeconds := time.Now().Unix() - int64(startTimeJiffies/100)
-					uptime := time.Duration(uptimeSeconds) * time.Second
+					bootTime, err := getSystemBootTime()
+					if err != nil {
+						return nil
+					}
+
+					startTimeSeconds := float64(startTimeJiffies) / 100.0
+
+					processStartTime := bootTime.Add(time.Duration(startTimeSeconds) * time.Second)
+
+					// Calculate uptime
+					uptime := time.Since(processStartTime)
 
 					return &t.ProcessInfo{
 						PID:    pid,

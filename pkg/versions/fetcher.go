@@ -54,20 +54,7 @@ func FetchLatestVersions() (*ClientVersions, error) {
 	for i := 0; i < len(repos); i++ {
 		res := <-results
 		if res.err != nil {
-			errors = append(errors, fmt.Sprintf("%s: %v", res.client, res.err))
-			// Use fallback versions
-			switch res.client {
-			case "geth":
-				versions.Geth = LatestGethVersion
-			case "reth":
-				versions.Reth = LatestRethVersion
-			case "lighthouse":
-				versions.Lighthouse = LatestLighthouseVersion
-			case "prysm":
-				versions.Prysm = getLatestPrysmVersion()
-			case "juno":
-				versions.Juno = LatestJunoVersion
-			}
+			return nil, res.err
 		} else {
 			switch res.client {
 			case "geth":
@@ -153,20 +140,12 @@ func FetchLatestPrysmVersion() (string, error) {
 func FetchLatestJunoVersion() (string, error) {
 	return fetchGitHubRelease("juno", "NethermindEth/juno")
 }
+func FetchLatestStarknetValidatorVersion() (string, error) {
+	return fetchGitHubRelease("starknet-staking-v2", "NethermindEth/starknet-staking-v2")
+}
 
 // getLatestPrysmVersion returns the hardcoded Prysm version as fallback
 // Prysm handles versioning differently through their script
 func getLatestPrysmVersion() string {
 	return "latest" // Prysm script auto-downloads latest
-}
-
-// GetStaticVersions returns the hardcoded versions as fallback
-func GetStaticVersions() *ClientVersions {
-	return &ClientVersions{
-		Geth:       LatestGethVersion,
-		Reth:       LatestRethVersion,
-		Lighthouse: LatestLighthouseVersion,
-		Prysm:      "latest",
-		Juno:       LatestJunoVersion,
-	}
 }

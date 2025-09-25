@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
@@ -86,63 +86,13 @@ func GetEthereumMetrics() t.EthereumMetrics {
 	return metrics
 }
 
-func GetJunoMetrics() t.EthereumMetrics {
-	config, _ := utils.LoadConfig()
-	metrics := t.EthereumMetrics{
-		NetworkName: config.Network,
-		IsSyncing:   false,
-		SyncPercent: 100.0,
-	}
-
-	client := &http.Client{Timeout: 2 * time.Second}
-
-	// Get current block number
-	blockPayload := `{"jsonrpc":"2.0","method":"starknet_blockNumber","params":[],"id":1}`
-	resp, err := client.Post("http://localhost:6060", "application/json", strings.NewReader(blockPayload))
-	if err == nil {
-		defer resp.Body.Close()
-		body, _ := io.ReadAll(resp.Body)
-		var result map[string]any
-		if json.Unmarshal(body, &result) == nil {
-			if block, ok := result["result"].(float64); ok {
-				metrics.CurrentBlock = uint64(block)
-			}
-		}
-	}
-
-	// Get gas price
-	gasPricePayload := `{"jsonrpc":"2.0","method":"starknet_syncing","params":[],"id":3}`
-	gasResp, err := client.Post("http://localhost:6060", "application/json", strings.NewReader(gasPricePayload))
-	if err == nil {
-		defer gasResp.Body.Close()
-		syncBody, _ := io.ReadAll(gasResp.Body)
-		var syncResult map[string]any
-		if json.Unmarshal(syncBody, &syncResult) == nil {
-			if result, ok := syncResult["result"].(map[string]any); ok {
-				currentBlock, ok := result["current_block_num"].(float64)
-				if !ok {
-					return t.EthereumMetrics{}
-				}
-				hightestBlock, ok := result["highest_block_num"].(float64)
-				if !ok {
-					return t.EthereumMetrics{}
-				}
-				metrics.IsSyncing = hightestBlock > currentBlock
-				metrics.CurrentBlock = uint64(currentBlock)
-				metrics.SyncPercent = (currentBlock / hightestBlock) * 100
-			}
-		}
-	}
-	return metrics
-}
-
 // GetLatestLogs gets the latest log entries from client log files
 func GetLatestLogs(clientName string, lines int) []string {
-	logDir := filepath.Join(pkg.InstallClientsDir, clientName, "logs")
+	logDir := filepath.Join(constants.InstallClientsDir, clientName, "logs")
 
 	// NOTE minor fix
 	if clientName == "juno" {
-		logDir = filepath.Join(pkg.InstallStarknetDir, clientName, "logs")
+		logDir = filepath.Join(constants.InstallStarknetDir, clientName, "logs")
 	}
 
 	// Find the most recent log file

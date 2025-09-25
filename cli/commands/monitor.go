@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/thebuidl-grid/starknode-kit/pkg/monitoring"
+	"github.com/thebuidl-grid/starknode-kit/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -35,11 +36,11 @@ func runMonitor() {
 
 	monitor := monitoring.NewMonitorApp()
 
-	fmt.Println("Starting StarkNode-kit Monitor Dashboard...")
-	fmt.Println("Press 'q' or ESC to quit")
+	fmt.Println(utils.Cyan("🚀 Starting StarkNode-kit Monitor Dashboard..."))
+	fmt.Println(utils.Yellow("Press 'q' or ESC to quit"))
 
 	if err := monitor.Start(ctx); err != nil {
-		fmt.Printf("Error running monitor: %v\n", err)
+		fmt.Println(utils.Red(fmt.Sprintf("❌ Error running monitor: %v", err)))
 		os.Exit(1)
 	}
 }

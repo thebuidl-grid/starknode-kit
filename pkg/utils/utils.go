@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,13 +12,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/thebuidl-grid/starknode-kit/pkg"
+	"github.com/thebuidl-grid/starknode-kit/pkg/constants"
 	"github.com/thebuidl-grid/starknode-kit/pkg/process"
 	"github.com/thebuidl-grid/starknode-kit/pkg/types"
 	t "github.com/thebuidl-grid/starknode-kit/pkg/types"
 	"github.com/thebuidl-grid/starknode-kit/pkg/versions"
 
 	"github.com/NethermindEth/juno/core/felt"
+	"github.com/NethermindEth/starknet.go/account"
+	"github.com/NethermindEth/starknet.go/rpc"
+	starkutils "github.com/NethermindEth/starknet.go/utils"
 	envsubt "github.com/emperorsixpacks/envsubst"
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
@@ -47,7 +51,11 @@ func GetConsensusClient(c string) (t.ClientType, error) {
 }
 
 func IsInstalled(c t.ClientType) bool {
-	dir := path.Join(pkg.InstallClientsDir, string(c))
+	client := strings.ToLower(string(c))
+	dir := path.Join(constants.InstallClientsDir, client)
+	if c == t.ClientStarkValidator || c == t.ClientJuno {
+		dir = path.Join(constants.InstallStarknetDir, client)
+	}
 	info, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		return false
@@ -60,11 +68,11 @@ func IsInstalled(c t.ClientType) bool {
 
 func LoadConfig() (t.StarkNodeKitConfig, error) {
 	var cfg t.StarkNodeKitConfig
-	cfgByt, err := os.ReadFile(pkg.ConfigPath)
+	cfgByt, err := os.ReadFile(constants.ConfigPath)
 	if err != nil {
 		return t.StarkNodeKitConfig{}, err
 	}
-	err = godotenv.Load(pkg.EnvFIlePath)
+	err = godotenv.Load(constants.EnvFIlePath)
 	if err == nil {
 		err = envsubt.Unmarshal(cfgByt, &cfg)
 		if err != nil {
@@ -80,55 +88,47 @@ func LoadConfig() (t.StarkNodeKitConfig, error) {
 }
 
 func UpdateStarkNodeConfig(config t.StarkNodeKitConfig) error {
-	if err := os.MkdirAll(pkg.ConfigDir, 0755); err != nil {
+	if err := os.MkdirAll(constants.ConfigDir, 0755); err != nil {
 		return fmt.Errorf("failed to update config file: %w", err)
 	}
 	cfg, err := yaml.Marshal(config)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(pkg.ConfigPath, cfg, 0600)
+	err = os.WriteFile(constants.ConfigPath, cfg, 0600)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func CreateStarkNodeConfig() error {
-	if _, err := os.Stat(pkg.ConfigDir); err == nil {
-		return fmt.Errorf("Starknode-kit already initialized at %s", pkg.ConfigDir)
+func CreateStarkNodeConfig(cfg *types.StarkNodeKitConfig) error {
+	var setupConfig *types.StarkNodeKitConfig
+	if _, err := os.Stat(constants.ConfigPath); err == nil {
+		fmt.Println(Yellow(fmt.Sprintf("Starknode-kit already initialized at %s", constants.ConfigDir)))
 	}
+	cfg.ConsensusCientSettings.ConsensusCheckpoint = fmt.Sprintf("https://%s-checkpoint-sync.stakely.io/", cfg.Network)
 
-	default_config := defaultConfig()
-	if err := os.MkdirAll(pkg.ConfigDir, 0755); err != nil {
+	if cfg == nil {
+		setupConfig = defaultConfig()
+	} else {
+		setupConfig = cfg
+	}
+	if err := os.MkdirAll(constants.ConfigDir, 0755); err != nil {
 		return fmt.Errorf("failed to create config file: %w", err)
 	}
-	cfg, err := yaml.Marshal(default_config)
+	if setupConfig.Wallet.Name != "" {
+		setupConfig.Wallet.Wallet.Normalize()
+	}
+	conigBytes, err := yaml.Marshal(*setupConfig)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(pkg.ConfigPath, cfg, 0600)
+	err = os.WriteFile(constants.ConfigPath, conigBytes, 0600)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func GetClientVersion(clientName string) string {
-	// This would typically be cached or retrieved from a version check
-	// For now, return a placeholder
-	switch clientName {
-	case "geth":
-		return versions.LatestGethVersion
-	case "reth":
-		return versions.LatestRethVersion
-	case "lighthouse":
-		return versions.LatestLighthouseVersion
-	case "prysm":
-		return "" //versions.LatestPrysmVersion
-	default:
-		return "unknown"
-	}
 }
 
 func GetRunningClients() []types.ClientStatus {
@@ -141,7 +141,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:     gethInfo.Status,
 			PID:        gethInfo.PID,
 			Uptime:     gethInfo.Uptime,
-			Version:    GetClientVersion("geth"),
+			Version:    versions.GetVersionNumber("geth"),
 			SyncStatus: GetGethSyncStatus(),
 		}
 		clients = append(clients, status)
@@ -154,7 +154,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:     rethInfo.Status,
 			PID:        rethInfo.PID,
 			Uptime:     rethInfo.Uptime,
-			Version:    GetClientVersion("reth"),
+			Version:    versions.GetVersionNumber("reth"),
 			SyncStatus: GetRethSyncStatus(),
 		}
 		clients = append(clients, status)
@@ -167,7 +167,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:     lighthouseInfo.Status,
 			PID:        lighthouseInfo.PID,
 			Uptime:     lighthouseInfo.Uptime,
-			Version:    GetClientVersion("lighthouse"),
+			Version:    versions.GetVersionNumber("lighthouse"),
 			SyncStatus: GetLighthouseSyncStatus(),
 		}
 		clients = append(clients, status)
@@ -180,7 +180,7 @@ func GetRunningClients() []types.ClientStatus {
 			Status:     prysmInfo.Status,
 			PID:        prysmInfo.PID,
 			Uptime:     prysmInfo.Uptime,
-			Version:    GetClientVersion("prysm"),
+			Version:    versions.GetVersionNumber("prysm"),
 			SyncStatus: GetPrysmSyncStatus(),
 		}
 		clients = append(clients, status)
@@ -189,12 +189,11 @@ func GetRunningClients() []types.ClientStatus {
 	// Check for Juno (Starknet client)
 	if junoInfo := process.GetProcessInfo("juno"); junoInfo != nil {
 		status := types.ClientStatus{
-			Name:       "Juno",
-			Status:     junoInfo.Status,
-			PID:        junoInfo.PID,
-			Uptime:     junoInfo.Uptime,
-			Version:    GetClientVersion("juno"),
-			SyncStatus: GetJunoSyncStatus(),
+			Name:    "Juno",
+			Status:  junoInfo.Status,
+			PID:     junoInfo.PID,
+			Uptime:  junoInfo.Uptime,
+			Version: versions.GetVersionNumber("juno"),
 		}
 		clients = append(clients, status)
 	}
@@ -204,9 +203,7 @@ func GetRunningClients() []types.ClientStatus {
 
 func ParseHexInt(hexStr string) (uint64, error) {
 	// Remove 0x prefix if present
-	if strings.HasPrefix(hexStr, "0x") {
-		hexStr = hexStr[2:]
-	}
+	hexStr = strings.TrimPrefix(hexStr, "0x")
 	return strconv.ParseUint(hexStr, 16, 64)
 }
 
@@ -227,7 +224,8 @@ func SetNetwork(cfg *t.StarkNodeKitConfig, network string) error {
 
 func GetStarknetClient(c string) (t.ClientType, error) {
 	sprtClients := map[string]t.ClientType{
-		"juno": t.ClientJuno,
+		"juno":                t.ClientJuno,
+		"starknet-staking-v2": t.ClientStarkValidator,
 	}
 	client, ok := sprtClients[c]
 	if !ok {
@@ -300,4 +298,52 @@ func CheckRPCStatus(rpcURL, method string) (string, error) {
 		return "⚠️ Slow", nil
 	}
 	return "✅ Connected", nil
+}
+
+func EstimateGasFee(accnt *account.Account, callData []rpc.FunctionCall) (*rpc.BroadcastInvokeTxnV3, []rpc.FeeEstimation, error) {
+	nonce, err := accnt.Nonce(context.Background())
+	if err != nil {
+		return nil, nil, err
+	}
+	calldata, err := accnt.FmtCalldata(callData)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	InvokeTx := starkutils.BuildInvokeTxn(
+		accnt.Address,
+		nonce,
+		calldata,
+		&rpc.ResourceBoundsMapping{
+			L1Gas: rpc.ResourceBounds{
+				MaxAmount:       "0x0",
+				MaxPricePerUnit: "0x0",
+			},
+			L1DataGas: rpc.ResourceBounds{
+				MaxAmount:       "0x0",
+				MaxPricePerUnit: "0x0",
+			},
+			L2Gas: rpc.ResourceBounds{
+				MaxAmount:       "0x0",
+				MaxPricePerUnit: "0x0",
+			},
+		},
+		nil,
+	)
+
+	err = accnt.SignInvokeTransaction(context.Background(), InvokeTx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	feeRes, err := accnt.Provider.EstimateFee(
+		context.Background(),
+		[]rpc.BroadcastTxn{InvokeTx},
+		[]rpc.SimulationFlag{},
+		rpc.WithBlockTag(rpc.BlockTagLatest),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+	return InvokeTx, feeRes, nil
 }

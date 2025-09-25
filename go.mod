@@ -1,10 +1,10 @@
 module github.com/thebuidl-grid/starknode-kit
 
-go 1.24.2
+go 1.25.0
 
 require (
 	github.com/NethermindEth/juno v0.14.7
-	github.com/NethermindEth/starknet.go v0.13.0
+	github.com/NethermindEth/starknet.go v0.15.0
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/emperorsixpacks/envsubst v1.0.3
 	github.com/gdamore/tcell/v2 v2.7.1
