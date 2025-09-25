@@ -65,7 +65,7 @@ To uninstall `starknode-kit`, remove the binary and the configuration directory:
 
 ```bash
 sudo rm /usr/local/bin/starknode-kit
-rm -rf ~/.starknode-kit
+rm -rf ~/.config/starknode-kit
 ```
 
 > **Note**: This will not remove any of the client data (e.g., blockchain data). The data is stored in the locations specified in your `~/.starknode-kit/starknode.yml` file.
@@ -245,12 +245,3 @@ Whether you're a seasoned validator, hobbyist, or first-time node runner, you're
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-## Uninstallation
-
-```bash
-sudo rm /usr/local/bin/starknode-kit
-rm -rf ~/.starknode-kit
-```
