@@ -159,10 +159,12 @@ func validatorStartCommandRun(cmd *cobra.Command, args []string) {
 		fmt.Println(utils.Red(fmt.Sprintf("❌ Error creating validator client: %v", err)))
 		return
 	}
-	err = validatorNode.Start()
-	if err != nil {
-		fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting validator client: %v", err)))
-		return
+	if !options.IsClientRunning(types.ClientStarkValidator) {
+		err = validatorNode.Start()
+		if err != nil {
+			fmt.Println(utils.Red(fmt.Sprintf("❌ Error starting validator client: %v", err)))
+			return
+		}
 	}
 	fmt.Println(utils.Cyan("✅ Validator started"))
 	fmt.Println(utils.Cyan("⏳ Waiting for log files to be created..."))

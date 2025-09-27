@@ -39,7 +39,14 @@ Supported clients:
 			fmt.Println(utils.Red(fmt.Sprintf("❌ Client %s not installed", clientName)))
 			return
 		}
-
+		if options.IsClientRunning(clientType) {
+			if err != nil {
+				fmt.Println(utils.Red(fmt.Sprintf("❌ Client already running: %v", err)))
+				return
+			}
+			fmt.Println(utils.Cyan("⏳ Waiting for log files to be created..."))
+			options.LoadLogs([]string{string(clientType)})
+		}
 		fmt.Println(utils.Cyan(fmt.Sprintf("🚀 Attempting to run %s...", clientName)))
 
 		switch clientType {
@@ -97,4 +104,3 @@ Supported clients:
 
 	},
 }
-

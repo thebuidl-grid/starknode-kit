@@ -61,3 +61,12 @@ func LoadLogs(clients []string) {
 	}
 
 }
+
+func IsClientRunning(client types.ClientType) bool {
+	for _, i := range utils.GetRunningClients() {
+		if i.Name == string(client) {
+			return true
+		}
+	}
+	return false
+}
