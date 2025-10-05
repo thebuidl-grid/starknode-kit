@@ -1,0 +1,24 @@
+{
+  "title": "Starknode Kit Documentation",
+  "description": "Complete guide for setting up, managing, and maintaining Ethereum and Starknet nodes with Starknode Kit",
+  "author": "The Buidl Grid",
+  "language": "en",
+  "structure": {
+    "readme": "README.md",
+    "summary": "SUMMARY.md"
+  },
+  "plugins": [
+    "theme-default",
+    "search",
+    "fontsettings",
+    "highlight"
+  ],
+  "pluginsConfig": {
+    "theme-default": {
+      "showLevel": true,
+      "styles": {
+        "website": "styles/website.css"
+      }
+    }
+  }
+}
