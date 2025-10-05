@@ -1,0 +1,282 @@
+/* Custom styles for Starknode Kit documentation */
+
+/* Brand colors */
+:root {
+  --primary-color: #6366f1;
+  --secondary-color: #8b5cf6;
+  --accent-color: #06b6d4;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --text-color: #1f2937;
+  --bg-color: #ffffff;
+  --border-color: #e5e7eb;
+}
+
+/* Header styling */
+.book-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border-bottom: 1px solid var(--border-color);
+}
+
+.book-header h1 {
+  color: white;
+  font-weight: 600;
+}
+
+/* Navigation styling */
+.book-summary {
+  background-color: #f8fafc;
+  border-right: 1px solid var(--border-color);
+}
+
+.book-summary ul.summary li a {
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.book-summary ul.summary li.active > a {
+  color: var(--primary-color);
+  background-color: #e0e7ff;
+  border-left: 3px solid var(--primary-color);
+}
+
+.book-summary ul.summary li a:hover {
+  color: var(--primary-color);
+  background-color: #f1f5f9;
+}
+
+/* Content styling */
+.book-body {
+  background-color: var(--bg-color);
+}
+
+.markdown-section {
+  max-width: 900px;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.markdown-section h1,
+.markdown-section h2,
+.markdown-section h3,
+.markdown-section h4,
+.markdown-section h5,
+.markdown-section h6 {
+  color: var(--text-color);
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-section h1 {
+  font-size: 2.5rem;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+}
+
+.markdown-section h2 {
+  font-size: 2rem;
+  color: var(--primary-color);
+}
+
+.markdown-section h3 {
+  font-size: 1.5rem;
+  color: var(--secondary-color);
+}
+
+/* Code styling */
+.markdown-section pre {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.markdown-section code {
+  background-color: #f1f5f9;
+  color: var(--primary-color);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.markdown-section pre code {
+  background-color: transparent;
+  color: #e2e8f0;
+  padding: 0;
+}
+
+/* Blockquote styling */
+.markdown-section blockquote {
+  border-left: 4px solid var(--accent-color);
+  background-color: #f0f9ff;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.markdown-section blockquote p {
+  margin: 0;
+  color: #0c4a6e;
+}
+
+/* Table styling */
+.markdown-section table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-section table th {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.markdown-section table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.markdown-section table tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.markdown-section table tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Alert boxes */
+.alert {
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.alert-info {
+  background-color: #f0f9ff;
+  border-left-color: var(--accent-color);
+  color: #0c4a6e;
+}
+
+.alert-warning {
+  background-color: #fffbeb;
+  border-left-color: var(--warning-color);
+  color: #92400e;
+}
+
+.alert-success {
+  background-color: #f0fdf4;
+  border-left-color: var(--success-color);
+  color: #166534;
+}
+
+.alert-error {
+  background-color: #fef2f2;
+  border-left-color: var(--error-color);
+  color: #991b1b;
+}
+
+/* Button styling */
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn:hover {
+  background-color: var(--secondary-color);
+  color: white;
+  text-decoration: none;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+}
+
+/* Feature highlights */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.feature-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.feature-card .icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .markdown-section {
+    padding: 1rem;
+  }
+  
+  .markdown-section h1 {
+    font-size: 2rem;
+  }
+  
+  .markdown-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  .book-header,
+  .book-summary,
+  .book-body .navigation {
+    display: none;
+  }
+  
+  .book-body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .markdown-section {
+    max-width: none;
+  }
+}
