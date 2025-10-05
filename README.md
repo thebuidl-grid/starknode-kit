@@ -11,7 +11,7 @@
 1. Download and run the installation script:
 
    ```bash
-   /bin/bash -c "$(curl -sSL https://raw.githubusercontent.com/thebuidl-grid/starknode-kit/main/install.sh)" 
+   /bin/bash -c "$(curl -sSL https://raw.githubusercontent.com/thebuidl-grid/starknode-kit/main/install.sh)"
    ```
 
 2. Or download the script first and then run it:
@@ -53,6 +53,7 @@ After installation, verify that `starknode-kit` is working:
 ```bash
 starknode-kit --help
 ```
+
 #### Generate Config file
 
 ```bash
@@ -69,7 +70,6 @@ rm -rf ~/.config/starknode-kit
 ```
 
 > **Note**: This will not remove any of the client data (e.g., blockchain data). The data is stored in the locations specified in your `~/.starknode-kit/starknode.yml` file.
-
 
 ---
 
@@ -98,20 +98,20 @@ rm -rf ~/.config/starknode-kit
 #### Add a client pair (consensus + execution)
 
 ```bash
-starknode-kit add --consensus_client lighthouse --execution_client geth
+starknode-kit add --consensus-client lighthouse --execution-client geth
 ```
 
 #### Add a Starknet client
 
 ```bash
-starknode-kit add --starknet_client juno
+starknode-kit add --starknet-client juno
 ```
 
 #### Remove a configured client
 
 ```bash
-starknode-kit remove --consensus_client lighthouse
-starknode-kit remove --starknet_client juno
+starknode-kit remove --consensus-client lighthouse
+starknode-kit remove --starknet-client juno
 ```
 
 #### Change network
@@ -163,11 +163,13 @@ starknode-kit run lighthouse
 Manage the Starknet validator client.
 
 - **Get validator status:**
+
   ```bash
   starknode-kit validator status
   ```
 
 - **Get validator version:**
+
   ```bash
   starknode-kit validator --version
   ```
@@ -197,33 +199,33 @@ starknode-kit help add
 
 Make sure the following are installed on your system before using or building `starknode-kit`:
 
-* **Go**: Version **1.24 or later**
+- **Go**: Version **1.24 or later**
   Install from: [https://go.dev/dl/](https://go.dev/dl/)
 
-* **Rust**: Recommended for building Starknet clients (e.g., Juno)
+- **Rust**: Recommended for building Starknet clients (e.g., Juno)
   Install with:
 
   ```bash
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
   ```
 
-* **Make**: Required to build certain clients and scripts
+- **Make**: Required to build certain clients and scripts
   Install via package manager:
 
-  * Ubuntu/Debian: `sudo apt install make`
-  * macOS (with Homebrew): `brew install make`
-  * Windows (WSL): included or `sudo apt install make`
+  - Ubuntu/Debian: `sudo apt install make`
+  - macOS (with Homebrew): `brew install make`
+  - Windows (WSL): included or `sudo apt install make`
 
 ### 🖥️ Hardware Requirements
 
 See this [Rocket Pool Hardware Guide](https://docs.rocketpool.net/guides/node/hardware.html) for a detailed breakdown of node hardware requirements.
 
-* **CPU**: Node operation doesn't require heavy CPU power. The BG Client has run well on both i3 and i5 models of the ASUS NUC 13 PRO. Be cautious if using Celeron processors, as they may have limitations.
-* **RAM**: At least **32 GB** is recommended for good performance with overhead.
-* **Storage (SSD)**: The most critical component. Use a **2 TB+ NVMe SSD** with:
+- **CPU**: Node operation doesn't require heavy CPU power. The BG Client has run well on both i3 and i5 models of the ASUS NUC 13 PRO. Be cautious if using Celeron processors, as they may have limitations.
+- **RAM**: At least **32 GB** is recommended for good performance with overhead.
+- **Storage (SSD)**: The most critical component. Use a **2 TB+ NVMe SSD** with:
 
-  * A **DRAM cache**
-  * **No Quad-Level Cell (QLC)** NAND architecture
+  - A **DRAM cache**
+  - **No Quad-Level Cell (QLC)** NAND architecture
     See this [SSD List Gist](https://gist.github.com/bkase/fab02c5b3c404e9ef8e5c2071ac1558c) for tested options.
 
 ---
