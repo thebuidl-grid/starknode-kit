@@ -1,33 +1,23 @@
 {
   "name": "starknode-kit-docs",
   "version": "1.0.0",
-  "description": "Documentation for Starknode Kit - A CLI tool for managing Ethereum and Starknet nodes",
-  "main": "README.md",
+  "private": true,
   "scripts": {
-    "serve": "honkit serve",
-    "build": "honkit build",
-    "pdf": "honkit pdf . ./starknode-kit-docs.pdf",
-    "epub": "honkit epub . ./starknode-kit-docs.epub"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/thebuidl-grid/starknode-kit.git"
+  "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "next": "15.5.4"
   },
-  "keywords": [
-    "ethereum",
-    "starknet",
-    "blockchain",
-    "node",
-    "cli",
-    "documentation",
-    "gitbook"
-  ],
-  "author": "The Buidl Grid",
-  "license": "MIT",
   "devDependencies": {
-    "honkit": "^4.0.0"
-  },
-  "engines": {
-    "node": ">=16.0.0"
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4"
   }
 }

@@ -1,75 +1,71 @@
-# Starknode Kit Documentation
+# starknode-kit Documentation
 
-Welcome to the comprehensive documentation for **Starknode Kit** - a powerful CLI tool for setting up, managing, and maintaining Ethereum and Starknet nodes.
+Official documentation for starknode-kit, built with Next.js.
 
-## 🚀 Quick Start
-
-Get up and running with Starknode Kit in minutes:
+## Quick Start
 
 ```bash
-# Install Starknode Kit
-curl -sSL https://raw.githubusercontent.com/thebuidl-grid/starknode-kit/main/install.sh | bash
+# Install dependencies
+npm install
 
-# Initialize configuration
-starknode-kit init
-
-# Add your first client
-starknode-kit add --consensus_client lighthouse --execution_client geth
-
-# Start your node
-starknode-kit start
+# Run development server
+npm run dev
 ```
 
-## 📚 Documentation Structure
+Open [http://localhost:3000](http://localhost:3000) to view the documentation.
 
-### Getting Started
-- [Installation and Setup](getting-started/installation.md)
-- [Hardware Requirements](getting-started/hardware-requirements.md)
-- [Quick Start Guide](getting-started/quick-start.md)
-- [Configuration](getting-started/configuration.md)
+## Features
 
-### Client Management
-- [Adding Clients](client-management/adding-clients.md)
-- [Ethereum Clients](client-management/ethereum-clients.md)
-- [Starknet Clients](client-management/starknet-clients.md)
-- [Client Configuration](client-management/client-configuration.md)
+- 🎨 Light/Dark mode toggle
+- 📱 Responsive design
+- 🔍 Clean, simple navigation
+- 📝 Comprehensive guides
+- 💻 Code examples with copy button
 
-### Operations
-- [Running Nodes](operations/running-nodes.md)
-- [Monitoring](operations/monitoring.md)
-- [Updates and Maintenance](operations/updates.md)
-- [Troubleshooting](operations/troubleshooting.md)
+## Building
 
-### Advanced Topics
-- [Network Configuration](advanced/network-configuration.md)
-- [Performance Optimization](advanced/performance.md)
-- [Security Best Practices](advanced/security.md)
-- [Custom Configurations](advanced/custom-configurations.md)
+```bash
+# Build for production
+npm run build
 
-### API Reference
-- [Command Reference](api-reference/commands.md)
-- [Configuration Schema](api-reference/configuration-schema.md)
-- [Environment Variables](api-reference/environment-variables.md)
+# Start production server
+npm start
+```
 
-## 🌟 Key Features
+## Documentation Pages
 
-- **🔧 Multi-Client Support**: Manage Ethereum (Geth, Reth, Lighthouse, Prysm) and Starknet (Juno) clients
-- **⚡ Easy Setup**: One-command installation and configuration
-- **📊 Real-time Monitoring**: Built-in monitoring dashboard
-- **🔄 Auto-Updates**: Automatic client updates and maintenance
-- **🌐 Network Flexibility**: Support for mainnet, testnets, and custom networks
-- **🛡️ Production Ready**: Designed for both development and production environments
+- **Introduction** - Overview and quick start
+- **Getting Started** - Step-by-step setup guide  
+- **Installation** - Installation methods
+- **Configuration** - Node configuration
+- **Commands** - CLI command reference
+- **Clients** - Supported clients (Geth, Reth, Lighthouse, Prysm, Juno)
+- **Validator Setup** - Validator node setup
+- **Requirements** - Hardware/software requirements
+- **Contributing** - Contribution guidelines
 
-## 🤝 Community and Support
+## Project Structure
 
-- **Telegram**: [Join our community](https://t.me/+SCPbza9fk8dkYWI0)
-- **GitHub**: [Report issues and contribute](https://github.com/thebuidl-grid/starknode-kit)
-- **Documentation**: This comprehensive guide
+```
+docs/
+├── src/
+│   ├── app/              # Documentation pages
+│   │   ├── page.tsx      # Homepage
+│   │   ├── layout.tsx    # Root layout
+│   │   ├── globals.css   # Global styles
+│   │   └── [pages]/      # Documentation pages
+│   └── components/       # Reusable components
+│       ├── Sidebar.tsx   # Navigation sidebar
+│       ├── Header.tsx    # Top header
+│       ├── ThemeToggle.tsx  # Light/dark mode toggle
+│       └── CodeBlock.tsx # Code block with copy
+└── package.json
+```
 
-## 📄 License
+## Contributing
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/thebuidl-grid/starknode-kit/blob/main/LICENSE) file for details.
+See the main [Contributing Guide](../README.md#contributing) for guidelines.
 
----
+## License
 
-*Built with ❤️ by The Buidl Grid*
+MIT License - see LICENSE file for details.
