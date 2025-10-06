@@ -151,7 +151,7 @@ func (i *installer) getClientFileName(client types.ClientType, version string) (
 			return "", err
 		}
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
-    goos, gethArch, version, gethHash[:8])
+			goos, gethArch, version, gethHash[:8])
 	case types.ClientReth:
 		fileName = fmt.Sprintf("reth-v%s-%s", version, archName)
 	case types.ClientLighthouse:
@@ -298,7 +298,7 @@ func (i *installer) installClientBinary(client types.ClientType, clientDir, clie
 	case types.ClientJuno:
 		return i.installJunoClient(client, clientDir, downloadURL, fileName)
 	default:
-		return i.installStandardClient(client, clientDir, downloadURL, fileName)
+		return i.installStandardClient(client, clientPath, downloadURL, fileName)
 	}
 }
 
@@ -359,7 +359,6 @@ func (i *installer) installStandardClient(client types.ClientType, clientDir, do
 	// Download file
 	fmt.Printf("Downloading %s.\n", client)
 	if err := downloadFile(downloadURL, archivePath); err != nil {
-		fmt.Println(err)
 		return err
 	}
 
