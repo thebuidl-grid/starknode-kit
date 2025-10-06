@@ -298,7 +298,7 @@ func (i *installer) installClientBinary(client types.ClientType, clientDir, clie
 	case types.ClientJuno:
 		return i.installJunoClient(client, clientDir, downloadURL, fileName)
 	default:
-		return i.installStandardClient(client, clientPath, downloadURL, fileName)
+		return i.installStandardClient(client, clientDir, downloadURL, fileName)
 	}
 }
 
