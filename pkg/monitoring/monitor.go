@@ -22,6 +22,7 @@ func NewMonitorApp() *MonitorApp {
 		ExecutionLogChan: make(chan string, 100),
 		ConsensusLogChan: make(chan string, 100),
 		JunoLogChan:      make(chan string, 100),
+		ValidatorLogChan: make(chan string, 100), // New validator channel
 		StatusChan:       make(chan string, 10),
 		JunoStatusChan:   make(chan string, 10),
 		NetworkChan:      make(chan string, 10),
@@ -113,17 +114,34 @@ func (m *MonitorApp) detectAndUpdateClientTitles() {
 	} else {
 		m.JunoLogBox.SetTitle(" Juno (Not Running) ❌ ")
 	}
+
+	// Check for Validator
+	var validatorClient *types.ClientStatus
+	for _, client := range runningClients {
+		if client.Name == "Validator" || client.Name == "StarknetValidator" {
+			validatorClient = &client
+			break
+		}
+	}
+
+	if validatorClient != nil {
+		m.ValidatorLogBox.SetTitle(" Starknet Validator 🛡️ ")
+	} else {
+		m.ValidatorLogBox.SetTitle(" Validator (Not Running) ❌ ")
+	}
 }
 
 func (m *MonitorApp) Start(ctx context.Context) error {
 	// Start new update goroutines matching JavaScript components exactly
-	go m.updateExecutionLogs(ctx)    // executionLog.js equivalent
-	go m.updateConsensusLogs(ctx)    // consensusLog.js equivalent
-	go m.updateJunoLogs(ctx)         // junoLog.js equivalent (Starknet client)
-	go m.updateStatusBox(ctx)        // statusBox.js equivalent
-	go m.updateChainInfoBox(ctx)     // chainInfoBox.js equivalent
-	go m.updateSystemStatsGauge(ctx) // systemStatsGauge.js equivalent
-	go m.updateRPCInfo(ctx)          // RPC info component
+	go m.updateExecutionLogs(ctx)     // executionLog.js equivalent
+	go m.updateConsensusLogs(ctx)     // consensusLog.js equivalent
+	go m.updateJunoLogs(ctx)          // junoLog.js equivalent (Starknet client)
+	go m.updateValidatorLogs(ctx)     // validatorLog.js equivalent (Starknet validator)
+	go m.updateStatusBox(ctx)         // statusBox.js equivalent
+	go m.updateChainInfoBox(ctx)      // chainInfoBox.js equivalent
+	go m.updateSystemStatsGauge(ctx)  // systemStatsGauge.js equivalent
+	go m.updateRPCInfo(ctx)           // RPC info component
+	go m.updateLayoutDynamically(ctx) // Dynamic layout updater
 	// Removed: go m.updateBandwidthGauge(ctx)   // Bandwidth component removed
 	// Removed: go m.updatePeerCountGauge(ctx)   // Peer count component removed
 
@@ -163,6 +181,11 @@ func (m *MonitorApp) handleUpdates(ctx context.Context) {
 			m.App.QueueUpdateDraw(func() {
 				m.JunoLogBox.SetText(text)
 				m.JunoLogBox.ScrollToEnd()
+			})
+		case text := <-m.ValidatorLogChan:
+			m.App.QueueUpdateDraw(func() {
+				m.ValidatorLogBox.SetText(text)
+				m.ValidatorLogBox.ScrollToEnd()
 			})
 		case text := <-m.StatusChan:
 			m.App.QueueUpdateDraw(func() {
