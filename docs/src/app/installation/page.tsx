@@ -6,7 +6,7 @@ export default function Installation() {
     <div className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-bold mb-4">Installation</h1>
 
-      <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+      <p className="text-xl text-white mb-4 leading-relaxed">
         There are multiple ways to install starknode-kit. Choose the method that
         best suits your needs.
       </p>
@@ -132,9 +132,9 @@ Use "starknode [command] --help" for more information about a command.`}
 rm -rf ~/.config/starknode-kit`}
       />
 
-      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 my-10 rounded-r-lg">
-        <p className="font-semibold mb-3 text-lg">⚠️ Note</p>
-        <p className="mb-0 text-base">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 p-6 my-10 rounded-r-lg">
+        <p className="font-semibold mb-3 text-lg text-gray-900 dark:text-yellow-400">⚠️ Note</p>
+        <p className="mb-0 text-base text-gray-700 dark:text-gray-300">
           This will not remove any client data (e.g., blockchain data). The data
           is stored in the locations specified in your{" "}
           <code>~/.starknode-kit/starknode.yml</code> file.
@@ -164,13 +164,13 @@ rm -rf ~/.config/starknode-kit`}
         have sudo access or contact your system administrator.
       </p>
 
-      <div className="mt-12 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">📖 Next Steps</h3>
-        <p className="text-gray-700 mb-4">
+      <div className="mt-12 p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-yellow-400">📖 Next Steps</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
           Ready to dive deeper? Check out our configuration guide:
         </p>
         <div className="flex flex-wrap gap-3">
-          <Link href="/configuration" className="text-blue-600 hover:text-blue-800 font-medium">Configuration Guide</Link>
+          <Link href="/configuration" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">Configuration Guide</Link>
         </div>
       </div>
     </div>

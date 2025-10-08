@@ -25,6 +25,14 @@ docs/.gitbook/
 docs/dist/
 docs/build/
 
+# Next.js build outputs
+docs/.next/
+docs/out/
+docs/next-env.d.ts
+.next/
+out/
+next-env.d.ts
+
 # IDE and editor files
 .vscode/
 .idea/

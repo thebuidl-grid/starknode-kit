@@ -34,19 +34,57 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.prose h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .prose h1 {
+    font-size: 2.5rem;
+  }
+}
+
 .prose h2 {
-  margin-top: 3rem;
+  margin-top: 2rem;
   margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .prose h2 {
+    margin-top: 3rem;
+    font-size: 1.875rem;
+  }
 }
 
 .prose h3 {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .prose h3 {
+    margin-bottom: 1.25rem;
+    font-size: 1.5rem;
+  }
+}
+
+.prose h4 {
+  font-size: 1.125rem;
+}
+
+@media (min-width: 640px) {
+  .prose h4 {
+    font-size: 1.25rem;
+  }
 }
 
 .prose a {
   color: #2563eb;
   text-decoration: none;
   transition: color 0.2s;
+  word-break: break-word;
 }
 
 .prose a:hover {
@@ -55,11 +93,12 @@ body {
 }
 
 .prose code {
-  background: #f3f4f6;
+  background: #040811;
   padding: 0.2em 0.4em;
   border-radius: 0.25rem;
   font-size: 0.875em;
   font-family: 'Courier New', monospace;
+  word-break: break-word;
 }
 
 .prose pre {
@@ -73,11 +112,20 @@ body {
   background: transparent;
   padding: 0;
   color: #e2e8f0;
+  word-break: normal;
 }
 
 .prose table {
   width: 100%;
   border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+
+@media (min-width: 768px) {
+  .prose table {
+    display: table;
+  }
 }
 
 .prose th {
@@ -90,4 +138,27 @@ body {
   padding-left: 1rem;
   font-style: italic;
   color: #6b7280;
+}
+
+.prose ul, .prose ol {
+  padding-left: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .prose ul, .prose ol {
+    padding-left: 2rem;
+  }
+}
+
+/* Responsive table wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.5rem 0;
+}
+
+/* Ensure images are responsive */
+.prose img {
+  max-width: 100%;
+  height: auto;
 }
