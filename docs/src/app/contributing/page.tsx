@@ -6,7 +6,7 @@ export default function Contributing() {
     <div className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-bold mb-4">Contributing</h1>
 
-      <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+      <p className="text-xl text-white mb-4 leading-relaxed">
         We welcome contributions to starknode-kit! This guide will help you get
         started with contributing to the project.
       </p>
@@ -251,9 +251,9 @@ Error log output here
         <li><a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener noreferrer">Conventional Commits</a></li>
       </ul>
 
-      <div className="bg-green-50 border-l-4 border-green-500 p-4 my-6">
-        <p className="font-semibold mb-2">🎉 Thank You!</p>
-        <p className="mb-0">
+      <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 dark:border-green-600 p-4 my-6">
+        <p className="font-semibold mb-2 text-gray-900 dark:text-green-400">🎉 Thank You!</p>
+        <p className="mb-0 text-gray-700 dark:text-gray-300">
           Thank you for considering contributing to starknode-kit! Your contributions help make this tool better for everyone.
         </p>
       </div>

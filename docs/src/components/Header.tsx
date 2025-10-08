@@ -8,12 +8,12 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-white border-b border-gray-200 z-30">
+    <header className="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-30 transition-colors">
       <div className="h-full px-4 lg:px-8 flex items-center justify-between">
         {/* Hamburger button for mobile */}
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 text-gray-600 hover:text-gray-900 -ml-2"
+          className="lg:hidden p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white -ml-2"
           aria-label="Open menu"
         >
           <svg
@@ -34,7 +34,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         {/* Mobile title - shown only on mobile */}
         <div className="lg:hidden flex-1 text-center">
           <Link href="/">
-            <span className="text-lg font-bold text-gray-900">starknode-kit</span>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">starknode-kit</span>
           </Link>
         </div>
 
@@ -44,7 +44,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             href="https://github.com/thebuidl-grid/starknode-kit"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             aria-label="GitHub"
           >
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             href="https://t.me/+SCPbza9fk8dkYWI0"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             aria-label="Telegram"
           >
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">

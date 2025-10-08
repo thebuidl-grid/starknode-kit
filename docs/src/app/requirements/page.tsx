@@ -6,16 +6,16 @@ export default function Requirements() {
     <div className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-bold mb-4">Requirements</h1>
 
-      <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+      <p className="text-xl text-white mb-4 leading-relaxed">
         Hardware and software requirements for running Ethereum and Starknet
         nodes with starknode-kit.
       </p>
 
       <h2 className="text-3xl font-semibold mb-6">Hardware Requirements</h2>
 
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">
-        <p className="font-semibold mb-2">📚 Reference</p>
-        <p className="mb-0">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 dark:border-blue-600 p-4 my-6">
+        <p className="font-semibold mb-2 text-gray-900 dark:text-blue-400">📚 Reference</p>
+        <p className="mb-0 text-gray-700 dark:text-gray-300">
           For a detailed breakdown of node hardware requirements, see the <a href="https://docs.rocketpool.net/guides/node/hardware.html" target="_blank" rel="noopener noreferrer">Rocket Pool Hardware Guide</a>.
         </p>
       </div>
@@ -26,38 +26,38 @@ export default function Requirements() {
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Component</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requirement</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Component</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Requirement</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Notes</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">CPU</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">4+ cores</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Intel i3/i5 or AMD equivalent. Avoid Celeron.</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">CPU</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">4+ cores</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Intel i3/i5 or AMD equivalent. Avoid Celeron.</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">RAM</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">32 GB</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Minimum 16GB, 32GB recommended for comfort</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">RAM</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">32 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Minimum 16GB, 32GB recommended for comfort</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Storage</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">2+ TB NVMe SSD</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Must have DRAM cache, no QLC NAND</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Storage</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">2+ TB NVMe SSD</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Must have DRAM cache, no QLC NAND</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Network</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">100+ Mbps</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Stable connection, unlimited data preferred</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Network</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">100+ Mbps</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Stable connection, unlimited data preferred</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Power</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">24/7 uptime</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">UPS recommended for validators</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Power</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">24/7 uptime</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">UPS recommended for validators</td>
                 </tr>
               </tbody>
             </table>
@@ -85,38 +85,38 @@ export default function Requirements() {
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Size</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Growth Rate</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Size</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Growth Rate</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Ethereum (Geth)</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~1.2 TB</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~150 GB/year</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Ethereum (Geth)</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~1.2 TB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~150 GB/year</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Ethereum (Reth)</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~900 GB</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~120 GB/year</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Ethereum (Reth)</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~900 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~120 GB/year</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Lighthouse</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~200 GB</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~50 GB/year</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~200 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~50 GB/year</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Prysm</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~250 GB</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~60 GB/year</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~250 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~60 GB/year</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Juno (Starknet)</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~300 GB</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~100 GB/year</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Juno (Starknet)</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~300 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~100 GB/year</td>
                 </tr>
               </tbody>
             </table>
@@ -135,9 +135,9 @@ export default function Requirements() {
         <li>✅ <strong>NVMe interface</strong> - SATA SSDs are too slow</li>
       </ul>
 
-      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 my-6">
-        <p className="font-semibold mb-2">⚠️ Warning</p>
-        <p className="mb-0">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 p-4 my-6">
+        <p className="font-semibold mb-2 text-gray-900 dark:text-yellow-400">⚠️ Warning</p>
+        <p className="mb-0 text-gray-700 dark:text-gray-300">
           Using a QLC SSD or SSD without DRAM cache will result in poor performance and potential node failures. 
           See the <a href="https://gist.github.com/bkase/fab02c5b3c404e9ef8e5c2071ac1558c" target="_blank" rel="noopener noreferrer">tested SSD list</a> for recommendations.
         </p>
@@ -207,33 +207,33 @@ make --version`} />
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Port</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Protocol</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Port</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Protocol</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Purpose</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">30303</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">TCP/UDP</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Ethereum execution P2P</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code text-gray-900 dark:text-gray-300">30303</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">TCP/UDP</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Ethereum execution P2P</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">9000</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">TCP/UDP</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Lighthouse consensus P2P</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code text-gray-900 dark:text-gray-300">9000</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">TCP/UDP</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Lighthouse consensus P2P</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">13000</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">TCP</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Prysm consensus P2P</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code text-gray-900 dark:text-gray-300">13000</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">TCP</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Prysm consensus P2P</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">6060</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">TCP</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Juno RPC (localhost only)</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code text-gray-900 dark:text-gray-300">6060</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">TCP</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Juno RPC (localhost only)</td>
                 </tr>
               </tbody>
             </table>
@@ -294,28 +294,28 @@ make --version`} />
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instance Type</th>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Est. Cost/Month</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Provider</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Instance Type</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Est. Cost/Month</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">AWS</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">m5.2xlarge + 4TB gp3</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~$500-700</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">AWS</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">m5.2xlarge + 4TB gp3</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~$500-700</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Google Cloud</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">n2-standard-8 + 4TB SSD</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~$600-800</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Google Cloud</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">n2-standard-8 + 4TB SSD</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~$600-800</td>
                 </tr>
                 <tr>
-                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Azure</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">Standard_D8s_v3 + 4TB Premium SSD</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">~$550-750</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Azure</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Standard_D8s_v3 + 4TB Premium SSD</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~$550-750</td>
                 </tr>
               </tbody>
             </table>
@@ -323,9 +323,9 @@ make --version`} />
         </div>
       </div>
 
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">
-        <p className="font-semibold mb-2">💡 Cost Consideration</p>
-        <p className="mb-0">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 dark:border-blue-600 p-4 my-6">
+        <p className="font-semibold mb-2 text-gray-900 dark:text-blue-400">💡 Cost Consideration</p>
+        <p className="mb-0 text-gray-700 dark:text-gray-300">
           Running on dedicated hardware is often more cost-effective long-term than cloud hosting, especially for validators.
         </p>
       </div>

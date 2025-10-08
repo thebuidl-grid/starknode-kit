@@ -5,13 +5,13 @@ export default function Validator() {
     <div className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-bold mb-4">Validator Setup</h1>
 
-      <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+      <p className="text-xl text-white mb-4 leading-relaxed">
         Set up and manage your Starknet validator node using starknode-kit.
       </p>
 
-      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 my-10 rounded-r-lg">
-        <p className="font-semibold mb-3 text-lg">⚠️ Important</p>
-        <p className="mb-0 text-base">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 p-6 my-10 rounded-r-lg">
+        <p className="font-semibold mb-3 text-lg text-gray-900 dark:text-yellow-400">⚠️ Important</p>
+        <p className="mb-0 text-base text-gray-700 dark:text-gray-300">
           Running a validator requires significant responsibility. Make sure you
           understand the requirements and risks before proceeding.
         </p>
@@ -209,9 +209,9 @@ starknode-kit monitor`} />
         <li><strong>Penalties</strong> - For downtime or malicious behavior</li>
       </ul>
 
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">
-        <p className="font-semibold mb-2">💡 Tip</p>
-        <p className="mb-0">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 dark:border-blue-600 p-4 my-6">
+        <p className="font-semibold mb-2 text-gray-900 dark:text-blue-400">💡 Tip</p>
+        <p className="mb-0 text-gray-700 dark:text-gray-300">
           Start on the testnet (Sepolia) to familiarize yourself with validator operations before running on mainnet.
         </p>
       </div>
@@ -224,13 +224,13 @@ starknode-kit monitor`} />
         <li><a href="https://github.com/thebuidl-grid/starknode-kit" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
       </ul>
 
-      <div className="mt-12 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">📖 Next Steps</h3>
-        <p className="text-gray-700 mb-4">
+      <div className="mt-12 p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-yellow-400">📖 Next Steps</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
           Ready to dive deeper? Check out our comprehensive guides:
         </p>
         <div className="flex flex-wrap gap-3">
-          <Link href="/requirements" className="text-blue-600 hover:text-blue-800 font-medium">System Requirements</Link>
+          <Link href="/requirements" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">System Requirements</Link>
         </div>
       </div>
     </div>

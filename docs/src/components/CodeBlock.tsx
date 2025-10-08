@@ -27,7 +27,7 @@ export default function CodeBlock({ code, language = 'bash' }: CodeBlockProps) {
         </button>
       </div>
       <pre className="bg-gray-900 text-gray-100 p-3 sm:p-4 rounded-lg overflow-x-auto border border-gray-700">
-        <code className={`language-${language} text-xs sm:text-sm font-source-code block`}>{code}</code>
+        <p className={`language-${language} text-xs sm:text-sm font-[var(--font-source-code)] block`}>{code}</p>
       </pre>
     </div>
   );
