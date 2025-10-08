@@ -2,11 +2,44 @@
 
 import Link from 'next/link';
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-white border-b border-gray-200 z-10">
-      <div className="h-full px-8 flex items-center justify-end">
-        <div className="flex items-center space-x-4">
+    <header className="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-white border-b border-gray-200 z-30">
+      <div className="h-full px-4 lg:px-8 flex items-center justify-between">
+        {/* Hamburger button for mobile */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 text-gray-600 hover:text-gray-900 -ml-2"
+          aria-label="Open menu"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+
+        {/* Mobile title - shown only on mobile */}
+        <div className="lg:hidden flex-1 text-center">
+          <Link href="/">
+            <span className="text-lg font-bold text-gray-900">starknode-kit</span>
+          </Link>
+        </div>
+
+        {/* Social links */}
+        <div className="flex items-center space-x-4 lg:ml-auto">
           <Link
             href="https://github.com/thebuidl-grid/starknode-kit"
             target="_blank"

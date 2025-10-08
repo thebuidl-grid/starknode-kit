@@ -187,43 +187,47 @@ starknode-kit config set juno eth_node=http://localhost:8545`}
 
       <p className="text-lg mb-6">Default ports for each client:</p>
 
-      <div className="not-prose my-8">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ports</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
-              <td className="px-6 py-4 text-sm font-mono">8545, 8546, 30303</td>
-              <td className="px-6 py-4 text-sm">HTTP RPC, WS RPC, P2P</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
-              <td className="px-6 py-4 text-sm font-mono">8545, 8546, 30303</td>
-              <td className="px-6 py-4 text-sm">HTTP RPC, WS RPC, P2P</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Lighthouse</td>
-              <td className="px-6 py-4 text-sm font-mono">5052, 9000</td>
-              <td className="px-6 py-4 text-sm">HTTP API, P2P</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Prysm</td>
-              <td className="px-6 py-4 text-sm font-mono">4000, 13000</td>
-              <td className="px-6 py-4 text-sm">HTTP API, P2P</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Juno</td>
-              <td className="px-6 py-4 text-sm font-mono">6060</td>
-              <td className="px-6 py-4 text-sm">RPC</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="not-prose my-8 overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ports</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code">8545, 8546, 30303</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">HTTP RPC, WS RPC, P2P</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code">8545, 8546, 30303</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">HTTP RPC, WS RPC, P2P</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code">5052, 9000</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">HTTP API, P2P</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code">4000, 13000</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">HTTP API, P2P</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Juno</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code">6060</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">RPC</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <h2 className="text-3xl font-semibold mt-16 mb-6">

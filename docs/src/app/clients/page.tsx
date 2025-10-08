@@ -67,38 +67,42 @@ export default function Clients() {
 
       <p>Popular client combinations for Ethereum nodes:</p>
 
-      <div className="not-prose my-6">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Execution</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consensus</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Characteristics</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Lighthouse</td>
-              <td className="px-6 py-4 text-sm">Most popular, well-tested</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Lighthouse</td>
-              <td className="px-6 py-4 text-sm">High performance, modern</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Prysm</td>
-              <td className="px-6 py-4 text-sm">Stable, feature-rich</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Prysm</td>
-              <td className="px-6 py-4 text-sm">Performance-focused</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="not-prose my-6 overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Execution</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consensus</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Characteristics</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Most popular, well-tested</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">High performance, modern</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Stable, feature-rich</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Performance-focused</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <h2 className="text-3xl font-semibold mt-16 mb-6">Choosing Clients</h2>
@@ -158,49 +162,53 @@ export default function Clients() {
 
       <h2 className="text-3xl font-semibold mt-16 mb-6">Resource Requirements by Client</h2>
 
-      <div className="not-prose my-6">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RAM</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disk</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
-              <td className="px-6 py-4 text-sm">16+ GB</td>
-              <td className="px-6 py-4 text-sm">~1.2 TB</td>
-              <td className="px-6 py-4 text-sm">4+ cores</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
-              <td className="px-6 py-4 text-sm">16+ GB</td>
-              <td className="px-6 py-4 text-sm">~900 GB</td>
-              <td className="px-6 py-4 text-sm">4+ cores</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Lighthouse</td>
-              <td className="px-6 py-4 text-sm">8+ GB</td>
-              <td className="px-6 py-4 text-sm">~200 GB</td>
-              <td className="px-6 py-4 text-sm">2+ cores</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Prysm</td>
-              <td className="px-6 py-4 text-sm">8+ GB</td>
-              <td className="px-6 py-4 text-sm">~250 GB</td>
-              <td className="px-6 py-4 text-sm">2+ cores</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Juno</td>
-              <td className="px-6 py-4 text-sm">8+ GB</td>
-              <td className="px-6 py-4 text-sm">~300 GB</td>
-              <td className="px-6 py-4 text-sm">2+ cores</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="not-prose my-6 overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RAM</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disk</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">16+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">~1.2 TB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">4+ cores</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">16+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">~900 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">4+ cores</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">8+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">~200 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">2+ cores</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">8+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">~250 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">2+ cores</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">Juno</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">8+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">~300 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">2+ cores</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div className="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">

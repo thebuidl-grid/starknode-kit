@@ -13,65 +13,69 @@ export default function Commands() {
 
       <h2 className="text-3xl font-semibold mb-6">Command Overview</h2>
 
-      <div className="not-prose my-8">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Command</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">add</td>
-              <td className="px-6 py-4 text-sm">Add an Ethereum or Starknet client to the config</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">completion</td>
-              <td className="px-6 py-4 text-sm">Generate the autocompletion script for the specified shell</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">config</td>
-              <td className="px-6 py-4 text-sm">Create, show, and update your Starknet node configuration</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">monitor</td>
-              <td className="px-6 py-4 text-sm">Launch real-time monitoring dashboard</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">remove</td>
-              <td className="px-6 py-4 text-sm">Remove a specified resource</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">run</td>
-              <td className="px-6 py-4 text-sm">Run a specific local infrastructure service</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">start</td>
-              <td className="px-6 py-4 text-sm">Run the configured Ethereum clients</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">status</td>
-              <td className="px-6 py-4 text-sm">Display status of running clients</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">stop</td>
-              <td className="px-6 py-4 text-sm">Stop the configured Ethereum clients</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">update</td>
-              <td className="px-6 py-4 text-sm">Check for and install client updates</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">validator</td>
-              <td className="px-6 py-4 text-sm">Manage the Starknet validator client</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">version</td>
-              <td className="px-6 py-4 text-sm">Show version of starknode-kit or a specific client</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="not-prose my-8 overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Command</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">add</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Add an Ethereum or Starknet client to the config</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">completion</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Generate the autocompletion script for the specified shell</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">config</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Create, show, and update your Starknet node configuration</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">monitor</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Launch real-time monitoring dashboard</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">remove</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Remove a specified resource</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">run</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Run a specific local infrastructure service</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">start</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Run the configured Ethereum clients</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">status</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Display status of running clients</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">stop</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Stop the configured Ethereum clients</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">update</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Check for and install client updates</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">validator</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Manage the Starknet validator client</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-source-code">version</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm">Show version of starknode-kit or a specific client</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <h2 className="text-3xl font-semibold mt-16 mb-6">Quick Examples</h2>
