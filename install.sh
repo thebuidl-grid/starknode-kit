@@ -601,7 +601,7 @@ perform_update() {
     print_status "Starting update process..."
 
     # Read node type from config
-    CONFIG_FILE="$HOME/.config/starknode-kit/config"
+    CONFIG_FILE="$HOME/.config/starknode-kit/config/starknode.yaml"
     if [ -f "$CONFIG_FILE" ]; then
         # shellcheck source=/dev/null
         . "$CONFIG_FILE"
