@@ -113,7 +113,7 @@ export STARKNET_SALT="0x..."`} />
 
       <p>Start your validator client:</p>
 
-      <CodeBlock code="starknode-kit run starknet-staking-v2" />
+      <CodeBlock code="starknode-kit validator start" />
 
       <h2 className="text-3xl font-semibold mt-16 mb-6">Monitoring Your Validator</h2>
 
