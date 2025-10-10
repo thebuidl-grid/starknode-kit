@@ -243,7 +243,7 @@ func (i *installer) InstallClient(client types.ClientType) error {
 func (i *installer) UpdateClient(client types.ClientType) error {
 	clientDir := i.getClientDirectory(client)
 	clientPath := i.getClientPath(client, clientDir)
-	return i.installClient(client, clientDir, clientPath)
+	return i.installClient(client, clientPath, clientDir)
 }
 
 // getClientDirectory returns the appropriate directory for the client
