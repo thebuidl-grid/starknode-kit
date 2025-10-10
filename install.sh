@@ -74,7 +74,7 @@ show_node_selection() {
         echo -e "${YELLOW}3)${NC} Starknet Validator Node"
         echo -e "   ${CYAN}└── Participate in Starknet consensus and earn rewards${NC}"
         echo
-        echo -e "${YELLOW}4)${NC} Update Starknod-kit"
+        echo -e "${YELLOW}4)${NC} Update Starknode-kit"
         echo -e "   ${CYAN}└── Update starknode-kit${NC}"
         echo
         echo -e "${RED}5)${NC} Exit"
