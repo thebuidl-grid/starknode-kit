@@ -10,3 +10,45 @@ starknode-kit.exe
 *.exe
 *.so
 *.dylib
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Documentation build outputs
+docs/_book/
+docs/.gitbook/
+docs/dist/
+docs/build/
+
+# Next.js build outputs
+docs/.next/
+docs/out/
+docs/next-env.d.ts
+.next/
+out/
+next-env.d.ts
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

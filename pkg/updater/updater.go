@@ -115,7 +115,7 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 	installer := pkg.NewInstaller()
 	clientType := types.GetClientType(client)
 
-	// Remove old version (using RemoveClient function if available)
+  // TODO Remove old version (using RemoveClient function if available)
 	fmt.Printf("Removing old %s installation...\n", client)
 
 	// Install new version
@@ -124,8 +124,7 @@ func (u *UpdateChecker) UpdateClient(client string) *UpdateResult {
 		return result
 	}
 
-	// Get new version (placeholder - you'd implement actual version detection)
-	newVersion, err := versions.FetchOnlineVersion(client) // Placeholder
+	newVersion, err := versions.FetchOnlineVersion(client) 
 	if err != nil {
 		fmt.Println(err)
 		return nil

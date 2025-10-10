@@ -151,7 +151,7 @@ func (i *installer) getClientFileName(client types.ClientType, version string) (
 			return "", err
 		}
 		fileName = fmt.Sprintf("geth-%s-%s-%s-%s",
-    goos, gethArch, version, gethHash[:8])
+			goos, gethArch, version, gethHash[:8])
 	case types.ClientReth:
 		fileName = fmt.Sprintf("reth-v%s-%s", version, archName)
 	case types.ClientLighthouse:
@@ -243,7 +243,7 @@ func (i *installer) InstallClient(client types.ClientType) error {
 func (i *installer) UpdateClient(client types.ClientType) error {
 	clientDir := i.getClientDirectory(client)
 	clientPath := i.getClientPath(client, clientDir)
-	return i.installClient(client, clientDir, clientPath)
+	return i.installClient(client, clientPath, clientDir)
 }
 
 // getClientDirectory returns the appropriate directory for the client
@@ -359,7 +359,6 @@ func (i *installer) installStandardClient(client types.ClientType, clientDir, do
 	// Download file
 	fmt.Printf("Downloading %s.\n", client)
 	if err := downloadFile(downloadURL, archivePath); err != nil {
-		fmt.Println(err)
 		return err
 	}
 

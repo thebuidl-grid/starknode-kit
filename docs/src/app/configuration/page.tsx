@@ -6,7 +6,7 @@ export default function Configuration() {
     <div className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-bold mb-4">Configuration</h1>
 
-      <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+      <p className="text-xl text-white mb-4 leading-relaxed">
         Learn how to configure starknode-kit for your Ethereum and Starknet
         nodes.
       </p>
@@ -171,9 +171,9 @@ starknode-kit config set juno eth_node=http://localhost:8545`}
         </li>
       </ul>
 
-      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 my-10 rounded-r-lg">
-        <p className="font-semibold mb-3 text-lg">⚠️ Important</p>
-        <p className="mb-0 text-base">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 p-6 my-10 rounded-r-lg">
+        <p className="font-semibold mb-3 text-lg text-gray-900 dark:text-yellow-400">⚠️ Important</p>
+        <p className="mb-0 text-base text-gray-700 dark:text-gray-300">
           Changing the network will affect all clients. Make sure to stop your
           nodes before changing networks.
         </p>
@@ -187,43 +187,47 @@ starknode-kit config set juno eth_node=http://localhost:8545`}
 
       <p className="text-lg mb-6">Default ports for each client:</p>
 
-      <div className="not-prose my-8">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ports</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
-              <td className="px-6 py-4 text-sm font-mono">8545, 8546, 30303</td>
-              <td className="px-6 py-4 text-sm">HTTP RPC, WS RPC, P2P</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
-              <td className="px-6 py-4 text-sm font-mono">8545, 8546, 30303</td>
-              <td className="px-6 py-4 text-sm">HTTP RPC, WS RPC, P2P</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Lighthouse</td>
-              <td className="px-6 py-4 text-sm font-mono">5052, 9000</td>
-              <td className="px-6 py-4 text-sm">HTTP API, P2P</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Prysm</td>
-              <td className="px-6 py-4 text-sm font-mono">4000, 13000</td>
-              <td className="px-6 py-4 text-sm">HTTP API, P2P</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Juno</td>
-              <td className="px-6 py-4 text-sm font-mono">6060</td>
-              <td className="px-6 py-4 text-sm">RPC</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="not-prose my-8 overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ports</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Purpose</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Geth</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code text-gray-900 dark:text-gray-300">8545, 8546, 30303</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">HTTP RPC, WS RPC, P2P</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Reth</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code text-gray-900 dark:text-gray-300">8545, 8546, 30303</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">HTTP RPC, WS RPC, P2P</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code text-gray-900 dark:text-gray-300">5052, 9000</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">HTTP API, P2P</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code text-gray-900 dark:text-gray-300">4000, 13000</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">HTTP API, P2P</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Juno</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm font-source-code text-gray-900 dark:text-gray-300">6060</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">RPC</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <h2 className="text-3xl font-semibold mt-16 mb-6">
@@ -316,13 +320,13 @@ starknode-kit config set juno eth_node=http://localhost:8545`}
         <li className="text-base">Stop conflicting services</li>
       </ul>
 
-      <div className="mt-12 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">📖 Next Steps</h3>
-        <p className="text-gray-700 mb-4">
+      <div className="mt-12 p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-yellow-400">📖 Next Steps</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
           Ready to dive deeper? Check out our comprehensive guides:
         </p>
         <div className="flex flex-wrap gap-3">
-          <Link href="/commands" className="text-blue-600 hover:text-blue-800 font-medium">Commands Reference</Link>
+          <Link href="/commands" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">Commands Reference</Link>
         </div>
       </div>
     </div>
