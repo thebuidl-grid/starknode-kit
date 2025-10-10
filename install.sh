@@ -74,9 +74,12 @@ show_node_selection() {
         echo -e "${YELLOW}3)${NC} Starknet Validator Node"
         echo -e "   ${CYAN}└── Participate in Starknet consensus and earn rewards${NC}"
         echo
-        echo -e "${RED}4)${NC} Exit"
+        echo -e "${YELLOW}4)${NC} Update Starknod-kit"
+        echo -e "   ${CYAN}└── Update starknode-kit${NC}"
         echo
-        echo -n -e "${GREEN}Enter your choice [1-4]: ${NC}"
+        echo -e "${RED}5)${NC} Exit"
+        echo
+        echo -n -e "${GREEN}Enter your choice [1-5]: ${NC}"
         
         read -r choice
         
@@ -97,12 +100,17 @@ show_node_selection() {
                 break
                 ;;
             4)
+                SELECTED_NODE_TYPE="update"
+                print_status "Update client"
+                break
+                ;;
+            5)
                 clear
                 print_status "Installation cancelled by user"
                 exit 0
                 ;;
             *)
-                print_error "Invalid choice. Please select 1-4."
+                print_error "Invalid choice. Please select 1-5."
                 sleep 2
                 ;;
         esac
@@ -549,6 +557,175 @@ show_completion() {
     echo
 }
 
+# Function to update the package
+perform_update() {
+    print_status "Checking for updates..."
+
+    # Check for current installation
+    if ! command_exists "$BINARY_NAME"; then
+        print_error "$BINARY_NAME is not installed. Please run the full installation first."
+        exit 1
+    fi
+
+    # Get current version
+    CURRENT_VERSION_FULL=$($BINARY_NAME version 2>/dev/null)
+    CURRENT_VERSION=$(echo "$CURRENT_VERSION_FULL" | grep -o -E 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+    if [ -z "$CURRENT_VERSION" ]; then
+        print_warning "Could not determine current version from output: '$CURRENT_VERSION_FULL'. Proceeding with update."
+    else
+        print_status "Current version: $CURRENT_VERSION"
+    fi
+
+    # Get latest version from GitHub using git tags
+    if ! command_exists git; then
+        print_warning "git is not installed, cannot check for latest version. Proceeding with update."
+    else
+        LATEST_VERSION=$(git ls-remote --tags "https://github.com/$GITHUB_REPO.git" | awk '{print $2}' | grep 'refs/tags/v' | sed 's|refs/tags/||' | sort -V | tail -n 1)
+        if [ -z "$LATEST_VERSION" ]; then
+            print_warning "Could not determine latest version from git tags. Proceeding with update."
+        else
+            print_status "Latest version available: $LATEST_VERSION"
+        fi
+    fi
+
+    # Compare versions
+    if [ -n "$CURRENT_VERSION" ] && [ -n "$LATEST_VERSION" ]; then
+        # Strip 'v' prefix for comparison
+        if [ "${CURRENT_VERSION#v}" == "${LATEST_VERSION#v}" ]; then
+            print_status "You already have the latest version ($CURRENT_VERSION)."
+            exit 0
+        fi
+        print_status "New version available. Proceeding with update..."
+    fi
+
+    print_status "Starting update process..."
+
+    # Read node type from config
+    CONFIG_FILE="$HOME/.config/starknode-kit/config"
+    if [ -f "$CONFIG_FILE" ]; then
+        # shellcheck source=/dev/null
+        . "$CONFIG_FILE"
+        print_status "Existing configuration found. Node type: $node_type"
+        SELECTED_NODE_TYPE=$node_type
+    else
+        print_error "No existing configuration found at $CONFIG_FILE."
+        print_error "Cannot determine node type for update. Please run the full installation first."
+        exit 1
+    fi
+
+    # Create temporary directory
+    TEMP_DIR=$(mktemp -d)
+    print_status "Created temporary directory: $TEMP_DIR"
+
+    # Cleanup function
+    cleanup() {
+        print_status "Cleaning up temporary files..."
+        rm -rf "$TEMP_DIR"
+    }
+
+    # Set trap to cleanup on exit
+    trap cleanup EXIT
+
+    # Clone the repository
+    print_status "Cloning repository: https://github.com/$GITHUB_REPO"
+    if ! git clone "https://github.com/$GITHUB_REPO.git" "$TEMP_DIR/$BINARY_NAME"; then
+        print_error "Failed to clone repository"
+        exit 1
+    fi
+
+    # Change to project directory
+    cd "$TEMP_DIR/$BINARY_NAME" || {
+        print_error "Failed to change to project directory"
+        exit 1
+    }
+
+    # Check if go.mod exists (Go modules)
+    if [ -f "go.mod" ]; then
+        print_status "Go modules detected, downloading dependencies..."
+        go mod download
+    else
+        print_status "No go.mod found, assuming GOPATH mode..."
+    fi
+
+    # Get version from git tag
+    VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "dev")
+    print_status "Building version: $VERSION"
+
+    # Construct linker flags
+    LDFLAGS="-X github.com/thebuidl-grid/starknode-kit/pkg/versions.StarkNodeVersion=$VERSION"
+
+    # Build the application with node type flag
+    print_status "Building the application for $SELECTED_NODE_TYPE node..."
+    BUILD_FLAGS=""
+    case $SELECTED_NODE_TYPE in
+        "ethereum") BUILD_FLAGS="-tags ethereum" ;;
+        "starknet") BUILD_FLAGS="-tags starknet" ;;
+        "validator") BUILD_FLAGS="-tags validator" ;;
+    esac
+
+    if ! go build $BUILD_FLAGS -ldflags="$LDFLAGS" -o "$BINARY_NAME" .; then
+        print_error "Failed to build the application"
+        exit 1
+    fi
+
+    # Check if binary was created
+    if [ ! -f "$BINARY_NAME" ]; then
+        print_error "Binary was not created successfully"
+        exit 1
+    fi
+
+    # Create install directory if it doesn't exist
+    if [ ! -d "$INSTALL_DIR" ]; then
+        print_warning "Install directory $INSTALL_DIR does not exist, creating it..."
+        sudo mkdir -p "$INSTALL_DIR"
+    fi
+
+    # Install the binary
+    print_status "Installing $BINARY_NAME to $INSTALL_DIR..."
+    if ! sudo cp "$BINARY_NAME" "$INSTALL_DIR/"; then
+        print_error "Failed to install binary to $INSTALL_DIR"
+        exit 1
+    fi
+
+    # Make it executable
+    sudo chmod +x "$INSTALL_DIR/$BINARY_NAME"
+
+    # Verify installation
+    if command_exists "$BINARY_NAME"; then
+        echo
+        print_status "✓ Update successful!"
+        print_status "You can now use '$BINARY_NAME' from anywhere in your terminal"
+
+        # Show version if available
+        if "$BINARY_NAME" --version >/dev/null 2>&1; then
+            VERSION=$("$BINARY_NAME" --version)
+            print_status "Installed version: $VERSION"
+        elif "$BINARY_NAME" -version >/dev/null 2>&1; then
+            VERSION=$("$BINARY_NAME" -version)
+            print_status "Installed version: $VERSION"
+        fi
+    else
+        print_warning "Update completed but '$BINARY_NAME' is not in PATH"
+        print_warning "You may need to add $INSTALL_DIR to your PATH or restart your terminal"
+    fi
+}
+
+# Function to show update completion message
+show_update_completion() {
+    echo
+    echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${GREEN}                         Update Complete!                          ${NC}"
+    echo -e "${GREEN}════════════════════════════════════════════════════════════════════${NC}"
+    echo
+    echo -e "${CYAN}Next Steps:${NC}"
+    echo "1. Run '$BINARY_NAME --help' to see available commands"
+    echo "2. To start your node, run: '$BINARY_NAME start'"
+    echo
+    echo -e "${YELLOW}For support and documentation, visit:${NC}"
+    echo "https://github.com/$GITHUB_REPO"
+    echo
+}
+
 # Main execution
 main() {
     USE_LOCAL=false
@@ -562,6 +739,12 @@ main() {
     show_banner
     check_prerequisites
     show_node_selection
+
+    if [ "$SELECTED_NODE_TYPE" == "update" ]; then
+        perform_update
+        show_update_completion
+        exit 0
+    fi
 
     handle_ethereum_selection
     case $SELECTED_NODE_TYPE in
