@@ -100,7 +100,7 @@ func GetVersionNumber(client string) string {
 
 	switch client {
 	case "reth":
-		versionMatch = regexp.MustCompile(`reth-ethereum-cli Version: (\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
+		versionMatch = regexp.MustCompile(`Reth Version:\s+(\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
 	case "lighthouse":
 		versionMatch = regexp.MustCompile(`Lighthouse v(\d+\.\d+\.\d+)`).FindStringSubmatch(versionOutput)
 	case "geth":

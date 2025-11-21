@@ -198,6 +198,18 @@ func GetRunningClients() []types.ClientStatus {
 		clients = append(clients, status)
 	}
 
+	// Check for Starknet Validator
+	if validatorInfo := process.GetProcessInfo("starknet-staking-v2"); validatorInfo != nil {
+		status := types.ClientStatus{
+			Name:    "Validator",
+			Status:  validatorInfo.Status,
+			PID:     validatorInfo.PID,
+			Uptime:  validatorInfo.Uptime,
+			Version: versions.GetVersionNumber("starknet-staking-v2"),
+		}
+		clients = append(clients, status)
+	}
+
 	return clients
 }
 
