@@ -142,7 +142,7 @@ func (m *MonitorApp) createVibrantPanel(title string, borderColor tcell.Color) *
 	panel.SetBorderColor(borderColor)
 
 	// Set TextView specific properties
-	panel.SetWrap(true)
+	panel.SetWrap(true).SetWordWrap(true)
 	panel.SetBackgroundColor(tcell.ColorBlack)
 	panel.SetTextColor(tcell.ColorWhite)
 	panel.SetDynamicColors(true)
