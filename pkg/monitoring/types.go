@@ -14,6 +14,7 @@ type MonitorApp struct {
 	ExecutionLogBox   *tview.TextView
 	ConsensusLogBox   *tview.TextView
 	JunoLogBox        *tview.TextView
+	ValidatorLogBox   *tview.TextView // New validator log panel
 	StatusBox         *tview.TextView
 	NetworkBox        *tview.TextView
 	StarknetStatusBox *tview.TextView
@@ -21,6 +22,7 @@ type MonitorApp struct {
 	SystemStatsBox    *tview.TextView
 	RPCInfoBox        *tview.TextView
 	StatusBar         *tview.TextView
+	NoClientsBox      *tview.TextView // Message box when no clients are running
 
 	// Legacy panels (for backward compatibility during transition)
 	SystemBox       *tview.TextView
@@ -39,6 +41,7 @@ type MonitorApp struct {
 	ExecutionLogChan chan string
 	ConsensusLogChan chan string
 	JunoLogChan      chan string
+	ValidatorLogChan chan string // New validator log channel
 	NetworkChan      chan string
 	StatusChan       chan string
 	JunoStatusChan   chan string

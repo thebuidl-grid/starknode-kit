@@ -41,6 +41,28 @@ func (m *MonitorApp) setupUI() {
 		SetTitle(" Juno (Detecting...) 🌟 ").
 		SetTitleAlign(tview.AlignLeft)
 
+	// Create Validator log panel
+	m.ValidatorLogBox = m.createVibrantPanel("Validator", tcell.ColorTeal)
+	m.ValidatorLogBox.SetBorder(true).
+		SetBorderColor(tcell.ColorTeal).
+		SetTitle(" Validator (Detecting...) 🛡️ ").
+		SetTitleAlign(tview.AlignLeft)
+
+	// Create "No Clients Running" message box
+	m.NoClientsBox = m.createVibrantPanel("Status", tcell.ColorYellow)
+	m.NoClientsBox.SetBorder(true).
+		SetBorderColor(tcell.ColorYellow).
+		SetTitle(" System Status ⚠️ ").
+		SetTitleAlign(tview.AlignCenter)
+	m.NoClientsBox.SetText("\n\n[yellow]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+		"[white]        ⚠️  NO CLIENTS RUNNING  ⚠️\n\n" +
+		"[dim]No Ethereum or Starknet clients are currently active.\n\n" +
+		"[yellow]To start clients, use:[white]\n" +
+		"  • starknode-kit start\n" +
+		"  • starknode-kit run\n\n" +
+		"[yellow]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[white]").
+		SetTextAlign(tview.AlignCenter)
+
 	// Create status boxes
 	m.StatusBox = m.createVibrantPanel("L1 Status", tcell.ColorTeal)
 	m.StatusBox.SetText("INITIALIZING...")
@@ -56,44 +78,8 @@ func (m *MonitorApp) setupUI() {
 	m.SystemStatsBox = m.createVibrantPanel("System Stats", tcell.ColorTeal)
 	m.RPCInfoBox = m.createVibrantPanel("RPC Info", tcell.ColorTeal)
 
-	// Setup main grid: LEFT (60%) for logs, RIGHT (40%) for info panels
-	m.Grid.SetRows(-1, -1, -1). // 3 rows for the 3 log panels
-					SetColumns(-3, -2). // LEFT(60%), RIGHT(40%)
-					SetBorders(false).
-					SetGap(0, 0)
-
-	// LEFT SIDE - Add log panels directly to main grid
-	m.Grid.AddItem(m.ExecutionLogBox, 0, 0, 1, 1, 0, 0, false) // Row 0, left col
-	m.Grid.AddItem(m.ConsensusLogBox, 1, 0, 1, 1, 0, 0, false) // Row 1, left col
-	m.Grid.AddItem(m.JunoLogBox, 2, 0, 1, 1, 0, 0, false)      // Row 2, left col
-
-	// RIGHT SIDE - Create sub-grid for info panels (5 rows total)
-	rightGrid := tview.NewGrid().
-		SetRows(-1, -1, -1, -1, -1). // 5 equal rows
-		SetColumns(-1).              // Single column
-		SetBorders(false).
-		SetGap(0, 0)
-
-	// Create status grid for ETH and Starknet status side by side
-	statusGrid := tview.NewGrid().
-		SetRows(-1).        // Single row
-		SetColumns(-1, -1). // 2 equal columns for ETH and Starknet
-		SetBorders(false).
-		SetGap(1, 0) // Small gap between status panels
-
-	// Add ETH and Starknet status to the status grid
-	statusGrid.AddItem(m.StatusBox, 0, 0, 1, 1, 0, 0, false)         // ETH Status (left)
-	statusGrid.AddItem(m.StarknetStatusBox, 0, 1, 1, 1, 0, 0, false) // Starknet Status (right)
-
-	// Add all panels to the right side sub-grid
-	rightGrid.AddItem(m.NetworkBox, 0, 0, 1, 1, 0, 0, false)     // Row 0: Network
-	rightGrid.AddItem(statusGrid, 1, 0, 1, 1, 0, 0, false)       // Row 1: Status grid (ETH + Starknet)
-	rightGrid.AddItem(m.ChainInfoBox, 2, 0, 1, 1, 0, 0, false)   // Row 2: Chain Info
-	rightGrid.AddItem(m.RPCInfoBox, 3, 0, 1, 1, 0, 0, false)     // Row 3: RPC Info
-	rightGrid.AddItem(m.SystemStatsBox, 4, 0, 1, 1, 0, 0, false) // Row 4: System Stats
-
-	// Add the right side sub-grid to main grid (spans all 3 rows on right)
-	m.Grid.AddItem(rightGrid, 0, 1, 3, 1, 0, 0, false) // Spans rows 0-2 on right column
+	// Initial setup with placeholder - will be rebuilt dynamically
+	m.rebuildDynamicLayout()
 
 	// Enhanced input handling
 	m.App.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -156,7 +142,7 @@ func (m *MonitorApp) createVibrantPanel(title string, borderColor tcell.Color) *
 	panel.SetBorderColor(borderColor)
 
 	// Set TextView specific properties
-	panel.SetWrap(true)
+	panel.SetWrap(true).SetWordWrap(true)
 	panel.SetBackgroundColor(tcell.ColorBlack)
 	panel.SetTextColor(tcell.ColorWhite)
 	panel.SetDynamicColors(true)

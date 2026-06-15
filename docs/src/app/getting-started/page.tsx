@@ -6,7 +6,7 @@ export default function GettingStarted() {
     <div className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-bold mb-4">Getting Started</h1>
 
-      <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+      <p className="text-xl text-white mb-4 leading-relaxed">
         Welcome to starknode-kit! This guide will help you get up and running
         with your Ethereum and Starknet nodes in just a few minutes.
       </p>
@@ -33,9 +33,9 @@ export default function GettingStarted() {
         </li>
       </ul>
 
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-6 my-10 rounded-r-lg">
-        <p className="font-semibold mb-3 text-lg">📝 Note</p>
-        <p className="mb-0 text-base">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 dark:border-blue-600 p-6 my-10 rounded-r-lg">
+        <p className="font-semibold mb-3 text-lg text-gray-900 dark:text-blue-400">📝 Note</p>
+        <p className="mb-0 text-base text-gray-700 dark:text-gray-300">
           For detailed hardware requirements, check out our{" "}
           <Link href="/requirements" className="font-medium">
             Requirements page
@@ -127,9 +127,9 @@ export default function GettingStarted() {
 
       <CodeBlock code="starknode-kit start" />
 
-      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-6 my-10 rounded-r-lg">
-        <p className="font-semibold mb-3 text-lg">⚠️ Important</p>
-        <p className="mb-0 text-base">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 p-6 my-10 rounded-r-lg">
+        <p className="font-semibold mb-3 text-lg text-gray-900 dark:text-yellow-400">⚠️ Important</p>
+        <p className="mb-0 text-base text-gray-700 dark:text-gray-300">
           The <code>start</code> command only launches Ethereum clients
           (execution + consensus). It does not start Starknet clients.
         </p>
@@ -164,42 +164,42 @@ starknode-kit run lighthouse`}
       <p className="text-lg mt-8 mb-6">The monitoring dashboard provides real-time insights:</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 not-prose">
-        <div className="p-5 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <div className="flex items-start gap-3">
             <span className="text-2xl">🔄</span>
             <div>
-              <h4 className="font-semibold text-blue-900 mb-1">Node Sync Status</h4>
-              <p className="text-sm text-gray-700">Real-time synchronization progress and health</p>
+              <h4 className="font-semibold text-blue-900 dark:text-blue-400 mb-1">Node Sync Status</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Real-time synchronization progress and health</p>
             </div>
           </div>
         </div>
 
-        <div className="p-5 bg-green-50 rounded-lg border border-green-200">
+        <div className="p-5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
           <div className="flex items-start gap-3">
             <span className="text-2xl">📊</span>
             <div>
-              <h4 className="font-semibold text-green-900 mb-1">Current Block Height</h4>
-              <p className="text-sm text-gray-700">Latest block number and sync progress</p>
+              <h4 className="font-semibold text-green-900 dark:text-green-400 mb-1">Current Block Height</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Latest block number and sync progress</p>
             </div>
           </div>
         </div>
 
-        <div className="p-5 bg-purple-50 rounded-lg border border-purple-200">
+        <div className="p-5 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
           <div className="flex items-start gap-3">
             <span className="text-2xl">🌐</span>
             <div>
-              <h4 className="font-semibold text-purple-900 mb-1">Network Statistics</h4>
-              <p className="text-sm text-gray-700">Peer connections and network performance</p>
+              <h4 className="font-semibold text-purple-900 dark:text-purple-400 mb-1">Network Statistics</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Peer connections and network performance</p>
             </div>
           </div>
         </div>
 
-        <div className="p-5 bg-orange-50 rounded-lg border border-orange-200">
+        <div className="p-5 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
           <div className="flex items-start gap-3">
             <span className="text-2xl">💻</span>
             <div>
-              <h4 className="font-semibold text-orange-900 mb-1">System Resources</h4>
-              <p className="text-sm text-gray-700">CPU, RAM, and disk usage metrics</p>
+              <h4 className="font-semibold text-orange-900 dark:text-orange-400 mb-1">System Resources</h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300">CPU, RAM, and disk usage metrics</p>
             </div>
           </div>
         </div>
@@ -213,13 +213,13 @@ starknode-kit run lighthouse`}
 
       <CodeBlock code="starknode-kit status" />
 
-      <div className="mt-12 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">📖 Next Steps</h3>
-        <p className="text-gray-700 mb-4">
+      <div className="mt-12 p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-yellow-400">📖 Next Steps</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
           Ready to dive deeper? Check out our installation guide:
         </p>
         <div className="flex flex-wrap gap-3">
-          <Link href="/installation" className="text-blue-600 hover:text-blue-800 font-medium">Installation Guide</Link>
+          <Link href="/installation" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">Installation Guide</Link>
         </div>
       </div>
     </div>

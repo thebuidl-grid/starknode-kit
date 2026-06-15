@@ -206,9 +206,8 @@ func installClients(starknetNode, validator bool, consensusClient, executionClie
 	if starknetNode {
 		err := options.Installer.InstallClient(types.ClientJuno)
 		if errors.Is(err, pkg.ErrClientIsInstalled) {
-			fmt.Println(utils.Yellow(fmt.Sprintf("🤔 Client Juno is already installed. Skipping.")))
-		} else {
-
+			fmt.Println(utils.Yellow("🤔 Client Juno is already installed. Skipping."))
+		} else if err != nil {
 			fmt.Println(utils.Red(fmt.Sprintf("❌ Could not install client Juno: %v", err)))
 			return
 		}

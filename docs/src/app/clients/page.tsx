@@ -5,7 +5,7 @@ export default function Clients() {
     <div className="prose prose-lg max-w-none">
       <h1 className="text-4xl font-bold mb-4">Supported Clients</h1>
 
-      <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+      <p className="text-xl text-white mb-4 leading-relaxed">
         starknode-kit supports multiple client implementations for both Ethereum
         and Starknet networks.
       </p>
@@ -27,19 +27,19 @@ export default function Clients() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-8">
-        <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
-          <h3 className="text-xl font-semibold mb-2 text-blue-900">Execution Clients</h3>
-          <p className="text-gray-700 mb-3">Handle transaction execution and state management</p>
-          <ul className="text-sm space-y-1">
+        <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <h3 className="text-xl font-semibold mb-2 text-blue-900 dark:text-blue-400">Execution Clients</h3>
+          <p className="text-gray-700 dark:text-gray-300 mb-3">Handle transaction execution and state management</p>
+          <ul className="text-sm space-y-1 text-gray-700 dark:text-gray-300">
             <li>• Geth (Go)</li>
             <li>• Reth (Rust)</li>
           </ul>
         </div>
 
-        <div className="p-6 bg-purple-50 rounded-lg border border-purple-200">
-          <h3 className="text-xl font-semibold mb-2 text-purple-900">Consensus Clients</h3>
-          <p className="text-gray-700 mb-3">Handle proof-of-stake consensus mechanism</p>
-          <ul className="text-sm space-y-1">
+        <div className="p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+          <h3 className="text-xl font-semibold mb-2 text-purple-900 dark:text-purple-400">Consensus Clients</h3>
+          <p className="text-gray-700 dark:text-gray-300 mb-3">Handle proof-of-stake consensus mechanism</p>
+          <ul className="text-sm space-y-1 text-gray-700 dark:text-gray-300">
             <li>• Lighthouse (Rust)</li>
             <li>• Prysm (Go)</li>
           </ul>
@@ -53,10 +53,10 @@ export default function Clients() {
       </p>
 
       <div className="not-prose my-8">
-        <div className="p-6 bg-orange-50 rounded-lg border border-orange-200 max-w-2xl">
-          <h3 className="text-xl font-semibold mb-2 text-orange-900">Starknet Clients</h3>
-          <p className="text-gray-700 mb-3">Full node implementations for Starknet</p>
-          <ul className="text-sm space-y-1">
+        <div className="p-6 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 max-w-2xl">
+          <h3 className="text-xl font-semibold mb-2 text-orange-900 dark:text-orange-400">Starknet Clients</h3>
+          <p className="text-gray-700 dark:text-gray-300 mb-3">Full node implementations for Starknet</p>
+          <ul className="text-sm space-y-1 text-gray-700 dark:text-gray-300">
             <li>• Juno (Go) - Full node client</li>
             <li>• Starknet Validator - Validator client for staking</li>
           </ul>
@@ -67,38 +67,42 @@ export default function Clients() {
 
       <p>Popular client combinations for Ethereum nodes:</p>
 
-      <div className="not-prose my-6">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Execution</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consensus</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Characteristics</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Lighthouse</td>
-              <td className="px-6 py-4 text-sm">Most popular, well-tested</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Lighthouse</td>
-              <td className="px-6 py-4 text-sm">High performance, modern</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Prysm</td>
-              <td className="px-6 py-4 text-sm">Stable, feature-rich</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm">Prysm</td>
-              <td className="px-6 py-4 text-sm">Performance-focused</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="not-prose my-6 overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Execution</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Consensus</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Characteristics</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Geth</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Most popular, well-tested</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Reth</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">High performance, modern</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Geth</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Stable, feature-rich</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Reth</td>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">Performance-focused</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <h2 className="text-3xl font-semibold mt-16 mb-6">Choosing Clients</h2>
@@ -158,54 +162,58 @@ export default function Clients() {
 
       <h2 className="text-3xl font-semibold mt-16 mb-6">Resource Requirements by Client</h2>
 
-      <div className="not-prose my-6">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RAM</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disk</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Geth</td>
-              <td className="px-6 py-4 text-sm">16+ GB</td>
-              <td className="px-6 py-4 text-sm">~1.2 TB</td>
-              <td className="px-6 py-4 text-sm">4+ cores</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Reth</td>
-              <td className="px-6 py-4 text-sm">16+ GB</td>
-              <td className="px-6 py-4 text-sm">~900 GB</td>
-              <td className="px-6 py-4 text-sm">4+ cores</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Lighthouse</td>
-              <td className="px-6 py-4 text-sm">8+ GB</td>
-              <td className="px-6 py-4 text-sm">~200 GB</td>
-              <td className="px-6 py-4 text-sm">2+ cores</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Prysm</td>
-              <td className="px-6 py-4 text-sm">8+ GB</td>
-              <td className="px-6 py-4 text-sm">~250 GB</td>
-              <td className="px-6 py-4 text-sm">2+ cores</td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">Juno</td>
-              <td className="px-6 py-4 text-sm">8+ GB</td>
-              <td className="px-6 py-4 text-sm">~300 GB</td>
-              <td className="px-6 py-4 text-sm">2+ cores</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="not-prose my-6 overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">RAM</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Disk</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">CPU</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Geth</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">16+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~1.2 TB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">4+ cores</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Reth</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">16+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~900 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">4+ cores</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Lighthouse</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">8+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~200 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">2+ cores</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Prysm</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">8+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~250 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">2+ cores</td>
+                </tr>
+                <tr>
+                  <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">Juno</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">8+ GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">~300 GB</td>
+                  <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 dark:text-gray-300">2+ cores</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">
-        <p className="font-semibold mb-2">💡 Recommendation</p>
-        <p className="mb-0">
+      <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 dark:border-blue-600 p-4 my-6">
+        <p className="font-semibold mb-2 text-gray-900 dark:text-blue-400">💡 Recommendation</p>
+        <p className="mb-0 text-gray-700 dark:text-gray-300">
           For most users, we recommend <strong>Reth + Lighthouse</strong> for Ethereum (best performance) 
           and <strong>Juno</strong> for Starknet.
         </p>
@@ -231,21 +239,21 @@ export default function Clients() {
         <li>Start nodes: <code>starknode-kit start</code></li>
       </ol>
 
-      <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 my-6">
-        <p className="font-semibold mb-2">⚠️ Note</p>
-        <p className="mb-0">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 p-4 my-6">
+        <p className="font-semibold mb-2 text-gray-900 dark:text-yellow-400">⚠️ Note</p>
+        <p className="mb-0 text-gray-700 dark:text-gray-300">
           Switching clients may require re-syncing from scratch, which can take several days. 
           Plan accordingly and ensure you have sufficient disk space.
         </p>
       </div>
 
-      <div className="mt-12 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">📖 Next Steps</h3>
-        <p className="text-gray-700 mb-4">
+      <div className="mt-12 p-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-yellow-400">📖 Next Steps</h3>
+        <p className="text-gray-700 dark:text-gray-300 mb-4">
           Ready to dive deeper? Check out our validator guide:
         </p>
         <div className="flex flex-wrap gap-3">
-          <Link href="/validator" className="text-blue-600 hover:text-blue-800 font-medium">Validator Guide</Link>
+          <Link href="/validator" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">Validator Guide</Link>
         </div>
       </div>
     </div>
